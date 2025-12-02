@@ -1,4 +1,3 @@
-from csv import Error
 from src.models import MenuDiario
 from sqlmodel import Session
 from src.config.database import db_engine

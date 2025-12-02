@@ -1,13 +1,16 @@
 from fastapi import APIRouter
 
 from src.models import platillos
-from . import menu_diario, platillos
+from . import menu_diario, platillos, clientes, pedidos
 
-router = APIRouter()
+app_router = APIRouter()
 
-@router.get("/")
+
+@app_router.get("/")
 async def health():
     return "OK"
 
-router.include_router(menu_diario.router, prefix="/menu")
-router.include_router(platillos.router, prefix="/platillos")
+app_router.include_router(menu_diario.router, prefix="/menu")
+app_router.include_router(platillos.router, prefix="/platillos")
+app_router.include_router(clientes.router, prefix="/clientes")
+app_router.include_router(pedidos.router, prefix="/pedidos")
