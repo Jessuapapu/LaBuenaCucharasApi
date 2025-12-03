@@ -7,6 +7,7 @@ from alembic import context
 
 from dotenv import load_dotenv
 import os
+from urllib import parse
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -47,7 +48,27 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = os.getenv("DATABASE_URL")
+    # Read variables
+    server = os.getenv("DB_SERVER")
+    database = os.getenv("DB_NAME")
+    username = os.getenv("DB_USER")
+    password = os.getenv("DB_PASSWORD")
+    driver = os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server")
+
+    connection_string = (
+        f"DRIVER={driver};"
+        f"SERVER={server};"
+        f"DATABASE={database};"
+        f"UID={username};"
+        f"PWD={password}"
+    )
+
+    # Encode for SQLAlchemy
+    connection_uri = (
+        f"mssql+pyodbc:///?odbc_connect={parse.quote_plus(connection_string)}"
+    )
+
+    url = connection_uri
     if url is None:
         raise ValueError("La variable de entorno DATABASE_URL no está configurada.")
     context.configure(
@@ -68,11 +89,27 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    database_url = os.getenv("DATABASE_URL")
-    if not database_url:
-        raise ValueError("DATABASE_URL env var not set.")
+    # Read variables
+    server = os.getenv("DB_SERVER")
+    database = os.getenv("DB_NAME")
+    username = os.getenv("DB_USER")
+    password = os.getenv("DB_PASSWORD")
+    driver = os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server")
+
+    connection_string = (
+        f"DRIVER={driver};"
+        f"SERVER={server};"
+        f"DATABASE={database};"
+        f"UID={username};"
+        f"PWD={password}"
+    )
+
+    # Encode for SQLAlchemy
+    connection_uri = (
+        f"mssql+pyodbc:///?odbc_connect={parse.quote_plus(connection_string)}"
+    )
     configuration = config.get_section(config.config_ini_section, {})
-    configuration["sqlalchemy.url"] = database_url
+    configuration["sqlalchemy.url"] = connection_uri
     connectable = engine_from_config(
         configuration=configuration,
         prefix="sqlalchemy.",
