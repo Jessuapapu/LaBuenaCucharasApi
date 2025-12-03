@@ -97,8 +97,8 @@ def run_migrations_online() -> None:
     driver = os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server")
 
     connection_string = (
-        f"DRIVER={driver};"
-        f"SERVER={server};"
+        f"DRIVER={{{driver}}};"  # NOTA: DOBLE LLAVE para ODBC
+        f"SERVER={server},{os.getenv('DB_PORT', '1433')};"
         f"DATABASE={database};"
         f"UID={username};"
         f"PWD={password}"
@@ -106,7 +106,8 @@ def run_migrations_online() -> None:
 
     # Encode for SQLAlchemy
     connection_uri = (
-        f"mssql+pyodbc:///?odbc_connect={parse.quote_plus(connection_string)}"
+        f"mssql+pyodbc://{username}:{password}@{server}:1433/{database}?"
+        f"driver={parse.quote_plus(driver)}"
     )
     configuration = config.get_section(config.config_ini_section, {})
     configuration["sqlalchemy.url"] = connection_uri

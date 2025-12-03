@@ -13,14 +13,17 @@ password = os.getenv("DB_PASSWORD")
 driver = os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server")
 
 connection_string = (
-    f"DRIVER={driver};"
-    f"SERVER={server};"
+    f"DRIVER={{{driver}}};"  # NOTA: DOBLE LLAVE para ODBC
+    f"SERVER={server},{os.getenv('DB_PORT', '1433')};"
     f"DATABASE={database};"
     f"UID={username};"
     f"PWD={password}"
 )
 
 # Encode for SQLAlchemy
-connection_uri = f"mssql+pyodbc:///?odbc_connect={parse.quote_plus(connection_string)}"
+connection_uri = (
+    f"mssql+pyodbc://{username}:{password}@{server}:1433/{database}?"
+    f"driver={parse.quote_plus(driver)}"
+)
 
 db_engine = create_engine(connection_uri, echo=True)
