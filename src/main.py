@@ -1,10 +1,7 @@
-from typing import Union
-
 from fastapi import FastAPI
+from .routes.main_router import app_router
 
 app = FastAPI()
+app.include_router(app_router)
 
-
-@app.get("/")
-async def read_root():
-    return {"Hello": "World"}
+print(f"La app inicio correctamente, la url base es http://localhost:8000")

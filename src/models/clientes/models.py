@@ -1,5 +1,6 @@
 from sqlmodel import Field, SQLModel
 from .types import EstadoContrato
+import datetime
 
 class Clientes(SQLModel, table=True):
     IdCliente: int | None = Field(default=None, primary_key=True)
@@ -8,19 +9,19 @@ class Clientes(SQLModel, table=True):
 
 class Contrato(SQLModel, table=True):
     IdContrato: int | None = Field(default=None, primary_key=True)
-    IdCliente: int = Field(foreign_key="clientes.IdCliente", nullable=False)  # corregido
+    IdCliente: int = Field(foreign_key="clientes.IdCliente", nullable=False)
     Presupuesto: float = Field(nullable=False)
     NumeroContrato: int = Field(nullable=False)
     Estado: EstadoContrato = Field(nullable=False)
-    FechaInicio: str = Field(max_length=10, nullable=False)
-    FechaVencimiento: str = Field(max_length=10, nullable=True)
+    FechaInicio: datetime.datetime = Field(max_length=10, nullable=False)
+    FechaVencimiento: datetime.datetime = Field(max_length=10, nullable=True)
 
 class ClienteTelefono(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    IdCliente: int = Field(foreign_key="clientes.IdCliente", nullable=False)  # corregido
+    IdCliente: int = Field(foreign_key="clientes.IdCliente", nullable=False)
     Telefono: str = Field(max_length=20, nullable=False)
 
 class ClienteCorreo(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    IdCliente: int = Field(foreign_key="clientes.IdCliente", nullable=False)  # corregido
+    IdCliente: int = Field(foreign_key="clientes.IdCliente", nullable=False)
     CorreoElectronico: str = Field(max_length=100, nullable=False)
