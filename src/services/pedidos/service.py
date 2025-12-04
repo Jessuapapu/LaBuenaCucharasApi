@@ -19,6 +19,7 @@ from sqlalchemy import select as sa_select
 
 
 def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
+
     statement = (
         sa_select(Pedidos, DetallesDePedidos, Platillos, Facturas, Clientes)
         .select_from(Pedidos)
@@ -31,19 +32,18 @@ def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
 
     with Session(db_engine) as session:
         query = session.execute(statement).all()
-        historial = []
+        historial_map: dict[int, dict] = {}
 
-        # Desempaquetar 5 modelos
         for pedido, detalle, platillo, factura, cliente in query:
-            historial.append(
-                {
+            if pedido.IdPedido is None:
+                continue
+            pid: int = pedido.IdPedido
+            if pid not in historial_map:
+                historial_map[pid] = {
+                    "id_pedido": pid,
                     "fecha": pedido.FechaPedido,
                     "estado_pedido": pedido.Estado,
-                    "detalle": {
-                        "nombre_platillo": platillo.NombrePlatillo,
-                        "cantidad": detalle.Cantidad,
-                        "precio_unitario": detalle.PrecioUnitario,
-                    },
+                    "detalles": [],
                     "factura": {
                         "fecha_factura": factura.FechaFactura,
                         "monto_total": factura.MontoTotal,
@@ -54,8 +54,16 @@ def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
                         "direccion_cliente": cliente.DireccionCliente,
                     },
                 }
+
+            historial_map[pid]["detalles"].append(
+                {
+                    "nombre_platillo": platillo.NombrePlatillo,
+                    "cantidad": detalle.Cantidad,
+                    "precio_unitario": detalle.PrecioUnitario,
+                }
             )
 
+        historial = list(historial_map.values())
         return historial
 
 
@@ -122,6 +130,87 @@ def crear_pedido(nombre_cliente: str, fecha: datetime.date, detalle: List[Detall
         except Exception as e:
             print(e)
             return None
+
+
+def actualizar_pedido(id_pedido: int, nombre_cliente: str, detalles: List[Detalles]):
+    with Session(db_engine) as session:
+        statement = (
+            select(DetallesDePedidos)
+            .select_from(Pedidos)
+            .join(DetallesDePedidos)
+            .where(Pedidos.IdPedido == id_pedido)
+        )
+
+        detalles_actualizar = session.exec(statement).all()
+
+        if not detalles_actualizar:
+            return None
+        # Validar que el pedido exista y obtener su factura
+        stmt_pedido_factura = (
+            select(Pedidos, Facturas)
+            .select_from(Pedidos)
+            .join(FacturasPedidos)
+            .join(Facturas)
+            .where(Pedidos.IdPedido == id_pedido)
+        )
+        resultado = session.exec(stmt_pedido_factura).first()
+        if not resultado:
+            return None
+
+        pedido, factura = resultado
+
+        # No permitir actualizar si el pedido/factura ya están cerrados
+        if (
+            pedido.Estado == EstadoPedido.ENTREGADO
+            or pedido.Estado == EstadoPedido.ANULADO
+            or factura.Estado == EstadoFactura.PAGADA
+            or factura.Estado == EstadoFactura.ANULADA
+        ):
+            return None
+
+        # Actualizar cliente si existe
+        nuevo_id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)
+        if nuevo_id_cliente is None:
+            return None
+        pedido.IdCliente = nuevo_id_cliente
+
+        # Eliminar detalles existentes del pedido
+        for d in detalles_actualizar:
+            session.delete(d)
+
+        # Insertar nuevos detalles y recalcular totales
+        monto_total = Decimal("0")
+        cantidad_total = 0
+
+        for det in detalles:
+            id_platillo = obtener_platillo_id_por_nombre(det.nombre_platillo)
+            if id_platillo is None:
+                session.rollback()
+                return None
+
+            session.add(
+                DetallesDePedidos(
+                    IdPedido=id_pedido,
+                    IdPlatillo=id_platillo,
+                    Cantidad=det.cantidad,
+                    PrecioUnitario=det.precio_unitario,
+                )
+            )
+
+            monto_total += Decimal(det.cantidad) * Decimal(str(det.precio_unitario))
+            cantidad_total += det.cantidad
+
+        # Actualizar factura asociada
+        factura.MontoTotal = monto_total
+        factura.CantidadTotal = cantidad_total
+        if factura.Estado == EstadoFactura.GENERADA:
+            factura.FechaFactura = str(datetime.date.today())
+
+        session.commit()
+        session.refresh(pedido)
+        session.refresh(factura)
+
+        return True
 
 
 def pagar_pedido_service(id_pedido: int):

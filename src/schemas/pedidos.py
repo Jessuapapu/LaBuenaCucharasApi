@@ -14,5 +14,6 @@ class PedidosIn(BaseModel):
     detalle: List[Detalles]
 
 
-class PedidosOp(BaseModel):
-    id: int
+class PedidosUpdate(BaseModel):
+    nombre_cliente: str
+    detalles: List[Detalles]
