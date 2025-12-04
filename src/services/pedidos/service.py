@@ -4,6 +4,7 @@ from src.models.pedidos.models import (
     Facturas,
     FacturasPedidos,
 )
+from src.models.clientes.models import Clientes
 from src.models.pedidos.types import EstadoPedido, EstadoFactura
 from sqlmodel import Session, select
 from src.config.database import db_engine
@@ -14,29 +15,39 @@ from src.schemas.pedidos import Detalles
 from typing import List
 from decimal import Decimal
 import datetime
+from sqlalchemy import select as sa_select
 
 
 def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
+    # Usamos sqlalchemy.select (sa_select) para seleccionar 5 modelos
+    statement = (
+        sa_select(Pedidos, DetallesDePedidos, Platillos, Facturas, Clientes)
+        .select_from(Pedidos)
+        .join(DetallesDePedidos)
+        .join(Platillos)
+        .join(FacturasPedidos)
+        .join(Facturas)
+        .join(Clientes)
+    )
+
+    # Aplicar filtros opcionales si vienen (opcional; descomentar si se desea)
+    # if estado is not None:
+    #     statement = statement.where(Pedidos.Estado == estado)
+    # if dia is not None:
+    #     statement = statement.where(Pedidos.FechaPedido == str(dia))
+
     with Session(db_engine) as session:
-        statement = (
-            select(Pedidos, DetallesDePedidos, Platillos, Facturas)
-            .select_from(Pedidos)
-            .join(DetallesDePedidos)
-            .join(Platillos)
-            .join(FacturasPedidos)
-            .join(Facturas)
-        )
-
-        query = session.exec(statement).all()
-
+        query = session.execute(statement).all()
         historial = []
-        for pedido, detalle, platillos, factura in query:
+
+        # Desempaquetar 5 modelos
+        for pedido, detalle, platillo, factura, cliente in query:
             historial.append(
                 {
                     "fecha": pedido.FechaPedido,
                     "estado_pedido": pedido.Estado,
                     "detalle": {
-                        "nombre_platillo": platillos.NombrePlatillo,
+                        "nombre_platillo": platillo.NombrePlatillo,
                         "cantidad": detalle.Cantidad,
                         "precio_unitario": detalle.PrecioUnitario,
                     },
@@ -44,6 +55,10 @@ def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
                         "fecha_factura": factura.FechaFactura,
                         "monto_total": factura.MontoTotal,
                         "estado_factura": factura.Estado,
+                    },
+                    "cliente": {
+                        "nombre_cliente": cliente.NombreCliente,
+                        "direccion_cliente": cliente.DireccionCliente,
                     },
                 }
             )
