@@ -1,5 +1,3 @@
-from math import factorial
-import re
 from src.models.pedidos.models import (
     Pedidos,
     DetallesDePedidos,
@@ -9,12 +7,48 @@ from src.models.pedidos.models import (
 from src.models.pedidos.types import EstadoPedido, EstadoFactura
 from sqlmodel import Session, select
 from src.config.database import db_engine
+from src.models.platillos.models import Platillos
 from src.services.clientes.service import obtener_id_cliente_por_nombre
 from src.services.platillos.service import obtener_platillo_id_por_nombre
 from src.schemas.pedidos import Detalles
 from typing import List
 from decimal import Decimal
 import datetime
+
+
+def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
+    with Session(db_engine) as session:
+        statement = (
+            select(Pedidos, DetallesDePedidos, Platillos, Facturas)
+            .select_from(Pedidos)
+            .join(DetallesDePedidos)
+            .join(Platillos)
+            .join(FacturasPedidos)
+            .join(Facturas)
+        )
+
+        query = session.exec(statement).all()
+
+        historial = []
+        for pedido, detalle, platillos, factura in query:
+            historial.append(
+                {
+                    "fecha": pedido.FechaPedido,
+                    "estado_pedido": pedido.Estado,
+                    "detalle": {
+                        "nombre_platillo": platillos.NombrePlatillo,
+                        "cantidad": detalle.Cantidad,
+                        "precio_unitario": detalle.PrecioUnitario,
+                    },
+                    "factura": {
+                        "fecha_factura": factura.FechaFactura,
+                        "monto_total": factura.MontoTotal,
+                        "estado_factura": factura.Estado,
+                    },
+                }
+            )
+
+        return historial
 
 
 def crear_pedido(nombre_cliente: str, fecha: datetime.date, detalle: List[Detalles]):

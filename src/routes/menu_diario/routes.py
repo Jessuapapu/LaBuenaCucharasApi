@@ -32,8 +32,3 @@ async def crear_menu(payload: MenuIn):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {e}")
-
-
-@router.delete("/")
-async def deshabilitar_menu(day: datetime.date):
-    pass
