@@ -19,7 +19,6 @@ from sqlalchemy import select as sa_select
 
 
 def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
-    # Usamos sqlalchemy.select (sa_select) para seleccionar 5 modelos
     statement = (
         sa_select(Pedidos, DetallesDePedidos, Platillos, Facturas, Clientes)
         .select_from(Pedidos)
@@ -29,12 +28,6 @@ def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
         .join(Facturas)
         .join(Clientes)
     )
-
-    # Aplicar filtros opcionales si vienen (opcional; descomentar si se desea)
-    # if estado is not None:
-    #     statement = statement.where(Pedidos.Estado == estado)
-    # if dia is not None:
-    #     statement = statement.where(Pedidos.FechaPedido == str(dia))
 
     with Session(db_engine) as session:
         query = session.execute(statement).all()
