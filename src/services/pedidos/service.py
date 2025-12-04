@@ -20,42 +20,43 @@ from sqlalchemy import select as sa_select
 
 def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
     statement = (
-        sa_select(Pedidos, DetallesDePedidos, Platillos, Facturas, Clientes)
+        select(Pedidos, DetallesDePedidos, Platillos, Facturas)
         .select_from(Pedidos)
         .join(DetallesDePedidos)
         .join(Platillos)
         .join(FacturasPedidos)
         .join(Facturas)
-        .join(Clientes)
     )
 
     with Session(db_engine) as session:
-        query = session.execute(statement).all()
-        historial = []
+        query = session.exec(statement).all()
+        historial_map: dict[int, dict] = {}
 
-        # Desempaquetar 5 modelos
-        for pedido, detalle, platillo, factura, cliente in query:
-            historial.append(
-                {
+        for pedido, detalle, platillo, factura in query:
+            if pedido.IdPedido is None:
+                continue
+            pid: int = pedido.IdPedido
+            if pid not in historial_map:
+                historial_map[pid] = {
                     "fecha": pedido.FechaPedido,
                     "estado_pedido": pedido.Estado,
-                    "detalle": {
-                        "nombre_platillo": platillo.NombrePlatillo,
-                        "cantidad": detalle.Cantidad,
-                        "precio_unitario": detalle.PrecioUnitario,
-                    },
+                    "detalles": [],
                     "factura": {
                         "fecha_factura": factura.FechaFactura,
                         "monto_total": factura.MontoTotal,
                         "estado_factura": factura.Estado,
                     },
-                    "cliente": {
-                        "nombre_cliente": cliente.NombreCliente,
-                        "direccion_cliente": cliente.DireccionCliente,
-                    },
+                }
+
+            historial_map[pid]["detalles"].append(
+                {
+                    "nombre_platillo": platillo.NombrePlatillo,
+                    "cantidad": detalle.Cantidad,
+                    "precio_unitario": detalle.PrecioUnitario,
                 }
             )
 
+        historial = list(historial_map.values())
         return historial
 
 
