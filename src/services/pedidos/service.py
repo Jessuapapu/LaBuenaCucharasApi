@@ -20,19 +20,20 @@ from sqlalchemy import select as sa_select
 
 def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
     statement = (
-        select(Pedidos, DetallesDePedidos, Platillos, Facturas)
+        sa_select(Pedidos, DetallesDePedidos, Platillos, Facturas, Clientes)
         .select_from(Pedidos)
         .join(DetallesDePedidos)
         .join(Platillos)
         .join(FacturasPedidos)
         .join(Facturas)
+        .join(Clientes)
     )
 
     with Session(db_engine) as session:
-        query = session.exec(statement).all()
+        query = session.execute(statement).all()
         historial_map: dict[int, dict] = {}
 
-        for pedido, detalle, platillo, factura in query:
+        for pedido, detalle, platillo, factura, cliente in query:
             if pedido.IdPedido is None:
                 continue
             pid: int = pedido.IdPedido
@@ -45,6 +46,10 @@ def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
                         "fecha_factura": factura.FechaFactura,
                         "monto_total": factura.MontoTotal,
                         "estado_factura": factura.Estado,
+                    },
+                    "cliente": {
+                        "nombre_cliente": cliente.NombreCliente,
+                        "direccion_cliente": cliente.DireccionCliente,
                     },
                 }
 
