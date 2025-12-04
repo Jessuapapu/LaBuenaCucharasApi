@@ -22,7 +22,7 @@ async def obtener_platillo(nombre_platillo: str | None):
 async def crear_platillo(payload: PlatilloIn):
     try:
         añadir_platillo(payload.nombre_platillo)
-        return "Platillo añadido con exito"
+        return {"detail": "Platillo añadido con exito"}
     except HTTPException:
         raise
     except Exception as e:

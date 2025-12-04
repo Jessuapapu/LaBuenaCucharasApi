@@ -1,16 +1,9 @@
+from src.schemas.pedidos import PedidosIn
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 from src.services.pedidos import service
 import datetime
 
 router = APIRouter()
-
-class PedidosIn(BaseModel):
-    nombre_cliente: str
-    fecha: datetime.date
-
-class PedidosOp(BaseModel):
-    id: int
 
 
 @router.get("/")
@@ -25,22 +18,33 @@ async def obtener_detalle(id: int):
 
 @router.post("/")
 async def crear_pedido(payload: PedidosIn):
-    pedido = service.crear_pedido(payload.nombre_cliente, payload.fecha)
+    pedido = service.crear_pedido(
+        payload.nombre_cliente, payload.fecha, payload.detalle
+    )
 
     if not pedido:
         raise HTTPException(500, {"message": "No se pudo crear el pedido"})
 
     return {
         "message": "Pedido creada exitosamente",
-        "pedido": pedido
     }
 
 
-@router.post("/pagar/{id}")
-async def pagar_pedido(id: int):
-    pass
+@router.post("/pagar/{id_pedido}")
+async def pagar_pedido(id_pedido: int):
+    resultado = service.pagar_pedido_service(id_pedido)
+
+    if resultado is None or resultado is not True:
+        raise HTTPException(500, {"message": "No se pudo pagar el pedido"})
+
+    return {"message": "El pedido se ha pagado exitosamente"}
 
 
-@router.post("/cancelar/{id}")
-async def cancelar_pedido(id: int):
-    pass
+@router.post("/cancelar/{id_pedido}")
+async def cancelar_pedido(id_pedido: int):
+    resultado = service.anular_pedido_service(id_pedido)
+
+    if resultado is None or resultado is not True:
+        raise HTTPException(500, {"message": "No se pudo cancelado el pedido"})
+
+    return {"message": "El pedido se ha cancelado exitosamente"}
