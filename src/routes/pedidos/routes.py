@@ -1,5 +1,6 @@
+from typing import Optional
 from src.schemas.pedidos import PedidosIn
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from src.services.pedidos import service
 import datetime
 
@@ -7,8 +8,13 @@ router = APIRouter()
 
 
 @router.get("/")
-async def obtener_pedidos(filtro: str, dia: datetime.date):
-    pass
+async def obtener_pedidos(
+    estado: Optional[str] = Query(default=None),
+    dia: Optional[datetime.date] = Query(default=None),
+):
+    pedidos = service.listar_historial_pedidos(estado, dia)
+
+    return pedidos
 
 
 @router.get("/detalle/{id}")
@@ -30,7 +36,7 @@ async def crear_pedido(payload: PedidosIn):
     }
 
 
-@router.post("/pagar/{id_pedido}")
+@router.put("/pagar/{id_pedido}")
 async def pagar_pedido(id_pedido: int):
     resultado = service.pagar_pedido_service(id_pedido)
 
@@ -40,7 +46,7 @@ async def pagar_pedido(id_pedido: int):
     return {"message": "El pedido se ha pagado exitosamente"}
 
 
-@router.post("/cancelar/{id_pedido}")
+@router.put("/cancelar/{id_pedido}")
 async def cancelar_pedido(id_pedido: int):
     resultado = service.anular_pedido_service(id_pedido)
 
