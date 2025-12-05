@@ -18,30 +18,24 @@ import datetime
 from sqlalchemy import select as sa_select
 
 
-def listar_historial_pedidos(limite: int | None):
-
-    statement = (
-        sa_select(Pedidos, DetallesDePedidos, Platillos, Facturas, Clientes)
-        .select_from(Pedidos)
-        .join(DetallesDePedidos)
-        .join(Platillos)
-        .join(FacturasPedidos)
-        .join(Facturas)
-        .join(Clientes)
-        .order_by(Pedidos.FechaPedido)
-    )
-
+def listar_historial_pedidos():
     with Session(db_engine) as session:
-        if limite is not None:
-            query = session.execute(statement.limit(limite)).all()
-        else:
-            query = session.execute(statement.limit(limite)).all()
+        statement = (
+            sa_select(Pedidos, DetallesDePedidos, Platillos, Facturas, Clientes)
+            .select_from(Pedidos)
+            .join(DetallesDePedidos)
+            .join(Platillos)
+            .join(FacturasPedidos)
+            .join(Facturas)
+            .join(Clientes)
+            .order_by(Pedidos.FechaPedido)
+        )
+
+        query = session.execute(statement).all()
 
         historial_map: dict[int, dict] = {}
 
         for pedido, detalle, platillo, factura, cliente in query:
-            if pedido.IdPedido is None:
-                continue
             pid: int = pedido.IdPedido
             if pid not in historial_map:
                 historial_map[pid] = {
@@ -137,7 +131,9 @@ def crear_pedido(nombre_cliente: str, fecha: datetime.date, detalle: List[Detall
             return None
 
 
-def actualizar_pedido(id_pedido: int, nombre_cliente: str, detalles: List[Detalles]):
+def actualizar_pedido(
+    id_pedido: int, nombre_cliente: str, estado: EstadoPedido, detalles: List[Detalles]
+):
     with Session(db_engine) as session:
         statement = (
             select(DetallesDePedidos)
@@ -175,7 +171,7 @@ def actualizar_pedido(id_pedido: int, nombre_cliente: str, detalles: List[Detall
             return None
 
         pedido.IdCliente = nuevo_id_cliente
-        pedido.Estado = EstadoPedido.PENDIENTE
+        pedido.Estado = estado
 
         for d in detalles_actualizar:
             session.delete(d)
@@ -203,7 +199,15 @@ def actualizar_pedido(id_pedido: int, nombre_cliente: str, detalles: List[Detall
 
         factura.MontoTotal = monto_total
         factura.CantidadTotal = cantidad_total
-        factura.Estado = EstadoFactura.GENERADA
+        if estado == EstadoPedido.ENTREGADO:
+            factura.Estado = EstadoFactura.PAGADA
+
+        if estado == EstadoPedido.PENDIENTE:
+            factura.Estado = EstadoFactura.GENERADA
+
+        if estado == EstadoPedido.ANULADO:
+            factura.Estado = EstadoFactura.ANULADA
+
         factura.FechaFactura = str(datetime.date.today())
 
         session.commit()
