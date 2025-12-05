@@ -379,7 +379,6 @@ def obtener_contador_platillos():
             )
             .select_from(DetallesDePedidos)
             .join(Platillos)
-            .where(Pedidos.Estado != EstadoPedido.ANULADO)
             .group_by(Platillos.NombrePlatillo)
             .order_by(func.SUM(DetallesDePedidos.Cantidad).desc())
         )
