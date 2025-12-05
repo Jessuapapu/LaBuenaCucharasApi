@@ -8,8 +8,8 @@ router = APIRouter()
 
 
 @router.get("/")
-async def obtener_pedidos(limite: Optional[int] = Query(default=None)):
-    pedidos = service.listar_historial_pedidos(limite)
+async def obtener_pedidos():
+    pedidos = service.listar_historial_pedidos()
 
     return pedidos
 
@@ -36,30 +36,10 @@ async def crear_pedido(payload: PedidosIn):
 @router.put("/detalles/{id_pedido}")
 async def actualizar_detalles_pedido(id_pedido: int, payload: PedidosUpdate):
     resultado = service.actualizar_pedido(
-        id_pedido, payload.nombre_cliente, payload.detalles
+        id_pedido, payload.nombre_cliente, payload.estado, payload.detalles
     )
 
     if resultado is None or not resultado:
         raise HTTPException(500, "No se pudo actualizar el pedido")
 
     return {"detail": "El pedido se actualizo correctamente"}
-
-
-@router.put("/pagar/{id_pedido}")
-async def pagar_pedido(id_pedido: int):
-    resultado = service.pagar_pedido_service(id_pedido)
-
-    if resultado is None or resultado is not True:
-        raise HTTPException(500, {"message": "No se pudo pagar el pedido"})
-
-    return {"detail": "El pedido se ha pagado exitosamente"}
-
-
-@router.put("/cancelar/{id_pedido}")
-async def cancelar_pedido(id_pedido: int):
-    resultado = service.anular_pedido_service(id_pedido)
-
-    if resultado is None or resultado is not True:
-        raise HTTPException(500, {"message": "No se pudo cancelado el pedido"})
-
-    return {"detail": "El pedido se ha cancelado exitosamente"}
