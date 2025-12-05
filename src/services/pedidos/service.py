@@ -335,3 +335,36 @@ def conteo_pedidos_semanal():
         ]
 
         return conteo_semanal
+
+
+def obtener_facturas_pedidos():
+    with Session(db_engine) as session:
+        statement = (
+            sa_select(Pedidos, Facturas, Clientes)
+            .select_from(Pedidos)
+            .join(FacturasPedidos)
+            .join(Facturas)
+            .join(Clientes)
+            .order_by(Pedidos.FechaPedido)
+        )
+
+        query = session.execute(statement).all()
+
+        facturas_list = []
+
+        for pedido, factura, cliente in query:
+            facturas_list.append(
+                {
+                    "id_pedido": pedido.IdPedido,
+                    "monto_total": factura.MontoTotal,
+                    "cantidad_total": factura.CantidadTotal,
+                    "estado_factura": factura.Estado,
+                    "fecha_factura": factura.FechaFactura,
+                    "cliente": {
+                        "nombre_cliente": cliente.NombreCliente,
+                        "direccion_cliente": cliente.DireccionCliente,
+                    },
+                }
+            )
+
+        return facturas_list
