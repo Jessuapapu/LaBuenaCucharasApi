@@ -145,7 +145,7 @@ def actualizar_pedido(id_pedido: int, nombre_cliente: str, detalles: List[Detall
 
         if not detalles_actualizar:
             return None
-        # Validar que el pedido exista y obtener su factura
+
         stmt_pedido_factura = (
             select(Pedidos, Facturas)
             .select_from(Pedidos)
@@ -159,26 +159,22 @@ def actualizar_pedido(id_pedido: int, nombre_cliente: str, detalles: List[Detall
 
         pedido, factura = resultado
 
-        # No permitir actualizar si el pedido/factura ya están cerrados
         if (
-            pedido.Estado == EstadoPedido.ENTREGADO
-            or pedido.Estado == EstadoPedido.ANULADO
-            or factura.Estado == EstadoFactura.PAGADA
+            pedido.Estado == EstadoPedido.ANULADO
             or factura.Estado == EstadoFactura.ANULADA
         ):
             return None
 
-        # Actualizar cliente si existe
         nuevo_id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)
         if nuevo_id_cliente is None:
             return None
-        pedido.IdCliente = nuevo_id_cliente
 
-        # Eliminar detalles existentes del pedido
+        pedido.IdCliente = nuevo_id_cliente
+        pedido.Estado = EstadoPedido.PENDIENTE
+
         for d in detalles_actualizar:
             session.delete(d)
 
-        # Insertar nuevos detalles y recalcular totales
         monto_total = Decimal("0")
         cantidad_total = 0
 
@@ -200,11 +196,10 @@ def actualizar_pedido(id_pedido: int, nombre_cliente: str, detalles: List[Detall
             monto_total += Decimal(det.cantidad) * Decimal(str(det.precio_unitario))
             cantidad_total += det.cantidad
 
-        # Actualizar factura asociada
         factura.MontoTotal = monto_total
         factura.CantidadTotal = cantidad_total
-        if factura.Estado == EstadoFactura.GENERADA:
-            factura.FechaFactura = str(datetime.date.today())
+        factura.Estado = EstadoFactura.GENERADA
+        factura.FechaFactura = str(datetime.date.today())
 
         session.commit()
         session.refresh(pedido)
@@ -224,6 +219,8 @@ def pagar_pedido_service(id_pedido: int):
         )
 
         resultado = session.exec(statement).first()
+
+        print(resultado)
 
         if not resultado:
             return None
