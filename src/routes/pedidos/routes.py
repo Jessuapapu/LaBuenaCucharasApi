@@ -55,3 +55,9 @@ async def obtener_conteo_pedidos_semanal():
 async def obtener_facturas():
     facturas = service.obtener_facturas_pedidos()
     return facturas
+
+
+@router.get("/platillos/conteo")
+async def obtener_platillos_populares():
+    platillos = service.obtener_contador_platillos()
+    return platillos
