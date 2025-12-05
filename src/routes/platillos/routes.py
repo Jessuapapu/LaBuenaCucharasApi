@@ -23,6 +23,19 @@ async def obtener_platillos():
     return platillos
 
 
+@router.get("/categoria", response_model=None)
+async def obtener_categorias():
+    try:
+        categorias = service.obtener_categorias_platillos_service()
+        if not categorias:
+            raise HTTPException(status_code=404, detail="No se encontraron categorías")
+        return categorias
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {e}")
+
+
 @router.post("/", response_model=None)
 async def crear_platillo(payload: PlatilloIn):
     try:
