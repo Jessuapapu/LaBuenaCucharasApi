@@ -1,4 +1,11 @@
-from src.models.clientes.models import Clientes, ClienteCorreo, ClienteTelefono
+import datetime
+from src.models.clientes.models import (
+    Clientes,
+    ClienteCorreo,
+    ClienteTelefono,
+    Contrato,
+)
+from src.models.clientes.types import EstadoContrato
 from sqlmodel import Session, select
 from src.config.database import db_engine
 
@@ -73,3 +80,42 @@ def obtener_id_cliente_por_nombre(nombre: str):
         if not id_cliente:
             return None
         return id_cliente
+
+
+def obtener_contratos_clientes():
+    with Session(db_engine) as session:
+        statement = select(Contrato)
+        contratos = session.exec(statement).all()
+
+        return contratos
+
+
+def registrar_contrato_cliente(
+    nombre_cliente: str,
+    numero_contrato: int,
+    fecha_inicio: datetime.datetime,
+    fecha_fin: datetime.datetime,
+    presupuesto: float,
+):
+    id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)
+    if id_cliente is None:
+        raise ValueError("Cliente no encontrado")
+
+    nuevo_contrato = Contrato(
+        IdCliente=id_cliente,
+        NumeroContrato=numero_contrato,
+        FechaInicio=fecha_inicio,
+        FechaVencimiento=fecha_fin,
+        Presupuesto=presupuesto,
+        Estado=EstadoContrato.ACTIVO,
+    )
+
+    with Session(db_engine) as session:
+        try:
+            session.add(nuevo_contrato)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e
+
+    return nuevo_contrato
