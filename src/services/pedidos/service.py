@@ -15,7 +15,8 @@ from src.schemas.pedidos import Detalles
 from typing import List
 from decimal import Decimal
 import datetime
-from sqlalchemy import select as sa_select
+from sqlalchemy import select as sa_select, func, cast
+from sqlalchemy.types import Date
 
 
 def listar_historial_pedidos():
@@ -287,3 +288,50 @@ def anular_pedido_service(id_pedido: int):
         session.refresh(factura)
 
         return True
+
+
+def conteo_pedidos_semanal():
+    with Session(db_engine) as session:
+        today = datetime.date.today()
+        start_of_week = today - datetime.timedelta(days=today.weekday())
+        end_of_week = start_of_week + datetime.timedelta(days=6)
+
+        statement = (
+            select(Pedidos.FechaPedido)
+            .select_from(Pedidos)
+            .where(cast(Pedidos.FechaPedido, Date).between(start_of_week, end_of_week))
+        )
+
+        resultados = session.execute(statement).all()
+
+        # Mapa de nombres de días en español
+        dias_es = [
+            "lunes",
+            "martes",
+            "miércoles",
+            "jueves",
+            "viernes",
+            "sábado",
+            "domingo",
+        ]
+
+        # Conteo por nombre de día
+        conteo_por_dia: dict[str, int] = {dia: 0 for dia in dias_es}
+
+        for (fecha_pedido_raw,) in resultados:
+            # Normalizar a date
+            if isinstance(fecha_pedido_raw, datetime.date):
+                fecha_pedido = fecha_pedido_raw
+            else:
+                # Asumir formato ISO (YYYY-MM-DD)
+                fecha_pedido = datetime.date.fromisoformat(str(fecha_pedido_raw))
+
+            nombre_dia = dias_es[fecha_pedido.weekday()]
+            conteo_por_dia[nombre_dia] += 1
+
+        # Construir la salida ordenada de lunes a domingo
+        conteo_semanal = [
+            {"dia": dia, "conteo": conteo_por_dia[dia]} for dia in dias_es
+        ]
+
+        return conteo_semanal

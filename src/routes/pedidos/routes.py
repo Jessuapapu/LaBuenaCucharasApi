@@ -43,3 +43,9 @@ async def actualizar_detalles_pedido(id_pedido: int, payload: PedidosUpdate):
         raise HTTPException(500, "No se pudo actualizar el pedido")
 
     return {"detail": "El pedido se actualizo correctamente"}
+
+
+@router.get("/conteo/semanal")
+async def obtener_conteo_pedidos_semanal():
+    conteo = service.conteo_pedidos_semanal()
+    return conteo
