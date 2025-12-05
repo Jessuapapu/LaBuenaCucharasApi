@@ -11,6 +11,10 @@ class MenuIn(BaseModel):
     nombre_platillo: str
 
 
+class MenuUpdate(BaseModel):
+    nombre_platillo: str
+
+
 @router.get("/")
 async def obtener_menu(day: Optional[datetime.date] = Query(default=None)):
     if day is not None:
@@ -28,6 +32,19 @@ async def crear_menu(payload: MenuIn):
             day=payload.day, nombre_platillo=payload.nombre_platillo
         )
         return {"detail": "Menu creado con exito"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {e}")
+
+
+@router.put("/{id_menu}")
+async def editar_menu(id_menu: int, payload: MenuUpdate):
+    try:
+        service.editar_menu_service(
+            id_menu=id_menu, nombre_platillo=payload.nombre_platillo
+        )
+        return {"detail": "Menu editado con exito"}
     except HTTPException:
         raise
     except Exception as e:
