@@ -368,3 +368,31 @@ def obtener_facturas_pedidos():
             )
 
         return facturas_list
+
+
+def obtener_contador_platillos():
+    with Session(db_engine) as session:
+        statement = (
+            select(
+                Platillos.NombrePlatillo,
+                func.SUM(DetallesDePedidos.Cantidad).label("total_vendido"),
+            )
+            .select_from(DetallesDePedidos)
+            .join(Platillos)
+            .group_by(Platillos.NombrePlatillo)
+            .order_by(func.SUM(DetallesDePedidos.Cantidad).desc())
+        )
+
+        query = session.exec(statement).all()
+
+        platillos_populares = []
+
+        for nombre_platillo, total_vendido in query:
+            platillos_populares.append(
+                {
+                    "nombre_platillo": nombre_platillo,
+                    "total_vendido": total_vendido,
+                }
+            )
+
+        return platillos_populares
