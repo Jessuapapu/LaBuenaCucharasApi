@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from src.models.clientes.types import EstadoContrato
 from src.services.clientes import service
 import datetime
 
@@ -18,6 +19,10 @@ class ContratosIn(BaseModel):
     fecha_inicio: datetime.datetime
     fecha_fin: datetime.datetime
     presupuesto: float
+
+
+class ContratoUpdateEstadoIn(BaseModel):
+    nuevo_estado: EstadoContrato
 
 
 @router.get("/")
@@ -69,3 +74,20 @@ async def registrar_contrato_cliente(payload: ContratosIn):
         raise HTTPException(500, {"message": "No se pudo crear el contrato"})
 
     return {"message": "Contrato creado exitosamente", "contrato": contrato}
+
+
+@router.put("/contratos/{numero_contrato}/estado")
+async def actualizar_estado_contrato(
+    numero_contrato: int, payload: ContratoUpdateEstadoIn
+):
+    contrato = service.actualizar_estado_contrato(numero_contrato, payload.nuevo_estado)
+
+    if contrato is None:
+        raise HTTPException(
+            500, {"message": "No se pudo actualizar el estado del contrato"}
+        )
+
+    return {
+        "message": "Estado del contrato actualizado exitosamente",
+        "contrato": contrato,
+    }

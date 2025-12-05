@@ -119,3 +119,23 @@ def registrar_contrato_cliente(
             raise e
 
     return nuevo_contrato
+
+
+def actualizar_estado_contrato(numero_contrato: int, nuevo_estado: EstadoContrato):
+    with Session(db_engine) as session:
+        statement = select(Contrato).where(Contrato.NumeroContrato == numero_contrato)
+        contrato = session.exec(statement).first()
+
+        if not contrato:
+            raise ValueError("Contrato no encontrado")
+
+        contrato.Estado = nuevo_estado
+
+        try:
+            session.add(contrato)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e
+
+    return contrato
