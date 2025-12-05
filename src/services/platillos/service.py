@@ -33,6 +33,28 @@ def obtener_platillos_service():
         return platillos
 
 
+def obtener_categorias_platillos_service():
+    with Session(db_engine) as session:
+        statement = select(CatalogoPlatillos)
+
+        categorias_query = session.exec(statement).all()
+
+        if not categorias_query:
+            return []
+
+        categorias = []
+
+        for categoria in categorias_query:
+            categorias.append(
+                {
+                    "id_categoria": categoria.IdCatalogoPlatillo,
+                    "nombre_categoria": categoria.NombreCatalogoPlatillo,
+                }
+            )
+
+        return categorias
+
+
 def añadir_platillo(nombre_platillo: str, nombre_categoria: str):
     with Session(db_engine) as session:
         try:
