@@ -49,3 +49,9 @@ async def actualizar_detalles_pedido(id_pedido: int, payload: PedidosUpdate):
 async def obtener_conteo_pedidos_semanal():
     conteo = service.conteo_pedidos_semanal()
     return conteo
+
+
+@router.get("/facturas")
+async def obtener_facturas():
+    facturas = service.obtener_facturas_pedidos()
+    return facturas
