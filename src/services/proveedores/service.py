@@ -1,6 +1,11 @@
+from decimal import Decimal
 from sqlmodel import Session, select
 from src.config.database import db_engine
-from src.models.insumos.models import Proveedores
+from src.models.insumos.models import (
+    Proveedores,
+    RegistroDeAbastecimiento,
+    DetallesRegistroInsumos,
+)
 from src.models.insumos.types import TipoDeProveedor
 
 
@@ -29,3 +34,27 @@ def registrar_proveedor(nombre: str, direccion: str, tipo: TipoDeProveedor):
         session.commit()
 
     return nuevo_proveedor
+
+
+def obtener_historial_abastecimiento():
+    with Session(db_engine) as session:
+        statement = select(RegistroDeAbastecimiento)
+        historial = session.exec(statement).all()
+
+        return historial
+
+
+def registrar_abastecimiento(
+    costo_total: Decimal, id_proveedor: int, total_ingresado: int
+):
+    with Session(db_engine) as session:
+        nuevo_abastecimiento = RegistroDeAbastecimiento(
+            CostoTotal=costo_total,
+            IdProveedor=id_proveedor,
+            TotalIngresado=total_ingresado,
+        )
+
+        session.add(nuevo_abastecimiento)
+        session.commit()
+
+        return nuevo_abastecimiento
