@@ -18,7 +18,7 @@ import datetime
 from sqlalchemy import select as sa_select
 
 
-def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
+def listar_historial_pedidos(inicio: int | None, fin: int | None):
 
     statement = (
         sa_select(Pedidos, DetallesDePedidos, Platillos, Facturas, Clientes)
@@ -28,10 +28,21 @@ def listar_historial_pedidos(estado: str | None, dia: datetime.date | None):
         .join(FacturasPedidos)
         .join(Facturas)
         .join(Clientes)
+        .order_by(Pedidos.FechaPedido)
     )
 
     with Session(db_engine) as session:
-        query = session.execute(statement).all()
+        if inicio is None and fin is None:
+            query = session.execute(statement).all()
+        elif inicio is not None:
+            query = session.execute(statement.offset(inicio)).all()
+        elif fin is not None:
+            query = session.execute(statement.limit(fin)).all()
+        else:
+            if inicio == fin:
+                return None
+            query = session.execute(statement.offset(inicio).limit(fin)).all()
+
         historial_map: dict[int, dict] = {}
 
         for pedido, detalle, platillo, factura, cliente in query:
