@@ -13,7 +13,6 @@ class Proveedores(SQLModel, table=True):
     IdProveedor: int | None = Field(default=None, primary_key=True)
     NombreProveedor: str = Field()
     Direccion: str | None = Field(default=None)
-    Activo: bool = Field(default=True)
     Tipo: TipoDeProveedor
 
 class CategoriasInsumos(SQLModel, table=True):
