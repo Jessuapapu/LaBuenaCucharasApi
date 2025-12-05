@@ -8,11 +8,8 @@ router = APIRouter()
 
 
 @router.get("/")
-async def obtener_pedidos(
-    inicio: Optional[int] = Query(default=None),
-    fin: Optional[int] = Query(default=None),
-):
-    pedidos = service.listar_historial_pedidos(inicio, fin)
+async def obtener_pedidos(limite: Optional[int] = Query(default=None)):
+    pedidos = service.listar_historial_pedidos(limite)
 
     return pedidos
 
