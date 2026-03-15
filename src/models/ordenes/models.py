@@ -15,7 +15,7 @@ class MetodosPagoOrdenes(SQLModel, table=True):
     
 class PagoOrdenes(SQLModel, table = True):
     IdPagoOrdenes: int | None  = Field(default = None, primary_key = True, index = True)
-    IdMetodoPagoOrdenes: int | None = Field(default = None, foreign_key = "metodosPagoOrdenes.IdMetodoPagoOrdenes")
+    IdMetodoPagoOrdenes: int | None = Field(default = None, foreign_key = "metodospagoordenes.IdMetodoPagoOrdenes")
     IdOrden: int | None = Field(default = None, foreign_key = "ordenes.IdOrdenes")
     PagoTotal: decimal.Decimal = Field(default = None)
     Fecha: datetime.datetime = Field(default=datetime.datetime.now())

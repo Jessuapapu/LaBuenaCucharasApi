@@ -1,5 +1,5 @@
 from sqlmodel import Field, SQLModel
-from .types import EstadoPedido, EstadoFactura
+from .types import EstadoPedido
 import decimal
 import datetime
 

@@ -26,6 +26,8 @@ from src.models.platillos import models as platillos_models
 from src.models.clientes import models as clientes_models
 from src.models.insumos import models as insumos_models
 from src.models.pedidos import models as pedidos_models
+from src.models.facturas import models as facturas_models
+from src.models.ordenes import models as ordenes_models
 from sqlmodel import SQLModel
 target_metadata = SQLModel.metadata
 
@@ -61,6 +63,7 @@ def run_migrations_offline() -> None:
         f"DATABASE={database};"
         f"UID={username};"
         f"PWD={password}"
+        f";Trusted_Connection=yes"
     )
 
     # Encode for SQLAlchemy
@@ -102,6 +105,7 @@ def run_migrations_online() -> None:
         f"DATABASE={database};"
         f"UID={username};"
         f"PWD={password}"
+        f";Trusted_Connection=yes"
     )
 
     connection_uri = (
