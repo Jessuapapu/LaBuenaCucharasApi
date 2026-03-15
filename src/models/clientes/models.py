@@ -13,8 +13,8 @@ class Contrato(SQLModel, table=True):
     Presupuesto: float = Field(nullable=False)
     NumeroContrato: int = Field(nullable=False)
     Estado: EstadoContrato = Field(nullable=False)
-    FechaInicio: datetime.datetime = Field(max_length=10, nullable=False)
-    FechaVencimiento: datetime.datetime = Field(max_length=10, nullable=True)
+    FechaInicio: datetime.datetime = Field(nullable=False)
+    FechaVencimiento: datetime.datetime = Field(nullable=True)
 
 class ClienteTelefono(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)

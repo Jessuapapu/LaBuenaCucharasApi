@@ -18,6 +18,7 @@ connection_string = (
     f"DATABASE={database};"
     f"UID={username};"
     f"PWD={password}"
+    f";Trusted_Connection=yes"
 )
 
 # Encode for SQLAlchemy

@@ -6,18 +6,18 @@ import decimal
 class Insumos(SQLModel, table=True):
     IdInsumo: int | None = Field(default=None, primary_key=True)
     IdCategoriaInsumo: int | None = Field(default=None, foreign_key="categoriasinsumos.IdCategoriaInsumo")
-    NombreInsumo: str = Field()
+    NombreInsumo: str = Field(max_length= 200, nullable=False)             
     Prioridad: PrioridadInsumo
 
 class Proveedores(SQLModel, table=True):
     IdProveedor: int | None = Field(default=None, primary_key=True)
-    NombreProveedor: str = Field()
+    NombreProveedor: str = Field(max_length= 150, nullable=False)
     Direccion: str | None = Field(default=None)
     Tipo: TipoDeProveedor
 
 class CategoriasInsumos(SQLModel, table=True):
     IdCategoriaInsumo: int | None = Field(default=None, primary_key=True)
-    NombreCategoriaInsumo: str = Field()
+    NombreCategoriaInsumo: str = Field(max_length= 150, nullable=False)
 
 class RegistroDeAbastecimiento(SQLModel, table=True):
     IdRegistro: int | None = Field(default=None, primary_key=True)
@@ -30,4 +30,4 @@ class DetallesRegistroInsumos(SQLModel, table=True):
     IdRegistroAbastecimiento: int | None = Field(default=None, foreign_key="registrodeabastecimiento.IdRegistro", primary_key=True)
     IdInsumo: int | None = Field(default=None, foreign_key="insumos.IdInsumo", primary_key=True)
     TotalIngresado: int = Field(nullable=False)
-    CostoIndividual: decimal.Decimal
+    CostoIndividual: decimal.Decimal = Field(nullable=False)
