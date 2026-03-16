@@ -14,4 +14,5 @@ app.add_middleware(
 )
 
 
+
 print(f"La app inicio correctamente, la url base es http://localhost:8000")
