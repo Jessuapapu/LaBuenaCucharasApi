@@ -11,12 +11,12 @@ class Ordenes(SQLModel, table = True):
     Fecha: datetime.datetime = Field(default=datetime.datetime.now())
     
 class MetodosPago(SQLModel, table=True):
-    IdMetodoPagoOrdenes: int | None = Field(default = None, primary_key = True)
+    IdMetodoPago: int | None = Field(default = None, primary_key = True)
     NombreTipo: str = Field(nullable = False, max_length=100)
     
 class Pago(SQLModel, table = True):
-    IdPagoOrdenes: int | None  = Field(default = None, primary_key = True, index = True)
-    IdMetodoPagoOrdenes: int | None = Field(default = None, foreign_key = "metodospagoordenes.IdMetodoPagoOrdenes")
+    IdPago: int | None  = Field(default = None, primary_key = True, index = True)
+    IdMetodoPagos: int | None = Field(default = None, foreign_key = "metodospago.IdMetodoPago")
     IdOrden: int | None = Field(default = None, foreign_key = "ordenes.IdOrdenes")
     PagoTotal: decimal.Decimal = Field(default = None)
     Fecha: datetime.datetime = Field(default=datetime.datetime.now())

@@ -1,6 +1,6 @@
 from sqlmodel import Field, SQLModel
 import datetime
-from decimal import Decimal
+import decimal
 from .types import TipoDeProveedor
 
 class Proveedores(SQLModel, table=True):
@@ -13,5 +13,5 @@ class RegistroDeAbastecimiento(SQLModel, table=True):
     IdRegistro: int | None = Field(default=None, primary_key=True)
     TotalIngresado: int = Field(default=None, nullable=False)
     IdProveedor: int | None = Field(default=None, foreign_key="proveedores.IdProveedor")
-    CostoTotal: Decimal = Field(nullable=False)
+    CostoTotal: decimal.Decimal = Field(nullable=False)
     Fecha: datetime.datetime = Field(default=datetime.datetime.now())

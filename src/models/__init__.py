@@ -4,3 +4,4 @@ from .pedidos import *
 from .platillos import *
 from .facturas import *
 from .ordenes import *
+from .proveedores import *
