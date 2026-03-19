@@ -3,17 +3,18 @@ import datetime
 import decimal
 
 
+# Si la orden es un pedido de un contrato o evento
 class Ordenes(SQLModel, table = True):
     IdOrdenes: int | None  = Field(default = None, primary_key = True, index = True)
     CostoTotal: decimal.Decimal = Field(default = None)
     IdCliente: int | None = Field(default = 0, foreign_key = "clientes.IdCliente")
     Fecha: datetime.datetime = Field(default=datetime.datetime.now())
     
-class MetodosPagoOrdenes(SQLModel, table=True):
+class MetodosPago(SQLModel, table=True):
     IdMetodoPagoOrdenes: int | None = Field(default = None, primary_key = True)
     NombreTipo: str = Field(nullable = False, max_length=100)
     
-class PagoOrdenes(SQLModel, table = True):
+class Pago(SQLModel, table = True):
     IdPagoOrdenes: int | None  = Field(default = None, primary_key = True, index = True)
     IdMetodoPagoOrdenes: int | None = Field(default = None, foreign_key = "metodospagoordenes.IdMetodoPagoOrdenes")
     IdOrden: int | None = Field(default = None, foreign_key = "ordenes.IdOrdenes")

@@ -25,3 +25,8 @@ class ClienteCorreo(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     IdCliente: int = Field(foreign_key="clientes.IdCliente", nullable=False)
     CorreoElectronico: str = Field(max_length=100, nullable=False)
+
+class ClienteDireccion(SQLModel,table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    IdCliente: int = Field(foreign_key="clientes.IdCliente", nullable=False)
+    Dirreccion: str = Field(max_length=100, nullable=False)

@@ -63,10 +63,12 @@ def añadir_platillo(nombre_platillo: str, nombre_categoria: str):
 
             session.flush()
 
+            
             id_categoria = obtener_categoria_id_por_nombre(nombre_categoria)
+            print(id_categoria)
 
             if id_categoria is None:
-                return None
+                return False
 
             categoria = CategoriaPlatillos(
                 IdPlatillo=nuevo_platillo.IdPlatillo, IdCatalogoPlatillo=id_categoria
@@ -74,6 +76,7 @@ def añadir_platillo(nombre_platillo: str, nombre_categoria: str):
 
             session.add(categoria)
             session.commit()
+            return True
         except Exception as e:
             session.rollback()
             raise e

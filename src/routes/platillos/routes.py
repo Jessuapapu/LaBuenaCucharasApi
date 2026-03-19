@@ -39,7 +39,10 @@ async def obtener_categorias():
 @router.post("/", response_model=None)
 async def crear_platillo(payload: PlatilloIn):
     try:
-        service.añadir_platillo(payload.nombre_platillo, payload.nombre_categoria)
+        # Se valida si la funcion retorna un none para decir que no pudo agregar el platillo
+        if not service.añadir_platillo(payload.nombre_platillo, payload.nombre_categoria):
+            return {"detail": "Error al agregar el platillo"}
+        
         return {"detail": "Platillo añadido con exito"}
     except HTTPException:
         raise

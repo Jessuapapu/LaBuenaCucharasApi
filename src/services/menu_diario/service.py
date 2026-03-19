@@ -19,7 +19,7 @@ def obtener_historial_menu_service():
             historial.append(
                 {
                     "id": menu_diario.IdMenu,
-                    "Fecha": menu_diario.FechaMenu,
+                    "Fecha": menu_diario.Fecha,
                     "NombrePlatillo": platillo.NombrePlatillo,
                 }
             )
@@ -32,7 +32,7 @@ def obtener_menu_dia_service(day: datetime.date):
         statement = (
             select(MenuDiario, Platillos)
             .join(Platillos)
-            .where(MenuDiario.FechaMenu == day)
+            .where(MenuDiario.Fecha == day)
         )
 
         result = session.exec(statement).first()
@@ -43,7 +43,7 @@ def obtener_menu_dia_service(day: datetime.date):
 
         return {
             "id": menu_diario.IdMenu,
-            "Fecha": menu_diario.FechaMenu,
+            "Fecha": menu_diario.Fecha,
             "NombrePlatillo": platillos.NombrePlatillo,
         }
 
@@ -54,7 +54,7 @@ def crear_menu_service(day: datetime.date, nombre_platillo: str):
     if id_platillo is None:
         raise ValueError("El platillo con el nombre ingresado no existe")
 
-    nuevo_menu = MenuDiario(FechaMenu=day, IdPlatillo=id_platillo)
+    nuevo_menu = MenuDiario(Fecha=day, IdPlatillo=id_platillo)
 
     with Session(db_engine) as session:
         try:

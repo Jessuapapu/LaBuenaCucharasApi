@@ -5,6 +5,3 @@ class PrioridadInsumo(Enum):
     MEDIA = "MEDIA"
     BAJA = "BAJA"
 
-class TipoDeProveedor(Enum):
-    ESPORANEO = "ESPORANEO"
-    FIJO = "FIJO"

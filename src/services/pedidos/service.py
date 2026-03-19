@@ -1,11 +1,15 @@
 from src.models.pedidos.models import (
     Pedidos,
     DetallesDePedidos,
+)
+from src.models.facturas.models import (
     Facturas,
     FacturasPedidos,
 )
+
 from src.models.clientes.models import Clientes
-from src.models.pedidos.types import EstadoPedido, EstadoFactura
+from src.models.pedidos.types import EstadoPedido
+from src.models.facturas.types import EstadoFactura
 from sqlmodel import Session, select
 from src.config.database import db_engine
 from src.models.platillos.models import Platillos
