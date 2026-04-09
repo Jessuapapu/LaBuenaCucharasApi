@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from src.services.proveedores import service
-from src.models.insumos.types import TipoDeProveedor
+from src.models.proveedores.types import TipoDeProveedor
 from pydantic import BaseModel
 
 class ProveedorIn(BaseModel):

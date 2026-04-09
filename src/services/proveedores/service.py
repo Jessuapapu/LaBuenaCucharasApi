@@ -1,12 +1,12 @@
 from decimal import Decimal
 from sqlmodel import Session, select
 from src.config.database import db_engine
-from src.models.insumos.models import (
+
+from src.models.proveedores.models import (
     Proveedores,
-    RegistroDeAbastecimiento,
-    DetallesRegistroInsumos,
+    RegistroDeAbastecimiento
 )
-from src.models.insumos.types import TipoDeProveedor
+from src.models.proveedores.types import TipoDeProveedor
 
 
 def obtener_proveedores():

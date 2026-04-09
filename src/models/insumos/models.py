@@ -9,7 +9,6 @@ class Insumos(SQLModel, table=True):
     NombreInsumo: str = Field(max_length= 200, nullable=False)             
     Prioridad: PrioridadInsumo
 
-
 class CategoriasInsumos(SQLModel, table=True):
     IdCategoriaInsumo: int | None = Field(default=None, primary_key=True)
     NombreCategoriaInsumo: str = Field(max_length= 150, nullable=False)

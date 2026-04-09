@@ -3,7 +3,8 @@ from src.models.clientes.models import (
     Clientes,
     ClienteCorreo,
     ClienteTelefono,
-    Contrato,
+    ClienteDireccion,
+    Contrato
 )
 from src.models.clientes.types import EstadoContrato
 from sqlmodel import Session, select
@@ -15,13 +16,14 @@ def listar_clientes():
         statement = (
             select(
                 Clientes.NombreCliente,
-                Clientes.DireccionCliente,
                 ClienteCorreo.CorreoElectronico,
+                ClienteDireccion.ClienteDireccion,
                 ClienteTelefono.Telefono,
             )
             .select_from(Clientes)
             .join(ClienteCorreo)
             .join(ClienteTelefono)
+            .join(ClienteDireccion)
         )
 
         clientes_query = session.exec(statement).all()

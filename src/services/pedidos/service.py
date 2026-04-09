@@ -1,10 +1,10 @@
 from src.models.pedidos.models import (
     Pedidos,
-    DetallesDePedidos,
+    DetallesOrdenes,
 )
+
 from src.models.facturas.models import (
-    Facturas,
-    FacturasPedidos,
+    Facturas
 )
 
 from src.models.clientes.models import Clientes
@@ -26,11 +26,11 @@ from sqlalchemy.types import Date
 def listar_historial_pedidos():
     with Session(db_engine) as session:
         statement = (
-            sa_select(Pedidos, DetallesDePedidos, Platillos, Facturas, Clientes)
+            sa_select(Pedidos, DetallesOrdenes, Platillos, Facturas, Clientes)
             .select_from(Pedidos)
-            .join(DetallesDePedidos)
+            .join(DetallesOrdenes)
             .join(Platillos)
-            .join(FacturasPedidos)
+            .join(Facturas)
             .join(Facturas)
             .join(Clientes)
             .order_by(Pedidos.FechaPedido)
@@ -97,7 +97,7 @@ def crear_pedido(nombre_cliente: str, fecha: datetime.date, detalle: List[Detall
                 if id_platillo is None:
                     return None
 
-                detalle_nuevo = DetallesDePedidos(
+                detalle_nuevo = DetallesOrdenes(
                     IdPedido=nuevo_pedido.IdPedido,
                     IdPlatillo=id_platillo,
                     Cantidad=det.cantidad,
@@ -123,7 +123,7 @@ def crear_pedido(nombre_cliente: str, fecha: datetime.date, detalle: List[Detall
             if nuevo_pedido.IdPedido is None:
                 raise ValueError("La base de datos no generó IdFactura")
 
-            relacion_factura_pedido = FacturasPedidos(
+            relacion_factura_pedido = Facturas(
                 IdFactura=factura_nueva.IdFactura, IdPedido=nuevo_pedido.IdPedido
             )
 
@@ -141,9 +141,9 @@ def actualizar_pedido(
 ):
     with Session(db_engine) as session:
         statement = (
-            select(DetallesDePedidos)
+            select(DetallesOrdenes)
             .select_from(Pedidos)
-            .join(DetallesDePedidos)
+            .join(DetallesOrdenes)
             .where(Pedidos.IdPedido == id_pedido)
         )
 
@@ -155,7 +155,7 @@ def actualizar_pedido(
         stmt_pedido_factura = (
             select(Pedidos, Facturas)
             .select_from(Pedidos)
-            .join(FacturasPedidos)
+            .join(Facturas)
             .join(Facturas)
             .where(Pedidos.IdPedido == id_pedido)
         )
@@ -191,7 +191,7 @@ def actualizar_pedido(
                 return None
 
             session.add(
-                DetallesDePedidos(
+                DetallesOrdenes(
                     IdPedido=id_pedido,
                     IdPlatillo=id_platillo,
                     Cantidad=det.cantidad,
@@ -227,7 +227,7 @@ def pagar_pedido_service(id_pedido: int):
         statement = (
             select(Pedidos, Facturas)
             .select_from(Pedidos)
-            .join(FacturasPedidos)
+            .join(Facturas)
             .join(Facturas)
             .where(Pedidos.IdPedido == id_pedido)
         )
@@ -264,7 +264,7 @@ def anular_pedido_service(id_pedido: int):
         statement = (
             select(Pedidos, Facturas)
             .select_from(Pedidos)
-            .join(FacturasPedidos)
+            .join(Facturas)
             .join(Facturas)
             .where(Pedidos.IdPedido == id_pedido)
         )
@@ -346,7 +346,7 @@ def obtener_facturas_pedidos():
         statement = (
             sa_select(Pedidos, Facturas, Clientes)
             .select_from(Pedidos)
-            .join(FacturasPedidos)
+            .join(Facturas)
             .join(Facturas)
             .join(Clientes)
             .order_by(Pedidos.FechaPedido)
@@ -379,12 +379,12 @@ def obtener_contador_platillos():
         statement = (
             select(
                 Platillos.NombrePlatillo,
-                func.SUM(DetallesDePedidos.Cantidad).label("total_vendido"),
+                func.SUM(DetallesOrdenes.Cantidad).label("total_vendido"),
             )
-            .select_from(DetallesDePedidos)
+            .select_from(DetallesOrdenes)
             .join(Platillos)
             .group_by(Platillos.NombrePlatillo)
-            .order_by(func.SUM(DetallesDePedidos.Cantidad).desc())
+            .order_by(func.SUM(DetallesOrdenes.Cantidad).desc())
         )
 
         query = session.exec(statement).all()
