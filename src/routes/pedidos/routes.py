@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.get("/")
 async def obtener_pedidos():
-    pedidos = service.listar_historial_pedidos()
+    pedidos = service.listar_historial_Ordenes()
 
     return pedidos
 
@@ -46,14 +46,14 @@ async def actualizar_detalles_pedido(id_pedido: int, payload: PedidosUpdate):
 
 
 @router.get("/conteo/semanal")
-async def obtener_conteo_pedidos_semanal():
-    conteo = service.conteo_pedidos_semanal()
+async def obtener_conteo_Ordenes_semanal():
+    conteo = service.conteo_Ordenes_semanal()
     return conteo
 
 
 @router.get("/facturas")
 async def obtener_facturas():
-    facturas = service.obtener_facturas_pedidos()
+    facturas = service.obtener_facturas_Ordenes()
     return facturas
 
 

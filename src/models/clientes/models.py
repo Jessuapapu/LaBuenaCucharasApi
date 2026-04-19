@@ -5,7 +5,6 @@ import datetime
 class Clientes(SQLModel, table=True):
     IdCliente: int | None = Field(default=None, primary_key=True)
     NombreCliente: str = Field(max_length=100, nullable=False)
-    DireccionCliente: str = Field(max_length=150, nullable=False)
 
 class Contrato(SQLModel, table=True):
     IdContrato: int | None = Field(default=None, primary_key=True)

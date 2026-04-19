@@ -17,7 +17,7 @@ def listar_clientes():
             select(
                 Clientes.NombreCliente,
                 ClienteCorreo.CorreoElectronico,
-                ClienteDireccion.ClienteDireccion,
+                ClienteDireccion.Dirreccion,
                 ClienteTelefono.Telefono,
             )
             .select_from(Clientes)
@@ -51,7 +51,7 @@ def crear_cliente(
 ):
     with Session(db_engine) as session:
         try:
-            nuevo_cliente = Clientes(NombreCliente=nombre, DireccionCliente=direccion)
+            nuevo_cliente = Clientes(NombreCliente=nombre)
             session.add(nuevo_cliente)
             session.flush()
 
@@ -67,6 +67,9 @@ def crear_cliente(
                 )
                 session.add(nuevo_telefono)
 
+            if direccion is not None and nuevo_cliente.IdCliente is not None:
+                nuevo_direccion = ClienteDireccion(IdCliente= nuevo_cliente.IdCliente, Dirreccion= direccion)
+                session.add(nuevo_direccion)
             session.commit()
 
             return nuevo_cliente

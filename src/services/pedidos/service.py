@@ -1,13 +1,14 @@
 from src.models.pedidos.models import (
-    Pedidos,
-    DetallesOrdenes,
+    Pedidos
 )
 
 from src.models.facturas.models import (
     Facturas
 )
 
-from src.models.clientes.models import Clientes
+from src.models.ordenes.models import Ordenes, DetallesOrdenes
+
+from src.models.clientes.models import Clientes, ClienteDireccion
 from src.models.pedidos.types import EstadoPedido
 from src.models.facturas.types import EstadoFactura
 from sqlmodel import Session, select
@@ -23,47 +24,44 @@ from sqlalchemy import select as sa_select, func, cast
 from sqlalchemy.types import Date
 
 
-def listar_historial_pedidos():
+def listar_historial_Ordenes():
     with Session(db_engine) as session:
         statement = (
-            sa_select(Pedidos, DetallesOrdenes, Platillos, Facturas, Clientes)
-            .select_from(Pedidos)
+            sa_select(Ordenes, DetallesOrdenes, Platillos, Facturas, Clientes)
+            .select_from(Ordenes)
             .join(DetallesOrdenes)
             .join(Platillos)
             .join(Facturas)
-            .join(Facturas)
             .join(Clientes)
-            .order_by(Pedidos.FechaPedido)
+            .order_by(Ordenes.Fecha)
         )
 
-        query = session.execute(statement).all()
+        query = session.exec(statement).all()
 
         historial_map: dict[int, dict] = {}
 
-        for pedido, detalle, platillo, factura, cliente in query:
-            pid: int = pedido.IdPedido
+        for ordenes, detalle, platillo, factura, cliente in query:
+            pid: int = ordenes.IdOrdenes
             if pid not in historial_map:
                 historial_map[pid] = {
                     "id_pedido": pid,
-                    "fecha": pedido.FechaPedido,
-                    "estado_pedido": pedido.Estado,
+                    "fecha": ordenes.Fecha,
                     "detalles": [],
                     "factura": {
-                        "fecha_factura": factura.FechaFactura,
+                        "fecha_factura": factura.Fecha,
                         "monto_total": factura.MontoTotal,
                         "estado_factura": factura.Estado,
                     },
                     "cliente": {
                         "nombre_cliente": cliente.NombreCliente,
-                        "direccion_cliente": cliente.DireccionCliente,
                     },
                 }
 
             historial_map[pid]["detalles"].append(
                 {
                     "nombre_platillo": platillo.NombrePlatillo,
-                    "cantidad": detalle.Cantidad,
-                    "precio_unitario": detalle.PrecioUnitario,
+                    "cantidad": detalle.CantidadPlatillo,
+                    "precio_unitario": detalle.PrecioUnico,
                 }
             )
 
@@ -77,7 +75,7 @@ def crear_pedido(nombre_cliente: str, fecha: datetime.date, detalle: List[Detall
     if id_cliente is None:
         raise ValueError(f"No se pudo obtener un id de cliente con el nombre de cliente {nombre_cliente}")
 
-    nuevo_pedido = Pedidos(IdCliente=id_cliente, FechaPedido=str(fecha), Estado=EstadoPedido.PENDIENTE)
+    nuevo_pedido = Ordenes(IdCliente=id_cliente, FechaPedido=str(fecha), Estado=EstadoPedido.PENDIENTE)
 
     with Session(db_engine) as session:
         try:
@@ -140,27 +138,27 @@ def actualizar_pedido(
     id_pedido: int, nombre_cliente: str, estado: EstadoPedido, detalles: List[Detalles]
 ):
     with Session(db_engine) as session:
+        #  querys seccion
         statement = (
             select(DetallesOrdenes)
-            .select_from(Pedidos)
+            .select_from(Ordenes)
             .join(DetallesOrdenes)
-            .where(Pedidos.IdPedido == id_pedido)
+            .where(Ordenes.IdOrdenes == id_pedido)
+        )
+
+        stmt_pedido_factura = (
+            select(Ordenes, Facturas)
+            .select_from(Ordenes)
+            .join(Facturas)
+            .join(Facturas)
+            .where(Ordenes.IdOrdenes == id_pedido)
         )
 
         detalles_actualizar = session.exec(statement).all()
-
-        if not detalles_actualizar:
-            return None
-
-        stmt_pedido_factura = (
-            select(Pedidos, Facturas)
-            .select_from(Pedidos)
-            .join(Facturas)
-            .join(Facturas)
-            .where(Pedidos.IdPedido == id_pedido)
-        )
         resultado = session.exec(stmt_pedido_factura).first()
-        if not resultado:
+        nuevo_id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)
+
+        if not resultado or not detalles_actualizar or not nuevo_id_cliente:
             return None
 
         pedido, factura = resultado
@@ -171,9 +169,6 @@ def actualizar_pedido(
         ):
             return None
 
-        nuevo_id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)
-        if nuevo_id_cliente is None:
-            return None
 
         pedido.IdCliente = nuevo_id_cliente
         pedido.Estado = estado
@@ -225,11 +220,11 @@ def actualizar_pedido(
 def pagar_pedido_service(id_pedido: int):
     with Session(db_engine) as session:
         statement = (
-            select(Pedidos, Facturas)
-            .select_from(Pedidos)
+            select(Ordenes, Facturas)
+            .select_from(Ordenes)
             .join(Facturas)
             .join(Facturas)
-            .where(Pedidos.IdPedido == id_pedido)
+            .where(Ordenes.IdOrdenes == id_pedido)
         )
 
         resultado = session.exec(statement).first()
@@ -262,11 +257,11 @@ def pagar_pedido_service(id_pedido: int):
 def anular_pedido_service(id_pedido: int):
     with Session(db_engine) as session:
         statement = (
-            select(Pedidos, Facturas)
-            .select_from(Pedidos)
+            select(Ordenes, Facturas)
+            .select_from(Ordenes)
             .join(Facturas)
             .join(Facturas)
-            .where(Pedidos.IdPedido == id_pedido)
+            .where(Ordenes.IdOrdenes == id_pedido)
         )
 
         resultado = session.exec(statement).first()
@@ -294,19 +289,19 @@ def anular_pedido_service(id_pedido: int):
         return True
 
 
-def conteo_pedidos_semanal():
+def conteo_Ordenes_semanal():
     with Session(db_engine) as session:
         today = datetime.date.today()
         start_of_week = today - datetime.timedelta(days=today.weekday())
         end_of_week = start_of_week + datetime.timedelta(days=6)
 
         statement = (
-            select(Pedidos.FechaPedido)
-            .select_from(Pedidos)
-            .where(cast(Pedidos.FechaPedido, Date).between(start_of_week, end_of_week))
+            select(Ordenes.Fecha)
+            .select_from(Ordenes)
+            .where(cast(Ordenes.Fecha, Date).between(start_of_week, end_of_week))
         )
 
-        resultados = session.execute(statement).all()
+        resultados = session.exec(statement).all()
 
         # Mapa de nombres de días en español
         dias_es = [
@@ -341,15 +336,16 @@ def conteo_pedidos_semanal():
         return conteo_semanal
 
 
-def obtener_facturas_pedidos():
+def obtener_facturas_Ordenes():
     with Session(db_engine) as session:
+        # TODO: REFACTORIZAR ESTO AJKSAJSKJS
         statement = (
-            sa_select(Pedidos, Facturas, Clientes)
-            .select_from(Pedidos)
+            sa_select(Ordenes, Facturas, Clientes)
+            .select_from(Ordenes)
             .join(Facturas)
             .join(Facturas)
             .join(Clientes)
-            .order_by(Pedidos.FechaPedido)
+            .order_by(Ordenes.Fecha)
         )
 
         query = session.execute(statement).all()

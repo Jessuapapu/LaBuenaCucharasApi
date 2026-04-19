@@ -2,7 +2,8 @@ from sqlmodel import Field, SQLModel
 import datetime
 import decimal
 
-
+def pritno():
+    pass    
 # Si la orden es un pedido de un contrato o evento
 class Ordenes(SQLModel, table = True):
     IdOrdenes: int | None  = Field(default = None, primary_key = True, index = True)
