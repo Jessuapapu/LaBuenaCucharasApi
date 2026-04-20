@@ -2,6 +2,10 @@ from fastapi import FastAPI
 from .routes.main_router import app_router
 from fastapi.middleware.cors import CORSMiddleware
 
+from PA import main as PA
+
+PA.main()
+
 app = FastAPI()
 app.include_router(app_router)
 

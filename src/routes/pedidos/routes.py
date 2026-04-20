@@ -16,6 +16,7 @@ async def obtener_pedidos():
 
 @router.get("/detalle/{id}")
 async def obtener_detalle(id: int):
+    
     pass
 
 
