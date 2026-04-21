@@ -68,6 +68,9 @@ def listar_historial_Ordenes():
         historial = list(historial_map.values())
         return historial
 
+def detalle_Ordenes(IdOrden: str | None):
+    pass
+
 
 def crear_pedido(nombre_cliente: str, fecha: datetime.date, detalle: List[Detalles]):
     id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)

@@ -4,9 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from PA import main as PA
 
-PA.main()
+
 
 app = FastAPI()
+PA.main()
 app.include_router(app_router)
 
 app.add_middleware(
