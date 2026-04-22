@@ -63,13 +63,17 @@ def validarTimeStamp():
             with open(ruta_completa, 'r') as sql:
                 modificacion_actual = os.path.getmtime(ruta_completa)
                 
+                if archivo not in EstadoAnterior.keys():
+                    print(f"ERROR AL CARGAR ARCHIVO EN ESTADO ANTERIOR: {archivo}")
+                    log.add_log(f"ERROR AL CARGAR ARCHIVO EN ESTADO ANTERIOR: {archivo}","ERROR")
+                    continue
+                    
                 if modificacion_actual > EstadoAnterior[archivo]:
                     print(f"modificado detectado: {archivo}")
-                    log.add_log(f"modificado detectado: {archivo}","INFO")
-
+                    log.add_log(f"modificado detectado: {archivo}", "INFO")
                     aplicarCambiosABD(ruta_completa)
                     guardar_estado()
-
+                
 
 def aplicarCambiosABD(ruta):
     with Session(db_engine) as session:
@@ -140,7 +144,6 @@ def validarNuevosArchivos():
                             session.commit()
 
                             log.add_log(f"PROCESO { NombreProceso.replace('CREATE PROC','').strip()} EJECUTADO CORRECTAMENTE", "INFO")
-                            ProcesosEjecutados += 1
                         except ValueError:
                             log.add_log(f"ERROR AL CARGAR EL PROCESO { NombreProceso.replace('CREATE PROC','').strip()}", "CRITICAL")
 

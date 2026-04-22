@@ -15,7 +15,7 @@ BEGIN
 	INNER JOIN detallesordenes OD ON O.IdOrdenes = OD.IdOrdenes
 	INNER JOIN clientes C ON O.IdCliente = C.IdCliente
 	INNER JOIN platillos P ON OD.IdPlatillo = P.IdPlatillo
-	WHERE O.IdOrdenes = IIF(@Id IS NULL, O.IdOrdenes, @Id) OR @IdCliente = IIF(@IdCliente IS NULL, O.IdCliente, @IdCliente)
+	WHERE O.IdOrdenes = IIF(@Id IS NULL, O.IdOrdenes, @Id) OR O.IdCliente = IIF(@IdCliente IS NULL, O.IdCliente, @IdCliente)
 	ORDER BY C.NombreCliente
 
 END

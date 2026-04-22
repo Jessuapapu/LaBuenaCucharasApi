@@ -75,11 +75,7 @@ def detalle_Ordenes(
         )
 
     with Session(db_engine) as session:
-        statement = text("""
-            EXEC MostrarDetalles 
-                @Id = :id_orden, 
-                @IdCliente = :id_cliente
-        """)
+        statement = text("EXEC MostrarDetalles  @Id = :id_orden,     @IdCliente = :id_cliente")
         
         parametros = {
             "id_orden": id_orden,

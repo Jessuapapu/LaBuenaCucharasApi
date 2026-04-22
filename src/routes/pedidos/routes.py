@@ -8,17 +8,24 @@ router = APIRouter()
 
 
 @router.get("/")
-async def obtener_pedidos():
-    pedidos = service.listar_historial_Ordenes()
-
+async def obtener_pedidos(
+    pagina: int = Query(1, description="Número de página"), 
+    rows: int = Query(10, description="Filas por página"), 
+    todo: bool = Query(False, description="Traer todo sin paginar")
+):
+    pedidos = service.listar_historial_Ordenes(pagina=pagina, rows=rows, todo=todo)
     return pedidos
 
 
-@router.get("/detalle/{id}")
+@router.get("/detalle/pedido/{id}")
 async def obtener_detalle(id: int):
-    
-    pass
+    detalle = service.detalle_Ordenes(id_orden=id)
+    return detalle
 
+@router.get("/detalle/cliente/{IdCliente}")
+async def obtener_detalle(IdCliente: int):
+    detalle = service.detalle_Ordenes(id_cliente=IdCliente)
+    return detalle
 
 @router.post("/")
 async def crear_pedido(payload: PedidosIn):
