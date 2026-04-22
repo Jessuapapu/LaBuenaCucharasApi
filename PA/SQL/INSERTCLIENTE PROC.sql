@@ -5,6 +5,7 @@ CREATE PROC InsertaCliente
 	@Correo NVARCHAR(100)
 
 	
+
 AS 
 BEGIN
 	
@@ -62,4 +63,3 @@ BEGIN
 	RETURN 0;
 
 END
-

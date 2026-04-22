@@ -18,6 +18,9 @@ BEGIN
 				END
 		END
 
+
+	
+
 	
 	SELECT c.IdCliente, C.NombreCliente, CD.Dirreccion,CC.CorreoElectronico,CT.Telefono FROM Clientes C
 	INNER JOIN clientetelefono CT ON C.IdCliente = CT.IdCliente

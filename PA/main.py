@@ -1,47 +1,74 @@
-from sqlmodel import Session, select, text
+from sqlmodel import Session, text
 from src.config.database import db_engine
-from sqlalchemy import select as sa_select, func, cast
 import os
-
-import time
-from watchdog.observers import Observer
 from logs import logsApp
 import json
 
 log = logsApp.Logs()
-ARCHIVO_ESTADO = './JsonTimeStamp/estado_archivos.json'
+ARCHIVO_ESTADO = './PA/JsonTimeStamp/estado_archivos.json'
+
 
 def main():
-    Nuevos = validarNuevosArchivos()
-    validarTimeStamp()
+    validarNuevosArchivos()
+    if validarJson():
+        validarTimeStamp()
+
     print('PROCESOS ALMACENADOS LISTOS ^_____^')
-    log.add_log("PROCESOS CARGADOS Y LISTOS",'DEBUG')
+    log.add_log("PROCESOS CARGADOS Y LISTOS",'INFO')
 
 
+def validarJson():
+
+    if not os.path.exists(ARCHIVO_ESTADO):
+        print('ARCHIVO DE ESTADO NO ENCONTRADO O NO EXISTE, CREANDO UNO')
+        log.add_log('ARCHIVO DE ESTADO NO ENCONTRADO O NO EXISTE, CREANDO UNO','INFO')
+        guardar_estado()
+        
+        return False
+    
+    return True
     
 
-def guardar_estado(estado):
-    with open(ARCHIVO_ESTADO, 'wa') as f:
-        json.dump(estado, f, indent=4)
+
+def guardar_estado():
+    timeStamp = {}
+    with open(ARCHIVO_ESTADO, 'w') as f:
+        archivos = os.listdir('./PA/SQL/')
+        for archivo in archivos:
+            if '.sql' in archivo:
+                ruta_completa = './PA/SQL/' + archivo
+                timeStamp[archivo] = os.path.getmtime(ruta_completa)
+        
+        json.dump(timeStamp,f,indent=4)
 
 def validarTimeStamp():
     EstadoAnterior = None 
-    if os.path.exists(ARCHIVO_ESTADO):
-        with open(ARCHIVO_ESTADO, 'r') as f:
-            EstadoAnterior = json.load(f)
-            archivos = os.listdir('./PA/SQL/')
-        log.add_log(f"Lista de archivos SQL {archivos}","DEBUG")
 
-        # uno por uno se valida si esta, si no esta, se obtiene y se ejecuta
-        for archivo in archivos:
-            if '.sql' in archivo:
-                ruta_completa = './PA/' + archivo
-                with open(ruta_completa, 'r') as sql:
-                    modificacion_actual = os.path.getmtime(ruta_completa)
-                    
-                    if modificacion_actual > EstadoAnterior[archivo]:
-                        print(f"modificado detectado: {archivo}")
-                        aplicarCambiosABD(ruta_completa)
+    print("VALIDADON CAMBIOPS EN LOS PA")
+    with open(ARCHIVO_ESTADO, 'r') as f:
+        try:        
+            EstadoAnterior = json.load(f)
+        except:
+            guardar_estado()
+            return
+
+        archivos = os.listdir('./PA/SQL/')
+
+    log.add_log(f"Lista de archivos SQL {archivos} ","DEBUG")
+
+    for archivo in archivos:
+        if '.sql' in archivo:
+            ruta_completa = './PA/SQL/' + archivo
+
+            with open(ruta_completa, 'r') as sql:
+                modificacion_actual = os.path.getmtime(ruta_completa)
+                
+                if modificacion_actual > EstadoAnterior[archivo]:
+                    print(f"modificado detectado: {archivo}")
+                    log.add_log(f"modificado detectado: {archivo}","INFO")
+
+                    aplicarCambiosABD(ruta_completa)
+                    guardar_estado()
 
 
 def aplicarCambiosABD(ruta):
@@ -52,7 +79,7 @@ def aplicarCambiosABD(ruta):
             ArchivoSql = sql.read()
             NombreProceso =  sql.readline().replace('CREATE PROC','').strip()
 
-            log.add_log(F" EJECUTANDO CAMBIOS A PROCESO ALMACENADO {NombreProceso}","DEBUG")
+            log.add_log(F" EJECUTANDO CAMBIOS A PROCESO ALMACENADO {NombreProceso}", "INFO")
 
             try:
                 session.flush()
@@ -69,7 +96,6 @@ def aplicarCambiosABD(ruta):
 
 def validarNuevosArchivos():
     NombreProcesos = []
-    ProcesosEjecutados = 0
 
     with Session(db_engine) as session:
         
@@ -85,6 +111,7 @@ def validarNuevosArchivos():
                     if 'sp_' in columna:
                         continue
                     NombreProcesos.append(columna)
+                    
         log.add_log(f"Lista de procesos almacenados: {NombreProcesos}","DEBUG")
 
         # Obtenemos los archivos desde la carpeta
@@ -115,7 +142,5 @@ def validarNuevosArchivos():
                             ProcesosEjecutados += 1
                         except ValueError:
                             log.add_log(f"ERROR AL CARGAR EL PROCESO { NombreProceso.replace('CREATE PROC','').strip()}", "CRITICAL")
-
-    return ProcesosEjecutados
 
        
