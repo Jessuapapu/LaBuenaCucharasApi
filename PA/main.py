@@ -92,6 +92,7 @@ def aplicarCambiosABD(ruta):
 
             except ValueError:
                 log.add_log(f"ERROR AL CARGAR LOS CAMBIOS DEL PROCESO { NombreProceso }", "CRITICAL")
+                return
 
 
 def validarNuevosArchivos():

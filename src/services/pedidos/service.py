@@ -7,7 +7,7 @@ from src.models.facturas.models import (
 )
 
 from src.models.ordenes.models import Ordenes, DetallesOrdenes
-
+from fastapi import HTTPException
 from src.models.clientes.models import Clientes, ClienteDireccion
 from src.models.pedidos.types import EstadoPedido
 from src.models.facturas.types import EstadoFactura
@@ -24,53 +24,83 @@ from sqlalchemy import select as sa_select, func, cast
 from sqlalchemy.types import Date
 
 
-def listar_historial_Ordenes():
+from sqlmodel import Session
+from sqlalchemy import text
+from src.config.database import db_engine # Asegúrate de que la ruta sea correcta
+
+def listar_historial_Ordenes(
+    id_orden: int | None = None, 
+    pagina: int = 1, 
+    rows: int = 10, 
+    todo: int = 0
+):
     with Session(db_engine) as session:
-        statement = (
-            sa_select(Ordenes, DetallesOrdenes, Platillos, Facturas, Clientes)
-            .select_from(Ordenes)
-            .join(DetallesOrdenes)
-            .join(Platillos)
-            .join(Facturas)
-            .join(Clientes)
-            .order_by(Ordenes.Fecha)
-        )
+        statement = text("""
+            EXEC MostrarOrdenes 
+                @IdOrden = :id_orden, 
+                @Pagina = :pagina, 
+                @Rows = :rows, 
+                @Todo = :todo
+        """)
 
-        query = session.exec(statement).all()
+        parametros = {
+            "id_orden": id_orden,
+            "pagina": pagina,
+            "rows": rows,
+            "todo": todo
+        }
 
-        historial_map: dict[int, dict] = {}
+        resultados = session.exec(statement, params=parametros).all()
 
-        for ordenes, detalle, platillo, factura, cliente in query:
-            pid: int = ordenes.IdOrdenes
-            if pid not in historial_map:
-                historial_map[pid] = {
-                    "id_pedido": pid,
-                    "fecha": ordenes.Fecha,
-                    "detalles": [],
-                    "factura": {
-                        "fecha_factura": factura.Fecha,
-                        "monto_total": factura.MontoTotal,
-                        "estado_factura": factura.Estado,
-                    },
-                    "cliente": {
-                        "nombre_cliente": cliente.NombreCliente,
-                    },
-                }
+        historial = []
+        
+        for row in resultados:
+            historial.append({
+                "nombre_cliente": row.NombreCliente,
+                "id_pedido": row.IdOrdenes,
+                "monto_total": row.MONTOTOTAL,
+                "fecha": row.Fecha
+            })
 
-            historial_map[pid]["detalles"].append(
-                {
-                    "nombre_platillo": platillo.NombrePlatillo,
-                    "cantidad": detalle.CantidadPlatillo,
-                    "precio_unitario": detalle.PrecioUnico,
-                }
-            )
-
-        historial = list(historial_map.values())
         return historial
 
-def detalle_Ordenes(IdOrden: str | None):
-    pass
+def detalle_Ordenes(
+    id_orden: int | None = None,
+    id_cliente: int | None = None
+):
+    if id_orden is None and id_cliente is None:
+        raise HTTPException(
+            status_code=400, 
+            detail="Error: Debe ingresar al menos un identificador (IdOrden o IdCliente)."
+        )
 
+    with Session(db_engine) as session:
+        statement = text("""
+            EXEC MostrarDetalles 
+                @Id = :id_orden, 
+                @IdCliente = :id_cliente
+        """)
+        
+        parametros = {
+            "id_orden": id_orden,
+            "id_cliente": id_cliente
+        }
+        
+        resultados = session.exec(statement, params=parametros).all()
+
+        detalles_lista = []
+        
+        for row in resultados:
+            detalles_lista.append({
+                "nombre_cliente": row.NombreCliente,
+                "id_orden": row.IdOrdenes,
+                "platillo": row.NombrePlatillo,
+                "cantidad": row.CantidadPlatillo,
+                "precio_unitario": row.PrecioUnico,
+                "subtotal_linea": row.CantidadPlatillo * row.PrecioUnico 
+            })
+
+        return detalles_lista
 
 def crear_pedido(nombre_cliente: str, fecha: datetime.date, detalle: List[Detalles]):
     id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)

@@ -8,12 +8,16 @@ BEGIN
 	SET NOCOUNT ON
 	-- Validaciones para la paginacion
 	-- si queremos todo mandamos un 1 en la variable todo
+	IF @Pagina < 0 OR @Rows <= 1
+		BEGIN
+			PRINT ('INGRESE UNA PAGINA O UNA CANTIDAD DE FILAS VALIDAS')
+			RETURN
+		END
 	SET @Rows = IIF(@Todo = 1,(SELECT COUNT(IdOrdenes) FROM ordenes),@Rows)
 	-- SI TODO ES 1, SE DEBE INICIAR DESDE LA PAGINA 0
 	SET @Pagina = IIF(@Todo = 1,1,@Pagina)
 
-
-
+	
 
 	SELECT C.NombreCliente, O.IdOrdenes, SUM(OD.CantidadPlatillo * OD.PrecioUnico) MONTOTOTAL,
 	O.Fecha
@@ -26,6 +30,3 @@ BEGIN
 	OFFSET (@Pagina - 1) * @Rows ROWS FETCH NEXT @Rows ROWS ONLY
 
 END
-
-EXEC MostrarOrdenes @Todo = 1
-DROP PROC MostrarOrdenes
