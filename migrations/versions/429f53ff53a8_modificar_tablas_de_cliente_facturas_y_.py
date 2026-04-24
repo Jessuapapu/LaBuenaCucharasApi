@@ -50,7 +50,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_pago_IdPago'), 'pago', ['IdPago'], unique=False)
 
-    op.drop_table('sysdiagrams')
 
 
 
@@ -68,7 +67,7 @@ def upgrade() -> None:
                existing_type=sa.VARCHAR(length=10, collation='Modern_Spanish_CI_AS'),
                type_=sa.DateTime(),
                existing_nullable=False)
-    op.drop_constraint(op.f('FK__pedidos__IdClien__6C190EBB'), 'pedidos', type_='foreignkey')
+    op.drop_constraint('FK__pedidos__IdClien__3864608B', 'pedidos', type_='foreignkey')
     op.create_foreign_key(None, 'pedidos', 'ordenes', ['IdOrdenes'], ['IdOrdenes'])
     op.drop_column('pedidos', 'IdCliente')
     # ### end Alembic commands ###
