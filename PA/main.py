@@ -83,7 +83,7 @@ def aplicarCambiosABD(ruta):
             ArchivoSql = sql.read()
             NombreProceso =  sql.readline().replace('CREATE PROC','').strip()
 
-            log.add_log(F" EJECUTANDO CAMBIOS A PROCESO ALMACENADO {NombreProceso}", "INFO")
+            log.add_log(F"EJECUTANDO CAMBIOS A PROCESO ALMACENADO {NombreProceso}", "INFO")
 
             try:
                 session.flush()
@@ -133,7 +133,7 @@ def validarNuevosArchivos():
                     NombreProceso =  sql.readline()
                     log.add_log(f"Validando -> {NombreProceso.replace('CREATE PROC','')}", "DEBUG")
                     if NombreProceso.replace('CREATE PROC','').strip() not in NombreProcesos:
-                        log.add_log(F" EJECUTANDO PROCESO ALMACENADO {archivo}","DEBUG")
+                        log.add_log(F"EJECUTANDO PROCESO ALMACENADO {archivo}","DEBUG")
 
                         try:
                             session.flush()
