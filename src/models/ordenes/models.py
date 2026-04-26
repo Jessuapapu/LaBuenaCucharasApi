@@ -1,4 +1,5 @@
 from sqlmodel import Field, SQLModel
+from .types import EstadoOrden
 import datetime
 import decimal
 
@@ -10,6 +11,7 @@ class Ordenes(SQLModel, table = True):
     CostoTotal: decimal.Decimal = Field(default = None)
     IdCliente: int | None = Field(default = 0, foreign_key = "clientes.IdCliente")
     Fecha: datetime.datetime = Field(default=datetime.datetime.now())
+    Estado: EstadoOrden = Field(default=EstadoOrden.PENDIENTE)
     
 class MetodosPago(SQLModel, table=True):
     IdMetodoPago: int | None = Field(default = None, primary_key = True)
@@ -21,6 +23,7 @@ class Pago(SQLModel, table = True):
     IdOrden: int | None = Field(default = None, foreign_key = "ordenes.IdOrdenes")
     PagoTotal: decimal.Decimal = Field(default = None)
     Fecha: datetime.datetime = Field(default=datetime.datetime.now())
+
 
 class DetallesOrdenes(SQLModel, table= True):
     IdDetallesOrdenes: int| None = Field(default = None, primary_key = True, index = True)

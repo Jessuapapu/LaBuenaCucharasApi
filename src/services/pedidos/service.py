@@ -63,7 +63,10 @@ def listar_historial_Ordenes(
                 "cliente" : {
                     "nombre_cliente": row.NombreCliente,
                     "direccion_cliente" : row.dirreccion
-                }
+                },
+                "estado_pedido": row.Estado,
+                "detalles": detalle_Ordenes(id_orden=row.IdOrdenes)
+
             })
 
         return historial
@@ -92,12 +95,10 @@ def detalle_Ordenes(
         
         for row in resultados:
             detalles_lista.append({
-                "nombre_cliente": row.NombreCliente,
                 "id_orden": row.IdOrdenes,
-                "platillo": row.NombrePlatillo,
+                "nombre_platillo": row.NombrePlatillo,
                 "cantidad": row.CantidadPlatillo,
                 "precio_unitario": row.PrecioUnico,
-                "subtotal_linea": row.CantidadPlatillo * row.PrecioUnico 
             })
 
         return detalles_lista

@@ -20,13 +20,13 @@ BEGIN
 	
 
 	SELECT C.NombreCliente, O.IdOrdenes, SUM(OD.CantidadPlatillo * OD.PrecioUnico) MONTOTOTAL,
-	O.Fecha, CD.dirreccion
+	O.Fecha, CD.dirreccion, O.Estado
 	FROM detallesordenes OD
 	INNER JOIN ordenes O ON OD.IdOrdenes = O.IdOrdenes
 	INNER JOIN clientes C ON O.IdCliente = C.IdCliente
 	INNER JOIN clientedireccion CD ON O.IdCliente = CD.IdCliente
 	WHERE (@IdOrden IS NULL OR O.IdOrdenes = @IdOrden)
-	GROUP BY C.NombreCliente, O.IdOrdenes, O.Fecha, CD.dirreccion
+	GROUP BY C.NombreCliente, O.IdOrdenes, O.Fecha, CD.dirreccion, O.Estado
 	ORDER BY O.IdOrdenes
 	OFFSET (@Pagina - 1) * @Rows ROWS FETCH NEXT @Rows ROWS ONLY
 

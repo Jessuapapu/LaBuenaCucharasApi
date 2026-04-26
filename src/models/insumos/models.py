@@ -7,7 +7,7 @@ class Insumos(SQLModel, table=True):
     IdInsumo: int | None = Field(default=None, primary_key=True)
     IdCategoriaInsumo: int | None = Field(default=None, foreign_key="categoriasinsumos.IdCategoriaInsumo")
     NombreInsumo: str = Field(max_length= 200, nullable=False)             
-    Prioridad: PrioridadInsumo
+    Prioridad: PrioridadInsumo 
 
 class CategoriasInsumos(SQLModel, table=True):
     IdCategoriaInsumo: int | None = Field(default=None, primary_key=True)
