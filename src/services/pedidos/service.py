@@ -35,6 +35,7 @@ def listar_historial_Ordenes(
     todo: int = 0
 ):
     with Session(db_engine) as session:
+  
         statement = text("""
             EXEC MostrarOrdenes 
                 @IdOrden = :id_orden, 
@@ -56,10 +57,13 @@ def listar_historial_Ordenes(
         
         for row in resultados:
             historial.append({
-                "nombre_cliente": row.NombreCliente,
                 "id_pedido": row.IdOrdenes,
                 "monto_total": row.MONTOTOTAL,
-                "fecha": row.Fecha
+                "fecha": row.Fecha,
+                "cliente" : {
+                    "nombre_cliente": row.NombreCliente,
+                    "direccion_cliente" : row.dirreccion
+                }
             })
 
         return historial

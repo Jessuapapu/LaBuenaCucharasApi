@@ -10,8 +10,8 @@ ARCHIVO_ESTADO = './PA/JsonTimeStamp/estado_archivos.json'
 
 def main():
     validarNuevosArchivos()
-    #if validarJson():
-    #    validarTimeStamp()
+    if validarJson():
+        validarTimeStamp()
 
     print('PROCESOS ALMACENADOS LISTOS ^_____^')
     log.add_log("PROCESOS CARGADOS Y LISTOS",'INFO')
