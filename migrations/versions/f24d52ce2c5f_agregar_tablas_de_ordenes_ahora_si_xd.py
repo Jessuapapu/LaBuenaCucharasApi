@@ -66,7 +66,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('IdPagoOrdenes')
     )
     op.create_index(op.f('ix_pagoordenes_IdPagoOrdenes'), 'pagoordenes', ['IdPagoOrdenes'], unique=False)
-    op.drop_table('sysdiagrams')
     op.alter_column('categoriasinsumos', 'NombreCategoriaInsumo',
                existing_type=sa.VARCHAR(collation='Modern_Spanish_CI_AS'),
                type_=sqlmodel.sql.sqltypes.AutoString(length=150),
