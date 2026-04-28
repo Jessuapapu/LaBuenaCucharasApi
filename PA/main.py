@@ -7,6 +7,7 @@ import json
 log = logsApp.Logs()
 ARCHIVO_ESTADO = './PA/JsonTimeStamp/estado_archivos.json'
 timeStamp = {}
+ArchivoError = []
 
 def main():
     validarNuevosArchivos()
@@ -62,6 +63,11 @@ def validarTimeStamp():
             with open(ruta_completa, 'r') as sql:
                 modificacion_actual = os.path.getmtime(ruta_completa)
                 
+                if ruta_completa in ArchivoError:
+                    log.add_log(f"ERROR AL CARGAR ARCHIVO NO CONTIENE NADA: {archivo}","ERROR")
+                    continue
+
+
                 if archivo not in EstadoAnterior.keys():
                     print(f"ERROR AL CARGAR ARCHIVO EN ESTADO ANTERIOR: {archivo}")
                     log.add_log(f"ERROR AL CARGAR ARCHIVO EN ESTADO ANTERIOR: {archivo}","ERROR")
@@ -136,6 +142,7 @@ def validarNuevosArchivos():
 
                     if NombreProceso == '':
                         log.add_log(f"ERROR CON -> { archivo} PUEDE ESTAR VACIO O NO TENER EL FORMATO CORRECTO", "ERROR")
+                        ArchivoError.append('./PA/SQL/' + archivo)
                         continue
 
                     log.add_log(f"Validando -> {NombreProceso.replace('CREATE PROC','')}", "DEBUG")
