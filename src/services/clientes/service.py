@@ -7,7 +7,7 @@ from src.models.clientes.models import (
     Contrato
 )
 from src.models.clientes.types import EstadoContrato
-from sqlmodel import Session, select
+from sqlmodel import Session, select, text
 from src.config.database import db_engine
 
 
@@ -87,12 +87,34 @@ def obtener_id_cliente_por_nombre(nombre: str):
         return id_cliente
 
 
-def obtener_contratos_clientes():
+def obtener_contratos_clientes(
+    id_cliente: int | None = None,
+    fecha_inicio: datetime.datetime | None = None,
+    fecha_vencimiento: datetime.datetime | None = None,
+    presupuesto: float | None = None,
+    presupuesto_fin: float | None = None
+) -> list:
     with Session(db_engine) as session:
-        statement = select(Contrato)
-        contratos = session.exec(statement).all()
-
-        return contratos
+        query = text("""
+            EXEC MostrarContratos 
+                @IdCliente = :id_cliente,
+                @FechaInicio = :fecha_inicio,
+                @FechaVencimiento = :fecha_vencimiento,
+                @Presupuesto = :presupuesto,
+                @PresupuestoFin = :presupuesto_fin
+        """)
+        
+        valores_parametros = {
+            "id_cliente": id_cliente,
+            "fecha_inicio": fecha_inicio,
+            "fecha_vencimiento": fecha_vencimiento,
+            "presupuesto": presupuesto,
+            "presupuesto_fin": presupuesto_fin
+        }
+        
+        resultados = session.execute(query, valores_parametros).mappings().all()
+        
+        return [dict(row) for row in resultados]
 
 
 def registrar_contrato_cliente(

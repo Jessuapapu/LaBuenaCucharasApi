@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from src.models.clientes.types import EstadoContrato
 from src.services.clientes import service
@@ -50,11 +50,23 @@ async def registrar_cliente(payload: ClientesIn):
     return {"message": "Cliente creado exitosamente"}
 
 
-@router.get("/contratos")
-async def obtener_contratos_clientes():
-    contratos = service.obtener_contratos_clientes()
+async def obtener_contratos_clientes_endpoint(
+    id_cliente: int | None = Query(default=None, description="Filtra por el identificador único del cliente"),
+    fecha_inicio: datetime.datetime | None = Query(default=None, description="Filtra contratos a partir de esta fecha de inicio"),
+    fecha_vencimiento: datetime.datetime | None = Query(default=None, description="Filtra contratos hasta esta fecha de vencimiento"),
+    presupuesto: float | None = Query(default=None, ge=0, description="Presupuesto inicial mínimo (debe ser mayor o igual a 0)"),
+    presupuesto_fin: float | None = Query(default=None, description="Presupuesto final máximo")
+):
+    # Pasamos los parámetros de manera idéntica a la capa de servicio
+    contratos = service.obtener_contratos_clientes(
+        id_cliente=id_cliente,
+        fecha_inicio=fecha_inicio,
+        fecha_vencimiento=fecha_vencimiento,
+        presupuesto=presupuesto,
+        presupuesto_fin=presupuesto_fin
+    )
 
-    if contratos is None:
+    if not contratos: 
         return []
 
     return contratos
