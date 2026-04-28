@@ -4,9 +4,15 @@ import datetime
 import decimal
 
 class Facturas(SQLModel, table=True):
-    IdFactura: int | None = Field(default=None, primary_key=True)
+    IdFactura: int = Field(primary_key=True)
     MontoTotal: decimal.Decimal = Field(nullable=False)
     Fecha: datetime.datetime = Field(default=datetime.datetime.now())
-    IdOrdenes: int | None = Field(default = None, foreign_key = "ordenes.IdOrdenes")
     CantidadTotal: int = Field(nullable=False)
     Estado: EstadoFactura = Field(nullable=False)
+
+
+class FacturasOrdenes(SQLModel, table=True):
+    Id: int  = Field(primary_key=True)
+    IdFactura: int  = Field(foreign_key = "facturas.IdFactura")
+    IdOrdenes: int  = Field(foreign_key = "ordenes.IdOrdenes", unique=True)
+

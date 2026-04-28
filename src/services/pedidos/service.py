@@ -370,36 +370,52 @@ def conteo_Ordenes_semanal():
         return conteo_semanal
 
 
-def obtener_facturas_Ordenes():
+
+def obtener_facturas_ordenes(
+    id_cliente: int | None = None,
+    id_orden: int | None = None,
+    fecha_inicio: datetime.datetime | None = None,
+    fecha_fin: datetime.datetime | None = None,
+    monto: float | None = None,
+    monto_fin: float | None = None,
+    cantidad_total: int | None = None
+) -> list:
     with Session(db_engine) as session:
-        # TODO: REFACTORIZAR ESTO AJKSAJSKJS
-        statement = (
-            sa_select(Ordenes, Facturas, Clientes)
-            .select_from(Ordenes)
-            .join(Facturas)
-            .join(Facturas)
-            .join(Clientes)
-            .order_by(Ordenes.Fecha)
-        )
-
-        query = session.execute(statement).all()
-
+        query = text("""
+            EXEC MostrarFacturas 
+                @IdCliente = :id_cliente,
+                @IdOrden = :id_orden,
+                @FechaInicio = :fecha_inicio,
+                @FechaFin = :fecha_fin,
+                @Monto = :monto,
+                @MontoFin = :monto_fin,
+                @CantidadTotal = :cantidad_total
+        """)
+        
+        valores = {
+            "id_cliente": id_cliente,
+            "id_orden": id_orden,
+            "fecha_inicio": fecha_inicio,
+            "fecha_fin": fecha_fin,
+            "monto": monto,
+            "monto_fin": monto_fin,
+            "cantidad_total": cantidad_total
+        }
+        
+        resultados = session.execute(query, valores).mappings().all()
+        
         facturas_list = []
-
-        for pedido, factura, cliente in query:
-            facturas_list.append(
-                {
-                    "id_pedido": pedido.IdPedido,
-                    "monto_total": factura.MontoTotal,
-                    "cantidad_total": factura.CantidadTotal,
-                    "estado_factura": factura.Estado,
-                    "fecha_factura": factura.FechaFactura,
-                    "cliente": {
-                        "nombre_cliente": cliente.NombreCliente,
-                        "direccion_cliente": cliente.DireccionCliente,
-                    },
+        for row in resultados:
+            facturas_list.append({
+                "monto_total": row.get("MontoTotal"),
+                "cantidad_total": row.get("CantidadTotal"),
+                "estado_factura": row.get("Estado"),
+                "fecha_factura": row.get("Fecha"),
+                "cliente": {
+                    "nombre_cliente": row.get("NombreCliente"),
+                    "direccion_cliente": row.get("DireccionCliente", "Sin dirección") 
                 }
-            )
+            })
 
         return facturas_list
 

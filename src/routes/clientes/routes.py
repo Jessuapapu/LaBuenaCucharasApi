@@ -49,7 +49,7 @@ async def registrar_cliente(payload: ClientesIn):
 
     return {"message": "Cliente creado exitosamente"}
 
-
+@router.get("/contratos")
 async def obtener_contratos_clientes_endpoint(
     id_cliente: int | None = Query(default=None, description="Filtra por el identificador único del cliente"),
     fecha_inicio: datetime.datetime | None = Query(default=None, description="Filtra contratos a partir de esta fecha de inicio"),
