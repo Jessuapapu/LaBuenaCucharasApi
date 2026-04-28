@@ -6,7 +6,7 @@ import json
 
 log = logsApp.Logs()
 ARCHIVO_ESTADO = './PA/JsonTimeStamp/estado_archivos.json'
-
+timeStamp = {}
 
 def main():
     validarNuevosArchivos()
@@ -31,7 +31,6 @@ def validarJson():
 
 
 def guardar_estado():
-    timeStamp = {}
     with open(ARCHIVO_ESTADO, 'w') as f:
         archivos = os.listdir('./PA/SQL/')
         for archivo in archivos:
@@ -44,7 +43,7 @@ def guardar_estado():
 def validarTimeStamp():
     EstadoAnterior = None 
 
-    print("VALIDADON CAMBIOPS EN LOS PA")
+    print("VALIDADON CAMBIOS EN LOS PA")
     with open(ARCHIVO_ESTADO, 'r') as f:
         try:        
             EstadoAnterior = json.load(f)
@@ -66,14 +65,17 @@ def validarTimeStamp():
                 if archivo not in EstadoAnterior.keys():
                     print(f"ERROR AL CARGAR ARCHIVO EN ESTADO ANTERIOR: {archivo}")
                     log.add_log(f"ERROR AL CARGAR ARCHIVO EN ESTADO ANTERIOR: {archivo}","ERROR")
+                    
+                    log.add_log(f"CARGANDO UN TIMESTAMP PARA {archivo}", "INFO")
+                    timeStamp[archivo] = os.path.getmtime(ruta_completa)
                     continue
                     
                 if modificacion_actual > EstadoAnterior[archivo]:
                     print(f"modificado detectado: {archivo}")
                     log.add_log(f"modificado detectado: {archivo}", "INFO")
                     aplicarCambiosABD(ruta_completa)
-                    guardar_estado()
                 
+    guardar_estado()
 
 def aplicarCambiosABD(ruta):
     with Session(db_engine) as session:
@@ -131,7 +133,13 @@ def validarNuevosArchivos():
                     
                     # El nombre se obtiene directamente desde el contenido del archivo y no del nombre para evitar inconsistencias 
                     NombreProceso =  sql.readline()
+
+                    if NombreProceso == '':
+                        log.add_log(f"ERROR CON -> { archivo} PUEDE ESTAR VACIO O NO TENER EL FORMATO CORRECTO", "ERROR")
+                        continue
+
                     log.add_log(f"Validando -> {NombreProceso.replace('CREATE PROC','')}", "DEBUG")
+
                     if NombreProceso.replace('CREATE PROC','').strip() not in NombreProcesos:
                         log.add_log(F"EJECUTANDO PROCESO ALMACENADO {archivo}","DEBUG")
 

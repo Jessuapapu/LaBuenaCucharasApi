@@ -17,12 +17,12 @@ async def obtener_pedidos(
     return pedidos
 
 
-@router.get("/detalle/pedido/{id}")
+@router.get("/detalle/")
 async def obtener_detalle(
-    IdPedido: int = Query(None, description="Id de Pedido"),
-    IdCliente: int = Query(None, description="Id de Cliente")
+    IdPedido: int | None = Query(None, description="Id de Pedido"),
+    IdCliente: int | None  = Query(None, description="Id de Cliente")
     ):
-    
+
     detalle = service.detalle_Ordenes(id_orden = IdPedido, id_cliente = IdCliente)     
     return detalle
 

@@ -23,5 +23,4 @@ connection_string = (
 # Encode for SQLAlchemy
 connection_uri = f"mssql+pyodbc:///?odbc_connect={parse.quote_plus(connection_string)}"
 
-
 db_engine = create_engine(connection_uri, echo=True)
