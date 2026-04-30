@@ -7,7 +7,7 @@ CREATE PROC MostrarContratos
 
 AS 
 BEGIN
-
+    SET NOCOUNT ON;
 	-- Validar congruencia de fechas
     IF (@FechaInicio IS NOT NULL AND @FechaVencimiento IS NOT NULL AND @FechaInicio > @FechaVencimiento)
     BEGIN

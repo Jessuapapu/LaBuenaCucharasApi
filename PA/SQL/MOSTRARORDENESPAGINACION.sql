@@ -17,8 +17,6 @@ BEGIN
 	-- SI TODO ES 1, SE DEBE INICIAR DESDE LA PAGINA 0
 	SET @Pagina = IIF(@Todo = 1,1,@Pagina)
 
-	
-
 	SELECT C.NombreCliente, O.IdOrdenes, SUM(OD.CantidadPlatillo * OD.PrecioUnico) MONTOTOTAL,
 	O.Fecha, CD.dirreccion, O.Estado
 	FROM detallesordenes OD

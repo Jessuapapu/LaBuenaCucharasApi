@@ -4,6 +4,7 @@ CREATE PROC MostrarDetalleFactura
 	@IdOrden INT = NULL
 	AS
 	BEGIN
+    SET NOCOUNT ON;
 		WITH DetallesFacturas
 		AS (
 		

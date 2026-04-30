@@ -3,7 +3,7 @@ CREATE PROC ListarClientes
 	
 AS 
 BEGIN
-	
+	SET NOCOUNT ON;
 	DECLARE @IdCliente INT
 
 	-- Encontrar el Id del cliente por el nombre

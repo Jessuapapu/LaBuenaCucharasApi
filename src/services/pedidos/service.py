@@ -184,7 +184,7 @@ def actualizar_pedido(
         detalles_actualizar = session.exec(statement).all()
         resultado = session.exec(stmt_pedido_factura).first()
         nuevo_id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)
-        print(str(resultado))
+        
         if not resultado or not nuevo_id_cliente:
             return None
 

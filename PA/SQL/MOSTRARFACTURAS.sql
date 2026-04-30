@@ -8,6 +8,7 @@ CREATE PROC MostrarFacturas
     @CantidadTotal INT = NULL
 AS
 BEGIN
+    SET NOCOUNT ON;
     IF (@FechaInicio IS NOT NULL AND @FechaFin IS NOT NULL AND @FechaInicio > @FechaFin)
     BEGIN
         print 'Error: La fecha de inicio no puede ser mayor a la fecha fin.';

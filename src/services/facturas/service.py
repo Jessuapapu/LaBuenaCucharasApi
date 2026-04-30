@@ -1,15 +1,9 @@
-from src.models.ordenes.models import Ordenes, DetallesOrdenes
-from src.models.ordenes.types import EstadoOrden
 from fastapi import HTTPException
-from src.models.clientes.models import Clientes, ClienteDireccion
-from src.models.pedidos.types import EstadoPedido
-from src.models.facturas.types import EstadoFactura
+
 from sqlmodel import Session, select
 from src.config.database import db_engine
-from src.models.platillos.models import Platillos
-from src.services.clientes.service import obtener_id_cliente_por_nombre
-from src.services.platillos.service import obtener_platillo_id_por_nombre
-from src.schemas.pedidos import Detalles
+
+from src.schemas.facturas import facturaIn
 from typing import List
 from decimal import Decimal
 import datetime
@@ -32,6 +26,7 @@ def obtener_facturas_ordenes(
     monto_fin: float | None = None,
     cantidad_total: int | None = None
 ) -> list:
+    
     with Session(db_engine) as session:
         query = text("""
             EXEC MostrarFacturas 
@@ -54,7 +49,7 @@ def obtener_facturas_ordenes(
             "cantidad_total": cantidad_total
         }
         
-        resultados = session.execute(query, valores).mappings().all()
+        resultados = session.exec(query, params=valores).mappings().all()
         
         facturas_list = []
         for row in resultados:
@@ -70,3 +65,26 @@ def obtener_facturas_ordenes(
             })
 
         return facturas_list
+    
+
+
+def crear_facturas(
+    payLoadDetalles: facturaIn
+):
+    json_string = payLoadDetalles.model_dump_json()
+
+    with Session(db_engine) as session:
+        try:
+
+            query = text("EXEC GenerarFactura @PayloadJson = :json_data")
+            
+
+            id_generado = session.execute(query, {"json_data": json_string}).scalar()
+            
+            session.commit()
+            return id_generado
+            
+        except Exception as e:
+            print(f"Error al ejecutar el PA sp_GenerarFactura: {e}")
+            return False
+    return True
