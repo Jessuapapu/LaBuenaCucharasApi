@@ -3,7 +3,7 @@ from src.models.pedidos.models import (
 )
 
 from src.models.facturas.models import (
-    Facturas
+    Facturas, FacturasOrdenes
 )
 
 from src.models.ordenes.models import Ordenes, DetallesOrdenes
@@ -23,10 +23,9 @@ import datetime
 from sqlalchemy import select as sa_select, func, cast
 from sqlalchemy.types import Date
 
-
 from sqlmodel import Session
 from sqlalchemy import text
-from src.config.database import db_engine # Asegúrate de que la ruta sea correcta
+from src.config.database import db_engine
 
 def listar_historial_Ordenes(
     id_orden: int | None = None, 
@@ -109,61 +108,59 @@ def crear_pedido(nombre_cliente: str, fecha: datetime.date, detalle: List[Detall
     if id_cliente is None:
         raise ValueError(f"No se pudo obtener un id de cliente con el nombre de cliente {nombre_cliente}")
 
-    nuevo_pedido = Ordenes(IdCliente=id_cliente, FechaPedido=str(fecha), Estado=EstadoPedido.PENDIENTE)
+    nuevo_Orden = Ordenes(IdCliente=id_cliente, FechaPedido=str(fecha), CostoTotal=0.0)
 
     with Session(db_engine) as session:
         try:
-            session.add(nuevo_pedido)
-
+            session.add(nuevo_Orden)
             session.flush()
 
-            if nuevo_pedido.IdPedido is None:
+            if nuevo_Orden.IdOrdenes is None:
                 raise ValueError("La base de datos no generó IdPedido")
 
-            monto_total: Decimal = Decimal("0")
+            monto_total = 0.0
             cantidad_total = 0
 
             for det in detalle:
                 id_platillo = obtener_platillo_id_por_nombre(det.nombre_platillo)
 
                 if id_platillo is None:
+                    session.rollback()
                     return None
 
-                detalle_nuevo = DetallesOrdenes(
-                    IdPedido=nuevo_pedido.IdPedido,
-                    IdPlatillo=id_platillo,
-                    Cantidad=det.cantidad,
-                    PrecioUnitario=det.precio_unitario,
-                )
+                costo_por_platillo = float(det.cantidad) * float(det.precio_unitario)
+                monto_total += costo_por_platillo
+                cantidad_total += det.cantidad
 
+                detalle_nuevo = DetallesOrdenes(
+                    IdOrdenes=nuevo_Orden.IdOrdenes,
+                    IdPlatillo=id_platillo,
+                    CantidadPlatillo=det.cantidad,
+                    PrecioUnico=det.precio_unitario,
+                    CostoTotal=costo_por_platillo
+                )
                 session.add(detalle_nuevo)
 
-                monto_total += Decimal(det.cantidad) * Decimal(str(det.precio_unitario))
-                cantidad_total += det.cantidad
+            nuevo_Orden.CostoTotal = monto_total
 
             factura_nueva = Facturas(
                 MontoTotal=monto_total,
                 CantidadTotal=cantidad_total,
                 Estado=EstadoFactura.GENERADA,
-                FechaFactura=str(datetime.date.today()),
+                FechaFactura=str(datetime.date.today())
             )
-
             session.add(factura_nueva)
-
             session.flush()
 
-            if nuevo_pedido.IdPedido is None:
+            if factura_nueva.IdFactura is None:
                 raise ValueError("La base de datos no generó IdFactura")
 
-            relacion_factura_pedido = Facturas(
-                IdFactura=factura_nueva.IdFactura, IdPedido=nuevo_pedido.IdPedido
-            )
-
-            session.add(relacion_factura_pedido)
 
             session.commit()
-            return nuevo_pedido.model_dump_json()
+            return nuevo_Orden.model_dump_json()
+
         except Exception as e:
+            session.rollback()
             print(e)
             return None
 
@@ -172,19 +169,16 @@ def actualizar_pedido(
     id_pedido: int, nombre_cliente: str, estado: EstadoPedido, detalles: List[Detalles]
 ):
     with Session(db_engine) as session:
-        #  querys seccion
         statement = (
             select(DetallesOrdenes)
-            .select_from(Ordenes)
-            .join(DetallesOrdenes)
+            .join(Ordenes, Ordenes.IdOrdenes == DetallesOrdenes.IdOrdenes)
             .where(Ordenes.IdOrdenes == id_pedido)
         )
 
         stmt_pedido_factura = (
             select(Ordenes, Facturas)
-            .select_from(Ordenes)
-            .join(Facturas)
-            .join(Facturas)
+            .join(FacturasOrdenes, Ordenes.IdOrdenes == FacturasOrdenes.IdOrdenes)
+            .join(Facturas, FacturasOrdenes.IdFactura == Facturas.IdFactura)
             .where(Ordenes.IdOrdenes == id_pedido)
         )
 
@@ -192,17 +186,13 @@ def actualizar_pedido(
         resultado = session.exec(stmt_pedido_factura).first()
         nuevo_id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)
 
-        if not resultado or not detalles_actualizar or not nuevo_id_cliente:
+        if not resultado or not nuevo_id_cliente:
             return None
 
         pedido, factura = resultado
 
-        if (
-            pedido.Estado == EstadoPedido.ANULADO
-            or factura.Estado == EstadoFactura.ANULADA
-        ):
+        if pedido.Estado == EstadoPedido.ANULADO or factura.Estado == EstadoFactura.ANULADA:
             return None
-
 
         pedido.IdCliente = nuevo_id_cliente
         pedido.Estado = estado
@@ -218,28 +208,31 @@ def actualizar_pedido(
             if id_platillo is None:
                 session.rollback()
                 return None
+            
+            costo_fila = Decimal(det.cantidad) * Decimal(str(det.precio_unitario))
 
             session.add(
                 DetallesOrdenes(
-                    IdPedido=id_pedido,
+                    IdOrdenes=id_pedido,
                     IdPlatillo=id_platillo,
-                    Cantidad=det.cantidad,
-                    PrecioUnitario=det.precio_unitario,
+                    CantidadPlatillo=det.cantidad,
+                    PrecioUnico=det.precio_unitario,
+                    CostoTotal=costo_fila
                 )
             )
 
-            monto_total += Decimal(det.cantidad) * Decimal(str(det.precio_unitario))
+            monto_total += costo_fila
             cantidad_total += det.cantidad
 
         factura.MontoTotal = monto_total
         factura.CantidadTotal = cantidad_total
+        pedido.CostoTotal = float(monto_total)
+
         if estado == EstadoPedido.ENTREGADO:
             factura.Estado = EstadoFactura.PAGADA
-
-        if estado == EstadoPedido.PENDIENTE:
+        elif estado == EstadoPedido.PENDIENTE:
             factura.Estado = EstadoFactura.GENERADA
-
-        if estado == EstadoPedido.ANULADO:
+        elif estado == EstadoPedido.ANULADO:
             factura.Estado = EstadoFactura.ANULADA
 
         factura.FechaFactura = str(datetime.date.today())
@@ -425,12 +418,12 @@ def obtener_contador_platillos():
         statement = (
             select(
                 Platillos.NombrePlatillo,
-                func.SUM(DetallesOrdenes.Cantidad).label("total_vendido"),
+                func.SUM(DetallesOrdenes.CantidadPlatillo).label("total_vendido"),
             )
             .select_from(DetallesOrdenes)
             .join(Platillos)
             .group_by(Platillos.NombrePlatillo)
-            .order_by(func.SUM(DetallesOrdenes.Cantidad).desc())
+            .order_by(func.SUM(DetallesOrdenes.CantidadPlatillo).desc())
         )
 
         query = session.exec(statement).all()

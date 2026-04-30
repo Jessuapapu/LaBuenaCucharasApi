@@ -112,7 +112,7 @@ def obtener_contratos_clientes(
             "presupuesto_fin": presupuesto_fin
         }
         
-        resultados = session.execute(query, valores_parametros).mappings().all()
+        resultados = session.exec(query, valores_parametros).mappings().all()
         
         return [dict(row) for row in resultados]
 
