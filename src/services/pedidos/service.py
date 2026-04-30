@@ -7,6 +7,7 @@ from src.models.facturas.models import (
 )
 
 from src.models.ordenes.models import Ordenes, DetallesOrdenes
+from src.models.ordenes.types import EstadoOrden
 from fastapi import HTTPException
 from src.models.clientes.models import Clientes, ClienteDireccion
 from src.models.pedidos.types import EstadoPedido
@@ -176,22 +177,20 @@ def actualizar_pedido(
         )
 
         stmt_pedido_factura = (
-            select(Ordenes, Facturas)
-            .join(FacturasOrdenes, Ordenes.IdOrdenes == FacturasOrdenes.IdOrdenes)
-            .join(Facturas, FacturasOrdenes.IdFactura == Facturas.IdFactura)
+            select(Ordenes)
             .where(Ordenes.IdOrdenes == id_pedido)
         )
 
         detalles_actualizar = session.exec(statement).all()
         resultado = session.exec(stmt_pedido_factura).first()
         nuevo_id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)
-
+        print(str(resultado))
         if not resultado or not nuevo_id_cliente:
             return None
 
-        pedido, factura = resultado
+        pedido = resultado
 
-        if pedido.Estado == EstadoPedido.ANULADO or factura.Estado == EstadoFactura.ANULADA:
+        if pedido.Estado == EstadoOrden.ANULADO:
             return None
 
         pedido.IdCliente = nuevo_id_cliente
@@ -224,22 +223,9 @@ def actualizar_pedido(
             monto_total += costo_fila
             cantidad_total += det.cantidad
 
-        factura.MontoTotal = monto_total
-        factura.CantidadTotal = cantidad_total
-        pedido.CostoTotal = float(monto_total)
-
-        if estado == EstadoPedido.ENTREGADO:
-            factura.Estado = EstadoFactura.PAGADA
-        elif estado == EstadoPedido.PENDIENTE:
-            factura.Estado = EstadoFactura.GENERADA
-        elif estado == EstadoPedido.ANULADO:
-            factura.Estado = EstadoFactura.ANULADA
-
-        factura.FechaFactura = str(datetime.date.today())
-
         session.commit()
         session.refresh(pedido)
-        session.refresh(factura)
+
 
         return True
 
@@ -247,10 +233,8 @@ def actualizar_pedido(
 def pagar_pedido_service(id_pedido: int):
     with Session(db_engine) as session:
         statement = (
-            select(Ordenes, Facturas)
+            select(Ordenes)
             .select_from(Ordenes)
-            .join(Facturas)
-            .join(Facturas)
             .where(Ordenes.IdOrdenes == id_pedido)
         )
 
@@ -261,22 +245,18 @@ def pagar_pedido_service(id_pedido: int):
         if not resultado:
             return None
 
-        pedido, factura = resultado
+        pedido = resultado
 
         if (
             pedido.Estado == EstadoPedido.ENTREGADO
-            or factura.Estado == EstadoFactura.PAGADA
             or pedido.Estado == EstadoPedido.ANULADO
-            or factura.Estado == EstadoFactura.ANULADA
         ):
             return None
 
         pedido.Estado = EstadoPedido.ENTREGADO
-        factura.Estado = EstadoFactura.PAGADA
 
         session.commit()
         session.refresh(pedido)
-        session.refresh(factura)
 
         return True
 
@@ -364,53 +344,7 @@ def conteo_Ordenes_semanal():
 
 
 
-def obtener_facturas_ordenes(
-    id_cliente: int | None = None,
-    id_orden: int | None = None,
-    fecha_inicio: datetime.datetime | None = None,
-    fecha_fin: datetime.datetime | None = None,
-    monto: float | None = None,
-    monto_fin: float | None = None,
-    cantidad_total: int | None = None
-) -> list:
-    with Session(db_engine) as session:
-        query = text("""
-            EXEC MostrarFacturas 
-                @IdCliente = :id_cliente,
-                @IdOrden = :id_orden,
-                @FechaInicio = :fecha_inicio,
-                @FechaFin = :fecha_fin,
-                @Monto = :monto,
-                @MontoFin = :monto_fin,
-                @CantidadTotal = :cantidad_total
-        """)
-        
-        valores = {
-            "id_cliente": id_cliente,
-            "id_orden": id_orden,
-            "fecha_inicio": fecha_inicio,
-            "fecha_fin": fecha_fin,
-            "monto": monto,
-            "monto_fin": monto_fin,
-            "cantidad_total": cantidad_total
-        }
-        
-        resultados = session.execute(query, valores).mappings().all()
-        
-        facturas_list = []
-        for row in resultados:
-            facturas_list.append({
-                "monto_total": row.get("MontoTotal"),
-                "cantidad_total": row.get("CantidadTotal"),
-                "estado_factura": row.get("Estado"),
-                "fecha_factura": row.get("Fecha"),
-                "cliente": {
-                    "nombre_cliente": row.get("NombreCliente"),
-                    "direccion_cliente": row.get("DireccionCliente", "Sin dirección") 
-                }
-            })
 
-        return facturas_list
 
 
 def obtener_contador_platillos():

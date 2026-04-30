@@ -4,8 +4,9 @@ import os
 from logs import logsApp
 import json
 
+RUTA_INICIO = './PA/'
 log = logsApp.Logs()
-ARCHIVO_ESTADO = './PA/JsonTimeStamp/estado_archivos.json'
+ARCHIVO_ESTADO = RUTA_INICIO + 'JsonTimeStamp/estado_archivos.json'
 timeStamp = {}
 ArchivoError = []
 
@@ -33,10 +34,10 @@ def validarJson():
 
 def guardar_estado():
     with open(ARCHIVO_ESTADO, 'w') as f:
-        archivos = os.listdir('./PA/SQL/')
+        archivos = os.listdir(RUTA_INICIO +'SQL/')
         for archivo in archivos:
             if '.sql' in archivo:
-                ruta_completa = './PA/SQL/' + archivo
+                ruta_completa =RUTA_INICIO + 'SQL/' + archivo
                 timeStamp[archivo] = os.path.getmtime(ruta_completa)
         
         json.dump(timeStamp,f,indent=4)
@@ -44,7 +45,7 @@ def guardar_estado():
 def validarTimeStamp():
     EstadoAnterior = None 
 
-    print("VALIDADON CAMBIOS EN LOS PA")
+    print("VALIDANDO CAMBIOS EN LOS PA")
     with open(ARCHIVO_ESTADO, 'r') as f:
         try:        
             EstadoAnterior = json.load(f)
@@ -52,13 +53,13 @@ def validarTimeStamp():
             guardar_estado()
             return
 
-        archivos = os.listdir('./PA/SQL/')
+        archivos = os.listdir(RUTA_INICIO + 'SQL/')
 
     log.add_log(f"Lista de archivos SQL {archivos} ","DEBUG")
 
     for archivo in archivos:
         if '.sql' in archivo:
-            ruta_completa = './PA/SQL/' + archivo
+            ruta_completa = RUTA_INICIO + 'SQL/' + archivo
 
             with open(ruta_completa, 'r') as sql:
                 modificacion_actual = os.path.getmtime(ruta_completa)
@@ -128,21 +129,21 @@ def validarNuevosArchivos():
         log.add_log(f"Lista de procesos almacenados: {NombreProcesos}","DEBUG")
 
         # Obtenemos los archivos desde la carpeta
-        archivos = os.listdir('./PA/SQL/')
+        archivos = os.listdir(RUTA_INICIO + 'SQL/')
         log.add_log(f"Lista de archivos SQL {archivos}","DEBUG")
 
         # uno por uno se valida si esta, si no esta, se obtiene y se ejecuta
         for archivo in archivos:
             if '.sql' in archivo:
 
-                with open('./PA/SQL/' + archivo, 'r') as sql:
+                with open( RUTA_INICIO + 'SQL/' + archivo, 'r') as sql:
                     
                     # El nombre se obtiene directamente desde el contenido del archivo y no del nombre para evitar inconsistencias 
                     NombreProceso =  sql.readline()
 
                     if NombreProceso == '':
                         log.add_log(f"ERROR CON -> { archivo} PUEDE ESTAR VACIO O NO TENER EL FORMATO CORRECTO", "ERROR")
-                        ArchivoError.append('./PA/SQL/' + archivo)
+                        ArchivoError.append(RUTA_INICIO + 'SQL/' + archivo)
                         continue
 
                     log.add_log(f"Validando -> {NombreProceso.replace('CREATE PROC','')}", "DEBUG")

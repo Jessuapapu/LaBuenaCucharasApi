@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import List
 import datetime
 
-from src.models.pedidos.types import EstadoPedido
+from src.models.ordenes.types import EstadoOrden
 
 class Detalles(BaseModel):
     nombre_platillo: str
@@ -18,5 +18,5 @@ class PedidosIn(BaseModel):
 
 class PedidosUpdate(BaseModel):
     nombre_cliente: str
-    estado: EstadoPedido
+    estado: EstadoOrden
     detalles: List[Detalles]

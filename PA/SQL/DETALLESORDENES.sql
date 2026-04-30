@@ -1,6 +1,6 @@
 CREATE PROC MostrarDetalles
-	 @Id INT = NULL,
-	 @IdCliente INT = NULL
+	@Id INT = NULL,
+	@IdCliente INT = NULL
 AS
 BEGIN
 	SET NOCOUNT ON
