@@ -13,7 +13,7 @@ BEGIN
         DECLARE @MontoCalculado DECIMAL(18,2);
         DECLARE @CantidadTotal INT;
 
-        -- Al crear la tabla temporal, la columna se llama IdOrdenes
+
         SELECT IdOrdenes
         INTO #OrdenesTemporales
         FROM OPENJSON(@PayloadJson, '$.detalles')
@@ -35,7 +35,6 @@ BEGIN
         SET @NuevoIdFactura = SCOPE_IDENTITY();
 
         INSERT INTO facturasordenes (IdFactura, IdOrdenes)
-        -- CORRECCIÓN: Aquí debes llamar a IdOrdenes, que es el nombre en la tabla temporal
         SELECT @NuevoIdFactura, IdOrdenes
         FROM #OrdenesTemporales;
 
