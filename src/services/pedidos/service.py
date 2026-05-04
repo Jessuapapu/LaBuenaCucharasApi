@@ -324,7 +324,7 @@ def conteo_Ordenes_semanal():
         # Conteo por nombre de día
         conteo_por_dia: dict[str, int] = {dia: 0 for dia in dias_es}
 
-        for (fecha_pedido_raw,) in resultados:
+        for (fecha_pedido_raw) in resultados:
             # Normalizar a date
             if isinstance(fecha_pedido_raw, datetime.date):
                 fecha_pedido = fecha_pedido_raw

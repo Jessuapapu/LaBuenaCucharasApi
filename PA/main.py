@@ -4,13 +4,17 @@ import os
 from logs import logsApp
 import json
 
-RUTA_INICIO = './PA/'
+RUTA_BASE = os.getcwd()
+RUTA_INICIO = RUTA_BASE + '/PA/'
+
+
 log = logsApp.Logs()
-ARCHIVO_ESTADO = RUTA_INICIO + 'JsonTimeStamp/estado_archivos.json'
+ARCHIVO_ESTADO = RUTA_INICIO + 'Json/estado_archivos.json'
 timeStamp = {}
 ArchivoError = []
 
 def main():
+
     validarNuevosArchivos()
     if validarJson():
         validarTimeStamp()
@@ -30,7 +34,6 @@ def validarJson():
     
     return True
     
-
 
 def guardar_estado():
     with open(ARCHIVO_ESTADO, 'w') as f:

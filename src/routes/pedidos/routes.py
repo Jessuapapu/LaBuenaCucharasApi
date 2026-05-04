@@ -59,8 +59,6 @@ async def obtener_conteo_Ordenes_semanal():
 
 
 
-
-
 @router.get("/platillos/conteo")
 async def obtener_platillos_populares():
     platillos = service.obtener_contador_platillos()
