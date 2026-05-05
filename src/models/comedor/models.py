@@ -113,13 +113,14 @@ class MonitorComedor():
 
 
 
-class Auditoria_Mesas(SQLModel):
-    IdAuditoria_Mesas = Field(primary_key=True)
+class Auditoria_Mesas(SQLModel, table=True):
+    IdAuditoria_Mesas: int = Field(primary_key=True)
     IdMesa: int = Field(nullable=False)
+    IdOrden: int = Field(foreign_key = "ordenes.IdOrdenes", unique=True)
     HoraEntrada: datetime = Field(nullable=False)
     HoraSalida: datetime = Field(nullable=False)
 
-class Auditoria_Comedor(SQLModel):
-    IdAuditoria_Comedor = Field(primary_key=True)   
+class Auditoria_Comedor(SQLModel, table=True):
+    IdAuditoria_Comedor: int = Field(primary_key=True)   
     HoraApertura: datetime = Field(nullable=False)
     HoraCerrar: datetime = Field(nullable=False)

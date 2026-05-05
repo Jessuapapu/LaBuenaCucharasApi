@@ -29,6 +29,7 @@ from src.models.pedidos import models as pedidos_models
 from src.models.facturas import models as facturas_models
 from src.models.ordenes import models as ordenes_models
 from src.models.proveedores import models as Proveedores_models
+from src.models.comedor import models as comedor_models
 from sqlmodel import SQLModel
 target_metadata = SQLModel.metadata
 
