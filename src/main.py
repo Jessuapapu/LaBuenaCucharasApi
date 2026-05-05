@@ -3,11 +3,12 @@ from .routes.main_router import app_router
 from fastapi.middleware.cors import CORSMiddleware
 
 from PA import main as PA
-
+from src.models.comedor import models as comedor
 
 
 app = FastAPI()
 PA.main()
+comedor.MonitorComedor()
 app.include_router(app_router)
 
 app.add_middleware(

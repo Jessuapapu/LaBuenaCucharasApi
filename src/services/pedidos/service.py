@@ -116,7 +116,7 @@ def crear_pedido(nombre_cliente: str, fecha: datetime.date, detalle: List[Detall
             session.add(nuevo_Orden)
             session.flush()
 
-            if nuevo_Orden.IdOrdenes is None:
+            if nuevo_Orden.IdOrdenes is None:   
                 raise ValueError("La base de datos no generó IdPedido")
 
             monto_total = 0.0
@@ -348,7 +348,7 @@ def conteo_Ordenes_semanal():
 
 
 def obtener_contador_platillos():
-    with Session(db_engine) as session:
+        
         statement = (
             select(
                 Platillos.NombrePlatillo,

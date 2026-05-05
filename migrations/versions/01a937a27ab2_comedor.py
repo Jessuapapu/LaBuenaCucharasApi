@@ -32,7 +32,7 @@ def upgrade() -> None:
     sa.Column('IdMesa', sa.Integer(), nullable=False),
     sa.Column('IdOrden', sa.Integer(), nullable=False),
     sa.Column('HoraEntrada', sa.DateTime(), nullable=False),
-    sa.Column('HoraSalida', sa.DateTime(), nullable=False),
+    sa.Column('HoraSalida', sa.DateTime()),
     sa.ForeignKeyConstraint(['IdOrden'], ['ordenes.IdOrdenes'], ),
     sa.PrimaryKeyConstraint('IdAuditoria_Mesas'),
     sa.UniqueConstraint('IdOrden')
