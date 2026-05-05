@@ -360,7 +360,7 @@ def obtener_contador_platillos():
             .order_by(func.SUM(DetallesOrdenes.CantidadPlatillo).desc())
         )
 
-        query = session.exec(statement).all()
+        query = Session.exec(statement).all()
 
         platillos_populares = []
 

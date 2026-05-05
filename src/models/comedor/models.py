@@ -9,7 +9,7 @@ class OrdenComedor():
         self.HoraSalida: datetime | None = None
         self.IdOrden: int = IdOrden
         self.Activo: bool = True
-        
+
     def to_dict(self):
         return {
             "IdOrden": self.IdOrden,
@@ -83,6 +83,11 @@ class MonitorComedor():
                 return orden.to_dict()
             
         return None
+    
+    def obtener_orden(self,IdMesa: int, IdOrden: int) -> OrdenComedor | None:
+        mesa = self.Mesas[IdMesa] 
+
+        return (orden for orden in mesa.Ordenes if orden.IdOrden == IdOrden)
 
     def obtener_ordenTerminadas(self, IdMesa: int):
         self.limpiar_orden()
@@ -101,7 +106,6 @@ class MonitorComedor():
         if mesa:
             mesa.Ordenes.append(OrdenComedor(IdOrden=IdOrden))
 
-        
 
     def guardar_orden(self, IdOrden: int, IdMesa: int):
         self.limpiar_orden()
