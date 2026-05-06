@@ -21,6 +21,14 @@ async def obtener_estado_comedor(Id: int, Estado: bool):
     else:
         return comedor.obtener_estado_terminadas(IdMesa=Id)
 
+@router.put("/{IdMesa}/{IdOrden}")
+async def guardar_orden_mesa(IdMesa:int, IdOrden: int):
+    if IdMesa not in comedor.obtener_IdMesas():
+        return HTTPException(404, 'MESA NO ENCONTRADA')
+    
+    if not comedor.guardar_comedor_orden(IdMesa=IdMesa, IdOrden=IdOrden):
+        return HTTPException(500, 'ERROR AL GUARDAR ORDEN')
+
 @router.post("/{IdMesa}")
 async def crear_orden_comedor(IdMesa:int, payload: OrdenComedorIN):
     if not comedor.generar_orden_comedor(IdMesa=IdMesa,detalles=payload.Detalles):

@@ -92,6 +92,7 @@ class MonitorComedor():
     def obtener_ordenTerminadas(self, IdMesa: int):
         self.limpiar_orden()
         mesa = self.Mesas[IdMesa]
+        # Lista de Ordenes Terminadas
         LOT = []
 
         for orden in mesa.Ordenes:
@@ -132,6 +133,13 @@ class MonitorComedor():
                 mesa.Ordenes.remove(orden)
                 return True
         return False
+
+    def mesasId(self):
+        lista = []
+        for i in range(0,self.NumeroMesas):
+            lista.append(i)
+
+        return lista
 
     def to_dict(self):
         return {

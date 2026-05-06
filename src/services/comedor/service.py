@@ -47,8 +47,7 @@ def guardar_comedor_orden(IdMesa: int, IdOrden: int):
     orden = MC.guardar_orden(IdMesa=IdMesa, IdOrden=IdOrden)
 
     if not orden:
-        return {"msj": F"ERROR NO EN CONTRADO LA ORDEN EN ASOCIADA A LA MESA {IdOrden}", "ERROR": 404}
-    
+        return False
 
     with Session(db_engine) as session:
         try: 
@@ -74,6 +73,12 @@ def obtener_estado_terminadas(IdMesa: int):
 
 def obtener_estado_total():
     return MC.to_dict()
+
+def obtener_estado(IdMesa: int):
+    return MC.obtener_orden(IdMesa=IdMesa).to_dict()
+
+def obtener_IdMesas():
+    return MC.mesasId()
 
 def generar_orden_comedor(IdMesa: int, detalles: list[Detalles]):
     nuevo_Orden = orden.Ordenes(IdCliente=1, Fecha=datetime.now(), CostoTotal=0.0)
