@@ -112,15 +112,15 @@ class MonitorComedor():
         mesa = self.Mesas[IdMesa]
         
         if not mesa:
-            return False
+            return None
 
         for orden in mesa.Ordenes:
             if orden.IdOrden == IdOrden and orden.Activo:
                 orden.HoraSalida = datetime.now()
                 orden.Activo = False
         
-                return True
-        return False
+                return orden
+        return None
 
     def eliminar_orden(self, IdOrden: int, IdMesa: int):
         mesa = self.Mesas[IdMesa]

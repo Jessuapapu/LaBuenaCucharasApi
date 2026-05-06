@@ -1,4 +1,7 @@
 from src.models.comedor import models as comedor
+from src.models.ordenes import models as orden
+from src.schemas.pedidos import Detalles
+from src.services.platillos.service import obtener_platillo_id_por_nombre   
 from sqlmodel import Session
 from src.config.database import db_engine
 from datetime import datetime
@@ -11,10 +14,11 @@ logs = logsApp.Logs()
 
 def agregar_orden_comedor(IdMesa: int, IdOrden: int):
     
-    if IdMesa > MC.MaxIdGenerado:
+    if IdMesa > MC.MaxIdGenerado or IdMesa < 0:
         return False
     
     MC.agregar_orden(IdMesa=IdMesa, IdOrden=IdOrden)
+    return True
 
 def abrir_comedor():
     global horaApertura 
@@ -40,12 +44,11 @@ def cerrar_comedor():
             return False
         
 def guardar_comedor_orden(IdMesa: int, IdOrden: int):
-    orden = MC.obtener_orden(IdMesa=IdMesa, IdOrden=IdOrden)
+    orden = MC.guardar_orden(IdMesa=IdMesa, IdOrden=IdOrden)
 
     if not orden:
         return {"msj": F"ERROR NO EN CONTRADO LA ORDEN EN ASOCIADA A LA MESA {IdOrden}", "ERROR": 404}
     
-    orden.HoraSalida = datetime.now()
 
     with Session(db_engine) as session:
         try: 
@@ -60,6 +63,59 @@ def guardar_comedor_orden(IdMesa: int, IdOrden: int):
         except Exception as e:
             session.rollback()
             print(e)
+            return False
+
+
+def obtener_estado_activas(IdMesa: int):
+    return MC.obtener_ordenActiva(IdMesa=IdMesa)
+
+def obtener_estado_terminadas(IdMesa: int):
+    return MC.obtener_ordenTerminadas(IdMesa=IdMesa)
+
+def obtener_estado_total():
+    return MC.to_dict()
+
+def generar_orden_comedor(IdMesa: int, detalles: list[Detalles]):
+    nuevo_Orden = orden.Ordenes(IdCliente=1, Fecha=datetime.now(), CostoTotal=0.0)
+    with Session(db_engine) as session:
+        try:
+            session.add(nuevo_Orden)
+            session.flush()
+
+            if nuevo_Orden.IdOrdenes is None:   
+                raise ValueError("La base de datos no generó IdOrden")
+
+            MC.agregar_orden(IdMesa=IdMesa, IdOrden=nuevo_Orden.IdOrdenes)
+
+            monto_total = 0.0
+            cantidad_total = 0
+
+            for det in detalles:
+                id_platillo = obtener_platillo_id_por_nombre(det.nombre_platillo)
+
+                if id_platillo is None:
+                    session.rollback()
+                    return None
+
+                costo_por_platillo = float(det.cantidad) * float(det.precio_unitario)
+                monto_total += costo_por_platillo
+                cantidad_total += det.cantidad
+
+                detalle_nuevo = orden.DetallesOrdenes(
+                    IdOrdenes=nuevo_Orden.IdOrdenes,
+                    IdPlatillo=id_platillo,
+                    CantidadPlatillo=det.cantidad,
+                    PrecioUnico=det.precio_unitario,
+                    CostoTotal=costo_por_platillo
+                )
+                session.add(detalle_nuevo)
+
+            nuevo_Orden.CostoTotal = monto_total
+
+            session.commit()
+            return nuevo_Orden.model_dump_json()
+
+        except Exception as e:
+            session.rollback()
+            print(e)
             return None
-
-

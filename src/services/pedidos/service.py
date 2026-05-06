@@ -144,19 +144,6 @@ def crear_pedido(nombre_cliente: str, fecha: datetime.date, detalle: List[Detall
 
             nuevo_Orden.CostoTotal = monto_total
 
-            factura_nueva = Facturas(
-                MontoTotal=monto_total,
-                CantidadTotal=cantidad_total,
-                Estado=EstadoFactura.GENERADA,
-                FechaFactura=str(datetime.date.today())
-            )
-            session.add(factura_nueva)
-            session.flush()
-
-            if factura_nueva.IdFactura is None:
-                raise ValueError("La base de datos no generó IdFactura")
-
-
             session.commit()
             return nuevo_Orden.model_dump_json()
 
