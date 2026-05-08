@@ -330,12 +330,8 @@ def conteo_Ordenes_semanal():
         return conteo_semanal
 
 
-
-
-
-
 def obtener_contador_platillos():
-        
+    with Session(db_engine) as session:
         statement = (
             select(
                 Platillos.NombrePlatillo,
@@ -347,7 +343,7 @@ def obtener_contador_platillos():
             .order_by(func.SUM(DetallesOrdenes.CantidadPlatillo).desc())
         )
 
-        query = Session.exec(statement).all()
+        query = session.exec(statement).all()
 
         platillos_populares = []
 

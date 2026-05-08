@@ -65,11 +65,18 @@ def guardar_comedor_orden(IdMesa: int, IdOrden: int):
             return False
 
 
-def obtener_estado_activas(IdMesa: int):
+def obtener_estado_activas():
+    return MC.obtener_ordenActivas()
+
+def obtener_estado_terminadas():
+    return MC.obtener_ordenTerminadas()
+
+def obtener_estado_orden_mesa_activa(IdMesa: int):
     return MC.obtener_ordenActiva(IdMesa=IdMesa)
 
-def obtener_estado_terminadas(IdMesa: int):
-    return MC.obtener_ordenTerminadas(IdMesa=IdMesa)
+def obtener_estado_orden_mesa_terminadas(IdMesa: int):
+    return MC.obtener_ordenTerminadasMesa(IdMesa=IdMesa)
+
 
 def obtener_estado_total():
     return MC.to_dict()

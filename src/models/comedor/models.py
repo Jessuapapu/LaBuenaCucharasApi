@@ -44,7 +44,6 @@ class MonitorComedor():
    
     def __constructor(self):
         self.NumeroMesas: int = 7
-        self.MaxIdGenerado: int = 7
         self.Mesas: list[Mesa] = []
 
         for i in range(1, self.NumeroMesas + 1):
@@ -52,10 +51,12 @@ class MonitorComedor():
 
     def agregar_mesa(self):
         self.NumeroMesas += 1
-        self.MaxIdGenerado += 1
-        self.Mesas.append(Mesa(self.MaxIdGenerado))
+        self.Mesas.append(Mesa(self.NumeroMesas))
     
     def eliminar_mesa(self, Id: int):
+        if not self.validarIdMesa(IdMesa=Id):
+            return False
+
         for mesa in self.Mesas:
             if mesa.Id == Id:
                 self.Mesas.remove(mesa)
@@ -74,7 +75,10 @@ class MonitorComedor():
         for mesa, orden_borrar in OrdenesABorrar:
             mesa.Ordenes.remove(orden_borrar)
 
-    def obtener_ordenActiva(self, IdMesa: int):
+    def obtener_ordenActiva(self, IdMesa: int) -> dict:
+        if not self.validarIdMesa(IdMesa=IdMesa):
+            return False
+
         self.limpiar_orden()
         mesa = self.Mesas[IdMesa]
 
@@ -84,12 +88,47 @@ class MonitorComedor():
             
         return None
     
-    def obtener_orden(self,IdMesa: int, IdOrden: int) -> OrdenComedor | None:
+    def obtener_orden(self,IdMesa: int, IdOrden: int) -> dict | None:
+        if not self.validarIdMesa(IdMesa=IdMesa):
+            return False
+
         mesa = self.Mesas[IdMesa] 
 
         return (orden for orden in mesa.Ordenes if orden.IdOrden == IdOrden)
+    
+    def obtener_ordenActivas(self):
+        self.limpiar_orden()
+        mesas = self.Mesas
+        # Lista de Ordenes Activas
+        LOA = []
 
-    def obtener_ordenTerminadas(self, IdMesa: int):
+        for mesa in mesas:
+            for orden in mesa.Ordenes:
+                if orden.Activo:
+                    LOA.append(orden.to_dict())
+            
+        return LOA
+
+    def obtener_ordenActivasMesa(self, IdMesa: int) -> OrdenComedor | None:
+        if not self.validarIdMesa(IdMesa=IdMesa):
+            return False
+
+        self.limpiar_orden()
+        if IdMesa > self.NumeroMesas or IdMesa < self.NumeroMesas:
+            return None
+        
+        mesa = self.Mesas[IdMesa]
+        # Lista de Ordenes Activas
+
+        for orden in mesa.Ordenes:
+            if orden.Activo:
+                return orden.to_dict()
+    
+    def obtener_ordenTerminadasMesa(self, IdMesa: int) -> list[dict]:
+        """Obtener de una mesa"""
+        if not self.validarIdMesa(IdMesa=IdMesa):
+            return False
+
         self.limpiar_orden()
         mesa = self.Mesas[IdMesa]
         # Lista de Ordenes Terminadas
@@ -101,7 +140,24 @@ class MonitorComedor():
             
         return LOT
 
-    def agregar_orden(self, IdOrden: int, IdMesa: int):
+    def obtener_ordenTerminadas(self) -> list[dict]:
+        """Obtener de todas las mesas"""
+        self.limpiar_orden()
+        mesas = self.Mesas
+        # Lista de Ordenes Terminadas
+        LOT = []
+        
+        for mesa in mesas:
+            for orden in mesa.Ordenes:
+                if not orden.Activo:
+                    LOT.append(orden.to_dict())
+            
+        return LOT
+
+    def agregar_orden(self, IdOrden: int, IdMesa: int): 
+        if not self.validarIdMesa(IdMesa=IdMesa):
+            return False
+
         self.limpiar_orden()
         mesa = self.Mesas[IdMesa]
         if mesa:
@@ -109,6 +165,9 @@ class MonitorComedor():
 
 
     def guardar_orden(self, IdOrden: int, IdMesa: int):
+        if not self.validarIdMesa(IdMesa=IdMesa):
+            return False
+
         self.limpiar_orden()
         mesa = self.Mesas[IdMesa]
         
@@ -124,6 +183,9 @@ class MonitorComedor():
         return None
 
     def eliminar_orden(self, IdOrden: int, IdMesa: int):
+        if not self.validarIdMesa(IdMesa=IdMesa):
+            return False
+        
         mesa = self.Mesas[IdMesa]
         if not mesa:
             return False
@@ -140,6 +202,12 @@ class MonitorComedor():
             lista.append(i)
 
         return lista
+    
+    def validarIdMesa(self, IdMesa: int):
+        if IdMesa < self.NumeroMesas or IdMesa > self.NumeroMesas:
+            return False
+
+        return True
 
     def to_dict(self):
         return {
