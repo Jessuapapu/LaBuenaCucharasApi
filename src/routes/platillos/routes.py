@@ -1,16 +1,11 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from src.schemas.platillos import PlatilloIn, CategoriaIn
 from src.services.platillos import service
+
+
 
 router = APIRouter()
 
-class PlatilloIn(BaseModel):
-    nombre_platillo: str
-    nombre_categoria: str
-
-
-class CategoriaIn(BaseModel):
-    nombre_categoria: str
 
 
 @router.get("/", response_model=None)
@@ -59,3 +54,5 @@ async def crear_categoria(payload: CategoriaIn):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {e}")
+
+

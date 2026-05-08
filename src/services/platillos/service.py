@@ -113,3 +113,5 @@ def obtener_categoria_id_por_nombre(nombre_categoria: str):
             return id_categoria
         except Exception as e:
             raise e
+
+
