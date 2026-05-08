@@ -2,11 +2,7 @@ from fastapi import APIRouter, HTTPException
 from src.schemas.platillos import PlatilloIn, CategoriaIn
 from src.services.platillos import service
 
-
-
 router = APIRouter()
-
-
 
 @router.get("/", response_model=None)
 async def obtener_platillos():
