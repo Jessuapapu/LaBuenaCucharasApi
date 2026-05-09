@@ -6,3 +6,4 @@ from .facturas import *
 from .ordenes import *
 from .proveedores import *
 from .comedor import *
+from .imagenes import *
