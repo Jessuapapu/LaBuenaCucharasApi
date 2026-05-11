@@ -1,17 +1,16 @@
 from src.config.imagebase import ApiSupebase
 from src.config.database import db_engine
-from src.models.imagenes import models as imagenes
+from src.models.imagenes.models import *
 from src.services.platillos import service as PlatillosServices
-from sqlmodel import Session, text
+from sqlmodel import Session, text, select
 import json
 
-from fastapi import UploadFile
 
 CantidadPlatillo = {}
 Platillo_JSON_path = "./src/services/imagenes/platillos_imagenes.json"
 
 def cargar_en_json(IdPlatillo: int | None = None):
-    with open(mode="w+",file="./platillos_imagenes.json") as archivito:
+    with open(mode="w+",file=Platillo_JSON_path) as archivito:
         
         with Session(db_engine) as session:
             parametros = {
@@ -22,7 +21,10 @@ def cargar_en_json(IdPlatillo: int | None = None):
             resultados = session.exec(statement, params=parametros).all()
 
             for row in resultados:
-                CantidadPlatillo[str(row.IdPlatillo)] = int(row.CANTIDAD_IMAGENES)
+                CantidadPlatillo[str(row.IdPlatillo)] = {
+                    "CANTIDAD": int(row.CANTIDAD_IMAGENES),
+                    "NOMBRE": row.NombrePlatillo
+                    }
         
         json.dump(CantidadPlatillo,archivito,indent=4)
         
@@ -39,32 +41,63 @@ def cargar_json_platillos():
         except:
             cargar_en_json()
 
+
+
 def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen_content):
     if not CantidadPlatillo.keys():
         cargar_json_platillos()
 
-    print(CantidadPlatillo)
     try:
         IdPlatillo = PlatillosServices.obtener_platillo_id_por_nombre(NombrePlatillo)
-        NumeroDeImagen = CantidadPlatillo[str(IdPlatillo)]
+        if not IdPlatillo:
+            return False
         
-    
+        NumeroDeImagen = CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"]
+
         NombreDeArchivo = f"{NombrePlatillo}{NumeroDeImagen}.{extension}"
         ApiSupebase.storage.from_("Platillos").upload(file=imagen_bytes, path=NombreDeArchivo, file_options={"content-type": imagen_content})
         url_publica = ApiSupebase.storage.from_("Platillos").get_public_url(NombreDeArchivo)
-        
-        nueva_imagen = imagenes.ImagenesPlatillos(IdPlatillo=IdPlatillo,UrlImagen=url_publica)
+
+        nueva_imagen = ImagenesPlatillos(IdPlatillo=IdPlatillo,UrlImagen=url_publica)
         with Session(db_engine) as session:
             session.add(nueva_imagen)
             session.commit()
-        
-        if str(IdPlatillo) in CantidadPlatillo.keys():
-            CantidadPlatillo[str(IdPlatillo)] += 1
-        else: 
-            CantidadPlatillo[str(IdPlatillo)] = 1
+
+        CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] += 1
+
         Guardar_json()
         return True
 
     except Exception as e:
         print(e)
         return False    
+    
+def obtener_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlatillo: str | None = None) -> str | None: 
+    if not IdPlatillo and not NombrePlatillo:
+        return None
+
+    Idplato = IdPlatillo if IdPlatillo else PlatillosServices.obtener_platillo_id_por_nombre(NombrePlatillo)
+    
+    with Session(db_engine) as session:
+        Imagenes = select(
+            ImagenesPlatillos.UrlImagen
+        ).select_from(ImagenesPlatillos).where(ImagenesPlatillos.IdPlatillo == Idplato)
+        
+
+        for UrlImagen in Imagenes:
+            if f"{NumeroImagen}." in str(UrlImagen):
+                return str(UrlImagen)
+
+        NombreDeArchivo = CantidadPlatillo[str(Idplato)]["NOMBRE"] + CantidadPlatillo[str(Idplato)]["CANTIDAD"]
+        # Si no encuentra el link desde la base de datos
+        ListaDeArchivos = ApiSupebase.ApiSupebase.storage.from_("Platillos").list()
+        for Archivo in ListaDeArchivos:
+            if NombreDeArchivo in Archivo:
+                url_publica = ApiSupebase.storage.from_("Platillos").get_public_url(Archivo)
+                nueva_imagen = ImagenesPlatillos(IdPlatillo=IdPlatillo,UrlImagen=url_publica)
+                session.add(nueva_imagen)
+                session.commit()
+                return url_publica  
+    
+    return None
+

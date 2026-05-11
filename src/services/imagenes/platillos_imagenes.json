@@ -1,53 +1,206 @@
 {
-    "1": 0,
-    "2": 0,
-    "3": 0,
-    "4": 1,
-    "5": 0,
-    "6": 0,
-    "7": 0,
-    "8": 0,
-    "9": 0,
-    "10": 0,
-    "11": 0,
-    "12": 0,
-    "13": 0,
-    "14": 0,
-    "15": 0,
-    "16": 0,
-    "17": 0,
-    "18": 0,
-    "19": 0,
-    "20": 0,
-    "21": 0,
-    "22": 0,
-    "23": 0,
-    "24": 0,
-    "25": 0,
-    "26": 0,
-    "27": 0,
-    "28": 0,
-    "29": 0,
-    "30": 0,
-    "31": 0,
-    "32": 0,
-    "33": 0,
-    "34": 0,
-    "35": 0,
-    "36": 0,
-    "37": 0,
-    "38": 0,
-    "39": 0,
-    "40": 0,
-    "41": 0,
-    "42": 0,
-    "43": 0,
-    "44": 0,
-    "45": 0,
-    "46": 0,
-    "47": 0,
-    "48": 0,
-    "49": 0,
-    "50": 0,
-    "51": 0
+    "1": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Gallo Pinto Cl\u00e1sico"
+    },
+    "2": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Vigor\u00f3n Granadino"
+    },
+    "3": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Baho Tradicional"
+    },
+    "4": {
+        "CANTIDAD": 1,
+        "NOMBRE": "Nacatamal de Cerdo"
+    },
+    "5": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Nacatamal de Pollo"
+    },
+    "6": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Indio Viejo"
+    },
+    "7": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Sopa de Queso"
+    },
+    "8": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Sopa de Mondongo"
+    },
+    "9": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Sopa de Res con Punche"
+    },
+    "10": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Sopa de Gallina India"
+    },
+    "11": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Quesillo Doble"
+    },
+    "12": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Tostones con Queso"
+    },
+    "13": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Tajadas con Queso"
+    },
+    "14": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Carne Asada con Gallo Pinto"
+    },
+    "15": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Pollo Asado"
+    },
+    "16": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Lomo de Cerdo Asado"
+    },
+    "17": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Chancho con Yuca"
+    },
+    "18": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Salpic\u00f3n de Res"
+    },
+    "19": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Ropa Vieja"
+    },
+    "20": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Enchiladas Nicas"
+    },
+    "21": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Tacos de Res Fritos"
+    },
+    "22": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Arroz a la Valenciana"
+    },
+    "23": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Pescado a la Tipitapa"
+    },
+    "24": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Ceviche de Corvina"
+    },
+    "25": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Camarones al Ajillo"
+    },
+    "26": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Camarones Empanizados"
+    },
+    "27": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Filete Mignon"
+    },
+    "28": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Churrasco con Chimichurri"
+    },
+    "29": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Jalape\u00f1o Steak"
+    },
+    "30": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Fajitas de Pollo"
+    },
+    "31": {
+        "CANTIDAD": 2,
+        "NOMBRE": "Fajitas de Res"
+    },
+    "32": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Hamburguesa Cl\u00e1sica"
+    },
+    "33": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Hamburguesa Doble Queso"
+    },
+    "34": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Alitas Picantes (Buffalo)"
+    },
+    "35": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Dedos de Pollo (Tenders)"
+    },
+    "36": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Pizza Hawaiana"
+    },
+    "37": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Pizza de Pepperoni"
+    },
+    "38": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Pasta Fettuccine Alfredo"
+    },
+    "39": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Ensalada C\u00e9sar con Pollo"
+    },
+    "40": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Tres Leches"
+    },
+    "41": {
+        "CANTIDAD": 0,
+        "NOMBRE": "P\u00edo Quinto"
+    },
+    "42": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Atolillo"
+    },
+    "43": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Arroz con Leche"
+    },
+    "44": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Cajeta de Coco"
+    },
+    "45": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Bu\u00f1uelos con Miel"
+    },
+    "46": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Refresco de Cacao"
+    },
+    "47": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Refresco de Tiste"
+    },
+    "48": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Refresco de Grama"
+    },
+    "49": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Limonada con Hierbabuena"
+    },
+    "50": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Chicha de Ma\u00edz"
+    },
+    "51": {
+        "CANTIDAD": 0,
+        "NOMBRE": "pipi"
+    }
 }
