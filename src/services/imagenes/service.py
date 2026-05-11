@@ -3,6 +3,7 @@ from src.config.database import db_engine
 from src.models.imagenes.models import *
 from src.services.platillos import service as PlatillosServices
 from sqlmodel import Session, text, select
+from re import search, IGNORECASE
 import json
 
 
@@ -78,26 +79,39 @@ def obtener_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlati
 
     Idplato = IdPlatillo if IdPlatillo else PlatillosServices.obtener_platillo_id_por_nombre(NombrePlatillo)
     
+    if not Idplato:
+        return None
+
+    if not CantidadPlatillo.keys():
+        cargar_json_platillos()
+    
     with Session(db_engine) as session:
         Imagenes = select(
             ImagenesPlatillos.UrlImagen
         ).select_from(ImagenesPlatillos).where(ImagenesPlatillos.IdPlatillo == Idplato)
         
+        query = session.exec(Imagenes).all()
 
-        for UrlImagen in Imagenes:
-            if f"{NumeroImagen}." in str(UrlImagen):
-                return str(UrlImagen)
+        try:
+            NombrePlato: str = CantidadPlatillo[str(Idplato)]["NOMBRE"]
+        except:
+            return None
+        
+        patron = rf"{NombrePlato.replace(" ","%20")}{NumeroImagen}."
 
-        NombreDeArchivo = CantidadPlatillo[str(Idplato)]["NOMBRE"] + CantidadPlatillo[str(Idplato)]["CANTIDAD"]
+        for UrlImagen in query:
+            if patron in UrlImagen:
+                return UrlImagen
+
         # Si no encuentra el link desde la base de datos
-        ListaDeArchivos = ApiSupebase.ApiSupebase.storage.from_("Platillos").list()
+        ListaDeArchivos = ApiSupebase.storage.from_("Platillos").list()
         for Archivo in ListaDeArchivos:
-            if NombreDeArchivo in Archivo:
-                url_publica = ApiSupebase.storage.from_("Platillos").get_public_url(Archivo)
-                nueva_imagen = ImagenesPlatillos(IdPlatillo=IdPlatillo,UrlImagen=url_publica)
+            if patron.replace("%20"," ") in Archivo['name']:
+                url_publica = ApiSupebase.storage.from_("Platillos").get_public_url(Archivo['name'])
+                nueva_imagen = ImagenesPlatillos(IdPlatillo=Idplato,UrlImagen=url_publica)
                 session.add(nueva_imagen)
                 session.commit()
-                return url_publica  
+                return url_publica
     
     return None
 
