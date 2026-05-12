@@ -33,6 +33,14 @@ async def actualizar_image(NombrePlatillo: str, NumeroImagen: int, file: UploadF
     FileContent = file.content_type
 
     if not imagenes.actualizar_imagen(NumeroImagen=NumeroImagen,imagen_bytes=imagen_byte,extension=extension,imagen_content=FileContent,NombrePlatillo=NombrePlatillo):
-        HTTPException(500, {"ERROR AL ACTUALIZAR LA IMAGEN"})
+        HTTPException(404, {"ERROR AL ACTUALIZAR LA IMAGEN"})
+    else:
+        return True
+    
+@router.delete("/{NombrePlatillo}/{NumeroImagen}")
+async def actualizar_image(NombrePlatillo: str, NumeroImagen: int):
+
+    if not imagenes.eliminar_imagen(NombrePlatillo=NombrePlatillo, NumeroImagen=NumeroImagen):
+        HTTPException(404, {"ERROR AL eliminar LA IMAGEN"})
     else:
         return True
