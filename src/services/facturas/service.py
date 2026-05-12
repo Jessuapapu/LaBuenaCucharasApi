@@ -79,7 +79,7 @@ def crear_facturas(
             query = text("EXEC GenerarFactura @PayloadJson = :json_data")
             
 
-            id_generado = session.execute(query, {"json_data": json_string}).scalar()
+            id_generado = session.exec(query, {"json_data": json_string}).scalar()
             
             session.commit()
             return id_generado

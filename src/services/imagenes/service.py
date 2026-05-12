@@ -44,7 +44,7 @@ def cargar_json_platillos():
 
 
 
-def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen_content):
+def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen_content: str):
     if not CantidadPlatillo.keys():
         cargar_json_platillos()
 
@@ -111,7 +111,49 @@ def obtener_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlati
                 nueva_imagen = ImagenesPlatillos(IdPlatillo=Idplato,UrlImagen=url_publica)
                 session.add(nueva_imagen)
                 session.commit()
+
+                CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] += 1
+                Guardar_json()
                 return url_publica
     
     return None
 
+def actualizar_imagen(
+        NumeroImagen: int, imagen_bytes: bytes, extension: str, imagen_content: str,
+        IdPlatillo: int | None = None, NombrePlatillo: str | None = None,
+        ):
+    if not IdPlatillo and not NombrePlatillo:
+        return False
+
+    Idplato = IdPlatillo if IdPlatillo else PlatillosServices.obtener_platillo_id_por_nombre(NombrePlatillo)
+    
+    if not Idplato:
+        return False
+    
+    if not eliminar_imagen(IdPlatillo=Idplato, NumeroImagen=NumeroImagen):
+        return False
+    if not subir_imagen(imagen_bytes, extension, imagen_content, NombrePlatillo=CantidadPlatillo[str(Idplato)]["NOMBRE"]):
+        return True
+    
+    return True
+
+
+def eliminar_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlatillo: str | None = None):
+    if not IdPlatillo and not NombrePlatillo:
+        return None
+
+    Idplato = IdPlatillo if IdPlatillo else PlatillosServices.obtener_platillo_id_por_nombre(NombrePlatillo)
+    
+    if not Idplato:
+        return None
+    
+    ListaDeArchivos = ApiSupebase.storage.from_("Platillos").list()
+    NombrePlato: str = rf"{CantidadPlatillo[str(Idplato)]["NOMBRE"]}{NumeroImagen}."
+
+    for archivo in ListaDeArchivos:
+        if NombrePlato in archivo['name']:
+            if not ApiSupebase.storage.from_("Platillos").remove(archivo['name']):
+                return False
+            CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] -= 1
+
+    return True
