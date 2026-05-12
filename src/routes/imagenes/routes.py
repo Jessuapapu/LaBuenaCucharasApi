@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile, Query
 from src.services.imagenes import service as imagenes
-import datetime
 
 router = APIRouter()
 
@@ -15,7 +14,6 @@ async def crear_imagenes(NombrePlatillo: str, file: UploadFile = File(...)):
         HTTPException(500, {"ERROR AL CREAR IMAGEN"})
     else:
         return True
-    
 
 @router.get("/")
 async def obtener_imagen(
@@ -26,7 +24,7 @@ async def obtener_imagen(
     return imagenes.obtener_imagen(NombrePlatillo=NombrePlatillo,NumeroImagen=NumeroImagen,IdPlatillo=IdPlatillo)
 
 @router.put("/{NombrePlatillo}/{NumeroImagen}")
-async def actualizar_image(NombrePlatillo: str, NumeroImagen: int, file: UploadFile = File(...)):
+async def actualizar_imagen(NombrePlatillo: str, NumeroImagen: int, file: UploadFile = File(...)):
     imagen_byte = await file.read()
 
     extension = file.filename.split(".")[-1]    
@@ -38,7 +36,7 @@ async def actualizar_image(NombrePlatillo: str, NumeroImagen: int, file: UploadF
         return True
     
 @router.delete("/{NombrePlatillo}/{NumeroImagen}")
-async def actualizar_image(NombrePlatillo: str, NumeroImagen: int):
+async def eliminar_imagen(NombrePlatillo: str, NumeroImagen: int):
 
     if not imagenes.eliminar_imagen(NombrePlatillo=NombrePlatillo, NumeroImagen=NumeroImagen):
         HTTPException(404, {"ERROR AL eliminar LA IMAGEN"})

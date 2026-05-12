@@ -3,7 +3,6 @@ from src.config.database import db_engine
 from src.models.imagenes.models import *
 from src.services.platillos import service as PlatillosServices
 from sqlmodel import Session, text, select
-from re import search, IGNORECASE
 import json
 
 
@@ -44,7 +43,7 @@ def cargar_json_platillos():
 
 
 
-def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen_content: str):
+def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen_content: str, NumeroImagen: int | None = None):
     if not CantidadPlatillo.keys():
         cargar_json_platillos()
 
@@ -53,8 +52,7 @@ def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen
         if not IdPlatillo:
             return False
         
-        NumeroDeImagen = CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"]
-
+        NumeroDeImagen = CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] if not NumeroImagen else NumeroImagen
         NombreDeArchivo = f"{NombrePlatillo}{NumeroDeImagen}.{extension}"
         ApiSupebase.storage.from_("Platillos").upload(file=imagen_bytes, path=NombreDeArchivo, file_options={"content-type": imagen_content})
         url_publica = ApiSupebase.storage.from_("Platillos").get_public_url(NombreDeArchivo)
@@ -64,7 +62,7 @@ def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen
             session.add(nueva_imagen)
             session.commit()
 
-        CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] += 1
+        CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] += 1 if not NumeroImagen else 0
 
         Guardar_json()
         return True
@@ -132,7 +130,7 @@ def actualizar_imagen(
     
     if not eliminar_imagen(IdPlatillo=Idplato, NumeroImagen=NumeroImagen):
         return False
-    if not subir_imagen(imagen_bytes, extension, imagen_content, NombrePlatillo=CantidadPlatillo[str(Idplato)]["NOMBRE"]):
+    if not subir_imagen(imagen_bytes, extension, imagen_content, NombrePlatillo=CantidadPlatillo[str(Idplato)]["NOMBRE"], NumeroImagen=NumeroImagen):
         return True
     
     return True
@@ -154,6 +152,5 @@ def eliminar_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlat
         if NombrePlato in archivo['name']:
             if not ApiSupebase.storage.from_("Platillos").remove(archivo['name']):
                 return False
-            CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] -= 1
 
     return True

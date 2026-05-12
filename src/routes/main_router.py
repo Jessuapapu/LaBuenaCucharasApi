@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from src.models import platillos
-from . import menu_diario, platillos, clientes, pedidos, proveedores, abastecimiento, facturas, comedor, imagenes
+from . import menu_diario, platillos, clientes, pedidos, proveedores, abastecimiento, facturas, comedor, imagenes, ordenes
 
 app_router = APIRouter()
 
@@ -19,3 +19,4 @@ app_router.include_router(abastecimiento.router, prefix="/bodega")
 app_router.include_router(facturas.router, prefix="/facturas")
 app_router.include_router(comedor.router, prefix="/comedor")
 app_router.include_router(imagenes.router, prefix="/imagenes")
+app_router.include_router(ordenes.router, prefix="/ordenes")
