@@ -145,7 +145,7 @@ def crear_orden(nombre_cliente: str, fecha: datetime.date, detalle: List[Detalle
             nuevo_Orden.CostoTotal = monto_total
 
             session.commit()
-            return nuevo_Orden.model_dump_json()
+            return nuevo_Orden
 
         except Exception as e:
             session.rollback()

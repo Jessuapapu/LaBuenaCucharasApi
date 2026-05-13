@@ -53,6 +53,7 @@ def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen
             return False
         
         NumeroDeImagen = CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] if not NumeroImagen else NumeroImagen
+        print(NumeroImagen)
         NombreDeArchivo = f"{NombrePlatillo}{NumeroDeImagen}.{extension}"
         ApiSupebase.storage.from_("Platillos").upload(file=imagen_bytes, path=NombreDeArchivo, file_options={"content-type": imagen_content})
         url_publica = ApiSupebase.storage.from_("Platillos").get_public_url(NombreDeArchivo)
@@ -120,6 +121,10 @@ def actualizar_imagen(
         NumeroImagen: int, imagen_bytes: bytes, extension: str, imagen_content: str,
         IdPlatillo: int | None = None, NombrePlatillo: str | None = None,
         ):
+    if not CantidadPlatillo.keys():
+        cargar_json_platillos()
+    
+
     if not IdPlatillo and not NombrePlatillo:
         return False
 
@@ -130,7 +135,8 @@ def actualizar_imagen(
     
     if not eliminar_imagen(IdPlatillo=Idplato, NumeroImagen=NumeroImagen):
         return False
-    if not subir_imagen(imagen_bytes, extension, imagen_content, NombrePlatillo=CantidadPlatillo[str(Idplato)]["NOMBRE"], NumeroImagen=NumeroImagen):
+    
+    if not subir_imagen(imagen_bytes = imagen_bytes, extension= extension, imagen_content= imagen_content, NombrePlatillo=CantidadPlatillo[str(Idplato)]["NOMBRE"], NumeroImagen=NumeroImagen):
         return True
     
     return True
@@ -139,6 +145,10 @@ def actualizar_imagen(
 def eliminar_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlatillo: str | None = None):
     if not IdPlatillo and not NombrePlatillo:
         return None
+    
+    if not CantidadPlatillo.keys():
+        cargar_json_platillos()
+    
 
     Idplato = IdPlatillo if IdPlatillo else PlatillosServices.obtener_platillo_id_por_nombre(NombrePlatillo)
     
