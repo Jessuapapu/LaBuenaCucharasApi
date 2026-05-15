@@ -28,6 +28,23 @@ from sqlmodel import Session
 from sqlalchemy import text
 from src.config.database import db_engine
 
+def obtener_orden(IdOrden: int):
+    with Session(db_engine) as session:
+        query = select(Ordenes.IdOrdenes, Ordenes.IdCliente, Ordenes.Estado, Ordenes.Fecha).select_from(Ordenes).where(Ordenes.IdOrdenes == IdOrden)
+
+        try:
+            to_dict= {
+                "IdOrden": Ordenes.IdOrdenes, 
+                "IdCliente": Ordenes.IdCliente, 
+                "Estado": Ordenes.Estado, 
+                "Fecha": Ordenes.Fecha
+            }
+    
+            return to_dict
+        
+        except:
+            return None
+        
 def listar_historial_Ordenes(
     id_orden: int | None = None, 
     pagina: int = 1, 

@@ -1,5 +1,5 @@
 from sqlmodel import Field, SQLModel
-from .types import EstadoPedido
+from .types import EstadoPedido, TiposPedidos
 import decimal
 import datetime
 
@@ -9,7 +9,13 @@ class Pedidos(SQLModel, table=True):
     Estado: EstadoPedido = Field(nullable=False)
     fecha: datetime.datetime = Field(default=datetime.datetime.now())
 
+
 class PedidosOrdenes(SQLModel, table=True):
     IdPedidosOrdenes: int = Field(primary_key=True)
     IdPedido: int = Field(foreign_key = "pedidos.IdPedido")
     IdOrdenes: int = Field(foreign_key = "ordenes.IdOrdenes")
+
+class TipoPedido(SQLModel,table=True):
+    IdTipoPedido: int = Field(primary_key=True)
+    IdPedido: int = Field(foreign_key = "pedidos.IdPedido", unique=True)
+    TipoPedidos: TiposPedidos = Field(nullable=False)
