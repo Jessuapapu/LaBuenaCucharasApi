@@ -5,6 +5,8 @@ class EstadoPedido(Enum):
     ENTREGADO = "ENTREGADO"
     ANULADO = "ANULADO"
 
-class TipoPedidos(Enum):
+class TipoPedidoss(Enum):
     EVENTO = "EVENTO"
     CONTRATO = "CONTRATO"
+    BUFFET = "BUFFET"
+

@@ -2,6 +2,7 @@ CREATE PROC MostrarPedidos
 	@IdOrden INT = NULL,
 	@IdPedido INT = NULL,
 	@IdCliente INT = NULL,
+	@Tipo VARCHAR(8) = NULL,
 	@Pagina  INT = 1,
 	@Rows INT  = 10,
 	@Todo BIT = 0
@@ -24,7 +25,7 @@ BEGIN
 	INNER JOIN ordenes O ON PO.IdOrdenes = O.IdOrdenes
 	INNER JOIN clientes C ON O.IdCliente = C.IdCliente
 	WHERE (@IdOrden IS NULL OR O.IdOrdenes = @IdOrden) AND (@IdPedido IS NULL OR P.IdPedido = @IdPedido) 
-	AND (@IdCliente IS NULL OR C.IdCliente = @IdCliente)
+	AND (@IdCliente IS NULL OR C.IdCliente = @IdCliente) AND (@Tipo IS NULL OR P.TipoPedidos = @Tipo)
 	GROUP BY P.IdPedido, O.Estado, C.NombreCliente
 	ORDER BY P.IdPedido
 	OFFSET (@Pagina - 1) * @Rows ROWS FETCH NEXT @Rows ROWS ONLY
