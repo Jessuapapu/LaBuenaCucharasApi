@@ -9,6 +9,7 @@ router = APIRouter()
 class MenuIn(BaseModel):
     day: datetime.date
     nombre_platillo: str
+    monto: float
 
 
 class MenuUpdate(BaseModel):
@@ -25,11 +26,19 @@ async def obtener_menu(day: Optional[datetime.date] = Query(default=None)):
     return menus
 
 
+@router.get("/hoy")
+async def obtener_menu_hoy():    
+    menu = service.obtener_menu_dia_service(datetime.datetime.now().date())
+    return menu
+
+
+
+
 @router.post("/")
 async def crear_menu(payload: MenuIn):
     try:
         service.crear_menu_service(
-            day=payload.day, nombre_platillo=payload.nombre_platillo
+            day=payload.day, nombre_platillo=payload.nombre_platillo, monto=payload.monto
         )
         return {"detail": "Menu creado con exito"}
     except HTTPException:

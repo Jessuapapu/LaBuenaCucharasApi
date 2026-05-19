@@ -159,9 +159,11 @@ def crear_orden(nombre_cliente: str, fecha: datetime.date, detalle: List[Detalle
                 )
                 session.add(detalle_nuevo)
 
+
             nuevo_Orden.CostoTotal = monto_total
 
             session.commit()
+            session.refresh(nuevo_Orden)
             return nuevo_Orden
 
         except Exception as e:

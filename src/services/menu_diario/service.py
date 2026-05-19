@@ -21,6 +21,7 @@ def obtener_historial_menu_service():
                     "id": menu_diario.IdMenu,
                     "Fecha": menu_diario.Fecha,
                     "NombrePlatillo": platillo.NombrePlatillo,
+                    "Monto": menu_diario.Monto
                 }
             )
 
@@ -39,22 +40,27 @@ def obtener_menu_dia_service(day: datetime.date):
         if result is None:
             return None
 
-        menu_diario, platillos = result
+        Lista = []
+        for menu_diario, platillo in result:
+            Lista.append(
+                {
+                    "id": menu_diario.IdMenu,
+                    "Fecha": menu_diario.Fecha,
+                    "NombrePlatillo": platillo.NombrePlatillo,
+                    "Monto": menu_diario.Monto
+                }
+            )
 
-        return {
-            "id": menu_diario.IdMenu,
-            "Fecha": menu_diario.Fecha,
-            "NombrePlatillo": platillos.NombrePlatillo,
-        }
+        return Lista
 
 
-def crear_menu_service(day: datetime.date, nombre_platillo: str):
+def crear_menu_service(day: datetime.date, nombre_platillo: str,monto: float):
     id_platillo = service.obtener_platillo_id_por_nombre(nombre_platillo)
 
     if id_platillo is None:
         raise ValueError("El platillo con el nombre ingresado no existe")
 
-    nuevo_menu = MenuDiario(Fecha=day, IdPlatillo=id_platillo)
+    nuevo_menu = MenuDiario(Fecha=day, IdPlatillo=id_platillo,Monto=monto)
 
     with Session(db_engine) as session:
         try:

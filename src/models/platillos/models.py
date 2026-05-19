@@ -18,6 +18,7 @@ class MenuDiario(SQLModel, table=True):
         default=None, nullable=None, index=True, foreign_key="platillos.IdPlatillo"
     )
     Fecha: datetime.date = Field(nullable=False)
+    Monto: int = Field(nullable=False, default=0)
 
 class CategoriaPlatillos(SQLModel, table=True):
     Id: int = Field(default=None, primary_key=True)

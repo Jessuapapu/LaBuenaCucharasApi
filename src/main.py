@@ -5,14 +5,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from PA import main as PA
 from .models.comedor import models as comedor
 
+PA.main()
+comedor.MonitorComedor()
+
 from .config import socket
 import socketio
 
-from .events import *
+from .events.connection_event import *
+from .events.comedor_events import *
 
 app = FastAPI()
-PA.main()
-comedor.MonitorComedor()
 app.include_router(app_router)
 
 app.add_middleware(
