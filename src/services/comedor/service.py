@@ -77,6 +77,11 @@ def obtener_estado_orden_mesa_activa(IdMesa: int):
 def obtener_estado_orden_mesa_terminadas(IdMesa: int):
     return MC.obtener_ordenTerminadasMesa(IdMesa=IdMesa)
 
+def aumentar_mesa():
+    return MC.agregar_mesa()
+
+def eliminar_mesa():
+    return MC.eliminar_mesa()
 
 def obtener_estado_total():
     return MC.to_dict()

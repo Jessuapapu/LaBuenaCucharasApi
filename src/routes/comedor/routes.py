@@ -3,6 +3,7 @@ from src.services.pedidos import service as ordenes
 from src.services.comedor import service as comedor
 import datetime
 from src.schemas.ComedorPedidos import OrdenComedorIN
+from src.config.socket import sio
 
 router = APIRouter()
 
@@ -27,6 +28,26 @@ async def cerrar_comedor():
     Estado = False
 
     return  {"msj":"Comedor cerrado", "status": True}
+
+@router.put('/mesa/agregar')
+async def agregar_mesa():
+    if not comedor.aumentar_mesa():
+        return {"msj":"ERROR", "status": False}
+    
+    IdMesa = len(comedor.obtener_IdMesas())
+    await sio.emit("aumentar_mesa",data= {'IdMesa': IdMesa})
+    return {"msj":"ok", "IdMesa": IdMesa ,"status": True}
+
+
+@router.put('/mesa/eliminar')
+async def eliminar_mesa():
+    if not comedor.eliminar_mesa():
+        return {"msj":"ERROR", "status": False}
+    
+    IdMesa = len(comedor.obtener_IdMesas())
+    await sio.emit("eliminar_mesa")
+    return {"msj":"ok", "IdMesa": IdMesa ,"status": True}
+        
 
 @router.get("/Estado")
 async def estado():

@@ -1,6 +1,9 @@
 from sqlmodel import Field, SQLModel
 from datetime import datetime
 from logs import logsApp
+import json
+
+EstadoAnterior_JSON_path = "./src/models/comedor/estado_anterior.json"
 
 logs = logsApp.Logs()
 class OrdenComedor():
@@ -43,29 +46,30 @@ class MonitorComedor():
         return cls._instance
    
     def __constructor(self):
-        self.NumeroMesas: int = 7
+        self.NumeroMesas: int = self.leerEstadoAnterior()
         self.Mesas: list[Mesa] = []
 
         for i in range(0, self.NumeroMesas + 1):
             self.Mesas.append(Mesa(i))
         
-        self.agregar_orden(1,5)
-        self.agregar_orden(5,5)
-        self.guardar_orden(5,5)
 
     def agregar_mesa(self):
-        self.NumeroMesas += 1
-        self.Mesas.append(Mesa(self.NumeroMesas))
-    
-    def eliminar_mesa(self, Id: int):
-        if not self.validarIdMesa(IdMesa=Id):
+        try:
+            self.NumeroMesas += 1
+            self.Mesas.append(Mesa(self.NumeroMesas))
+            self.Guardar_json(self.NumeroMesas)
+            return True
+        except:
             return False
-
-        for mesa in self.Mesas:
-            if mesa.Id == Id:
-                self.Mesas.remove(mesa)
-                self.NumeroMesas -= 1
-                return
+    
+    def eliminar_mesa(self):
+        try:
+            self.NumeroMesas -= 1
+            self.Guardar_json(self.NumeroMesas)
+            return True
+        
+        except:
+            return False
 
     def limpiar_orden(self):
         OrdenesABorrar = []
@@ -213,6 +217,26 @@ class MonitorComedor():
             return False
 
         return True
+    
+    def leerEstadoAnterior(self):
+        try:
+            with open(mode="r+", file=EstadoAnterior_JSON_path) as archivo:
+               
+                EstadoAnterior = json.load(archivo)
+                return EstadoAnterior["NumeroMesas"]
+                
+        except:
+            return self.Guardar_json(7)
+
+    def Guardar_json(self, NumeroMesas):
+        with open(mode="w+", file=EstadoAnterior_JSON_path) as archivo:
+            EstadoActual = {
+                "NumeroMesas": NumeroMesas
+            }
+            
+            json.dump(EstadoActual,archivo,indent=4)
+            return NumeroMesas
+    
 
     def to_dict(self):
         return {
