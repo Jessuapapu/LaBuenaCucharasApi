@@ -28,23 +28,30 @@ async def cerrar_comedor():
 
     return  {"msj":"Comedor cerrado", "status": True}
 
+@router.get("/Estado")
+async def estado():
+    return {"msj":"Comedor aun no abierto","status": False} if not estado else {"msj":"Comedor abierto","status": True}
+
 @router.get('/')
 async def obtener_estado_comedor():
     return comedor.obtener_estado_total()
 
-@router.get('/mesa/{Id}/{Estado}')
-async def obtener_estado_comedor(Id: int, Estado: bool):
-    if not Id:
+@router.get('/mesa/{IdMesa}/{Estado}')
+async def obtener_estado_comedor(IdMesa: int, Estado: bool):
+    if not IdMesa:
         return HTTPException(400,"falta el id de mesa")
-    
+
     mesa = None
 
     if Estado:
-        mesa = comedor.obtener_estado_activas(IdMesa=Id)
+        mesa = comedor.obtener_estado_orden_mesa_activa(IdMesa=IdMesa)
     else:
-        mesa = comedor.obtener_estado_terminadas(IdMesa=Id)
-
-    return mesa if mesa else HTTPException(400,"mesa no encontrada")
+        mesa = comedor.obtener_estado_orden_mesa_terminadas(IdMesa=IdMesa)
+    
+    if mesa is False:
+        return HTTPException(400,"mesa no encontrada")
+    
+    return mesa
 
 @router.post("/{IdMesa}/{IdOrden}")
 async def guardar_orden_mesa(IdMesa:int, IdOrden: int):
@@ -66,3 +73,12 @@ async def obtener_numero_mesas():
 @router.post("/NumeroMesas/{numeroid}")
 async def aumentar_mesas(numeroid: int):
     return 
+
+@router.get("/{IdMesa}/historial")
+async def obtener_historial_mesa(IdMesa: int):
+    return comedor.obtener_estado_orden_mesa_terminadas(IdMesa=IdMesa)
+
+
+@router.get("/{IdMesa}/activa")
+async def obtener_historial_mesa(IdMesa: int):
+    return comedor.obtener_estado_orden_mesa_activa(IdMesa=IdMesa)

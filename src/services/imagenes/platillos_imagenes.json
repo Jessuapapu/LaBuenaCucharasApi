@@ -1,30 +1,30 @@
 {
     "1": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Gallo Pinto Cl\u00e1sico"
+        "CANTIDAD": 3,
+        "NOMBRE": "Arroz a la valenciana"
     },
     "2": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Vigor\u00f3n Granadino"
+        "CANTIDAD": 3,
+        "NOMBRE": "Consume"
     },
     "3": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Baho Tradicional"
+        "CANTIDAD": 1,
+        "NOMBRE": "Numero 2"
     },
     "4": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Nacatamal de Cerdo"
+        "CANTIDAD": 5,
+        "NOMBRE": "Omelet"
     },
     "5": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Nacatamal de Pollo"
+        "CANTIDAD": 1,
+        "NOMBRE": "Numero 1"
     },
     "6": {
         "CANTIDAD": 0,
         "NOMBRE": "Indio Viejo"
     },
     "7": {
-        "CANTIDAD": 0,
+        "CANTIDAD": 3,
         "NOMBRE": "Sopa de Queso"
     },
     "8": {
@@ -32,80 +32,80 @@
         "NOMBRE": "Sopa de Mondongo"
     },
     "9": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Sopa de Res con Punche"
+        "CANTIDAD": 2,
+        "NOMBRE": "Carne Res Asada"
     },
     "10": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Sopa de Gallina India"
+        "CANTIDAD": 2,
+        "NOMBRE": "Cerdo Asado"
     },
     "11": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Quesillo Doble"
+        "CANTIDAD": 2,
+        "NOMBRE": "Pollo Frito"
     },
     "12": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Tostones con Queso"
+        "CANTIDAD": 2,
+        "NOMBRE": "Alitas de Pollo"
     },
     "13": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Tajadas con Queso"
+        "CANTIDAD": 2,
+        "NOMBRE": "Carne Tapada"
     },
     "14": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Carne Asada con Gallo Pinto"
+        "CANTIDAD": 6,
+        "NOMBRE": "Churrasco"
     },
     "15": {
         "CANTIDAD": 0,
         "NOMBRE": "Pollo Asado"
     },
     "16": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Lomo de Cerdo Asado"
+        "CANTIDAD": 2,
+        "NOMBRE": "Carne Desmenuzada "
     },
     "17": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Chancho con Yuca"
+        "CANTIDAD": 2,
+        "NOMBRE": "Tacos de pollo Fritos"
     },
     "18": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Salpic\u00f3n de Res"
+        "CANTIDAD": 2,
+        "NOMBRE": "Salpicon"
     },
     "19": {
         "CANTIDAD": 0,
-        "NOMBRE": "Ropa Vieja"
+        "NOMBRE": "Jalape\u00f1o de res"
     },
     "20": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Enchiladas Nicas"
+        "CANTIDAD": 2,
+        "NOMBRE": "Nacatamal"
     },
     "21": {
-        "CANTIDAD": 0,
+        "CANTIDAD": 2,
         "NOMBRE": "Tacos de Res Fritos"
     },
     "22": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Arroz a la Valenciana"
+        "CANTIDAD": 2,
+        "NOMBRE": "Pollo tapado"
     },
     "23": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Pescado a la Tipitapa"
+        "CANTIDAD": 2,
+        "NOMBRE": "Bistec"
     },
     "24": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Ceviche de Corvina"
+        "CANTIDAD": 1,
+        "NOMBRE": "Filete de Curvina"
     },
     "25": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Camarones al Ajillo"
+        "CANTIDAD": 3,
+        "NOMBRE": "Pollo a la plancha"
     },
     "26": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Camarones Empanizados"
+        "CANTIDAD": 1,
+        "NOMBRE": "Sopa de Hueso"
     },
     "27": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Filete Mignon"
+        "CANTIDAD": 2,
+        "NOMBRE": "Churrasco"
     },
     "28": {
         "CANTIDAD": 0,
@@ -116,11 +116,11 @@
         "NOMBRE": "Jalape\u00f1o Steak"
     },
     "30": {
-        "CANTIDAD": 0,
+        "CANTIDAD": 3,
         "NOMBRE": "Fajitas de Pollo"
     },
     "31": {
-        "CANTIDAD": 2,
+        "CANTIDAD": 1,
         "NOMBRE": "Fajitas de Res"
     },
     "32": {

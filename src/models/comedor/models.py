@@ -46,8 +46,12 @@ class MonitorComedor():
         self.NumeroMesas: int = 7
         self.Mesas: list[Mesa] = []
 
-        for i in range(0, self.NumeroMesas):
+        for i in range(0, self.NumeroMesas + 1):
             self.Mesas.append(Mesa(i))
+        
+        self.agregar_orden(1,5)
+        self.agregar_orden(5,5)
+        self.guardar_orden(5,5)
 
     def agregar_mesa(self):
         self.NumeroMesas += 1
@@ -205,7 +209,7 @@ class MonitorComedor():
         return lista
     
     def validarIdMesa(self, IdMesa: int):
-        if IdMesa > self.NumeroMesas or IdMesa < 0:
+        if (IdMesa > self.NumeroMesas) or (IdMesa < 0):
             return False
 
         return True

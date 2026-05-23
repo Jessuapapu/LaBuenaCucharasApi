@@ -75,7 +75,7 @@ def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen
 def obtener_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlatillo: str | None = None) -> str | None: 
     if not IdPlatillo and not NombrePlatillo:
         return None
-
+    
     Idplato = IdPlatillo if IdPlatillo else PlatillosServices.obtener_platillo_id_por_nombre(NombrePlatillo)
     
     if not Idplato:
@@ -99,13 +99,13 @@ def obtener_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlati
         patron = rf"{NombrePlato.replace(" ","%20")}{NumeroImagen}."
 
         for UrlImagen in query:
-            if patron in UrlImagen:
+            if patron.lower() in UrlImagen.lower():
                 return UrlImagen
 
         # Si no encuentra el link desde la base de datos
         ListaDeArchivos = ApiSupebase.storage.from_("Platillos").list()
         for Archivo in ListaDeArchivos:
-            if patron.replace("%20"," ") in Archivo['name']:
+            if patron.replace("%20"," ").lower() in Archivo['name'].lower():
                 url_publica = ApiSupebase.storage.from_("Platillos").get_public_url(Archivo['name'])
                 nueva_imagen = ImagenesPlatillos(IdPlatillo=Idplato,UrlImagen=url_publica)
                 session.add(nueva_imagen)

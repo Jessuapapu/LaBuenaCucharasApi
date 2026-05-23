@@ -120,8 +120,10 @@ def detalle_Ordenes(
 
         return detalles_lista
 
-def crear_orden(nombre_cliente: str, fecha: datetime.date, detalle: List[Detalles]):
-    id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)
+def crear_orden( fecha: datetime.date, detalle: List[Detalles], Id_cliente: int | None = None, nombre_cliente: str | None = None):
+    
+
+    id_cliente = Id_cliente if Id_cliente else obtener_id_cliente_por_nombre(nombre_cliente)
 
     if id_cliente is None:
         raise ValueError(f"No se pudo obtener un id de cliente con el nombre de cliente {nombre_cliente}")
@@ -173,7 +175,7 @@ def crear_orden(nombre_cliente: str, fecha: datetime.date, detalle: List[Detalle
 
 
 def actualizar_ordenes(
-    id_pedido: int, nombre_cliente: str, estado: EstadoPedido, detalles: List[Detalles]
+    id_pedido: int, estado: EstadoOrden, detalles: List[Detalles], Id_cliente: int | None = None, nombre_cliente: str | None = None
 ):
     with Session(db_engine) as session:
         statement = (
@@ -189,7 +191,7 @@ def actualizar_ordenes(
 
         detalles_actualizar = session.exec(statement).all()
         resultado = session.exec(stmt_pedido_factura).first()
-        nuevo_id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)
+        nuevo_id_cliente = Id_cliente if Id_cliente else obtener_id_cliente_por_nombre(nombre_cliente)
         
         if not resultado or not nuevo_id_cliente:
             return None

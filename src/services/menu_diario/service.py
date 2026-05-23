@@ -36,7 +36,7 @@ def obtener_menu_dia_service(day: datetime.date):
             .where(MenuDiario.Fecha == day)
         )
 
-        result = session.exec(statement).first()
+        result = session.exec(statement).all()
         if result is None:
             return None
 
