@@ -85,5 +85,5 @@ def crear_facturas(
     return True
 
 
-def actulizar_factura(IdFactura: int, payLoadDetalles: facturaIn):
+def actualizar_factura(IdFactura: int, payLoadDetalles: facturaIn):
     pass

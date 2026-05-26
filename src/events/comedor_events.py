@@ -25,9 +25,10 @@ async def nueva_orden(sid, data):
         MC.agregar_orden(int(nueva_orden.IdOrdenes), NumeroMesa)
 
         if not nueva_orden:
-            sio.emit("error_generar",{"MENSAJE": "ERROR AL GENERAR LA ORDEN MESA PUEDE SER LOS DATOS"}, to=sid)
+            await sio.emit("error_generar",{"MENSAJE": "ERROR AL GENERAR LA ORDEN MESA PUEDE SER LOS DATOS"}, to=sid)
             comedor.logs.add_log("ERROR AL GENERAR LA ORDEN MESA PUEDE SER LOS DATOS",'ERROR')
 
+        await sio.emit("orden_actualizada", data={'IdMesa': NumeroMesa})
         
     except: 
         await sio.emit("error_generar",{"MENSAJE": "ERROR AL GENERAR LA ORDEN MESA"}, to=sid)
@@ -55,6 +56,8 @@ async def actualizar_orden(sid, data):
         if not orden_actualizado:
             sio.emit("error_actualizar",{"MENSAJE": "ERROR AL ACTUALIZAR LA ORDEN MESA"}, to=sid)
             comedor.logs.add_log("ERROR AL GENERAR LA ORDEN MESA PUEDE SER LOS DATOS",'ERROR')
+
+        await sio.emit("orden_actualizada", data={'IdMesa': NumeroMesa})
 
     except: 
         await sio.emit("error_actualizar",{"MENSAJE": "ERROR AL ACTUALIZAR LA ORDEN MESA"}, to=sid)
@@ -84,7 +87,9 @@ async def cancelar_orden(sid, data):
             sio.emit("error_actualizar",{"MENSAJE": "ERROR AL ACTUALIZAR LA ORDEN MESA"}, to=sid)
             comedor.logs.add_log("ERROR AL GENERAR LA ORDEN MESA PUEDE SER LOS DATOS",'ERROR')
 
-    except: 
+        
+        await sio.emit("orden_actualizada", data={'IdMesa': NumeroMesa})
+    except:     
         await sio.emit("error_actualizar",{"MENSAJE": "ERROR AL ACTUALIZAR LA ORDEN MESA"}, to=sid)
         comedor.logs.add_log("ERROR AL GENERAR LA ORDEN MESA",'ERROR')
 
@@ -113,6 +118,7 @@ async def guardar_estado_orden(sid, data):
             sio.emit("error_actualizar",{"MENSAJE": "ERROR AL ACTUALIZAR LA ORDEN MESA"}, to=sid)
             comedor.logs.add_log('ERROR',"ERROR AL GUARDAR LA ORDEN MESA PUEDE SER LOS DATOS")
 
+        await sio.emit("orden_actualizada", data={'IdMesa': NumeroMesa})
     except: 
         await sio.emit("error_actualizar",{"MENSAJE": "ERROR AL GUARDAR LA ORDEN MESA"}, to=sid)
         comedor.logs.add_log("ERROR AL GUARDAR LA ORDEN MESA",'ERROR')

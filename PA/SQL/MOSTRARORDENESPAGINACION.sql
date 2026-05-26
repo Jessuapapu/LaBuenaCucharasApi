@@ -1,5 +1,6 @@
 CREATE PROC MostrarOrdenes
 	@IdOrden INT = NULL,
+	@IdCliente INT = NULL,
 	@Pagina  INT = 1,
 	@Rows INT  = 10,
 	@Todo BIT = 0
@@ -23,7 +24,8 @@ BEGIN
 	INNER JOIN ordenes O ON OD.IdOrdenes = O.IdOrdenes
 	INNER JOIN clientes C ON O.IdCliente = C.IdCliente
 	INNER JOIN clientedireccion CD ON O.IdCliente = CD.IdCliente
-	WHERE (@IdOrden IS NULL OR O.IdOrdenes = @IdOrden)
+	WHERE (@IdOrden IS NULL OR O.IdOrdenes = @IdOrden) AND 
+	(@IdCliente IS NULL OR O.IdCliente = C.IdCliente)
 	GROUP BY C.NombreCliente, O.IdOrdenes, O.Fecha, CD.dirreccion, O.Estado
 	ORDER BY O.IdOrdenes
 	OFFSET (@Pagina - 1) * @Rows ROWS FETCH NEXT @Rows ROWS ONLY

@@ -11,7 +11,8 @@ router = APIRouter()
 async def obtener_ordenes(
     pagina: int = Query(1, description="Número de página"), 
     rows: int = Query(10, description="Filas por página"), 
-    todo: bool = Query(False, description="Traer todo sin paginar")
+    todo: bool = Query(False, description="Traer todo sin paginar"),
+    nombeCliente: str = Query(None, description="Nombre del Cliente"),
 ):
     pedidos = service.listar_historial_Ordenes(pagina=pagina, rows=rows, todo=todo)
     return pedidos

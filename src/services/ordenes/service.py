@@ -49,8 +49,10 @@ def listar_historial_Ordenes(
     id_orden: int | None = None, 
     pagina: int = 1, 
     rows: int = 10, 
-    todo: int = 0
+    todo: int = 0,
+    NombreCliente: str = None
 ):
+    id_cliente = obtener_id_cliente_por_nombre(NombreCliente)
     with Session(db_engine) as session:
   
         statement = text("""
@@ -58,14 +60,16 @@ def listar_historial_Ordenes(
                 @IdOrden = :id_orden, 
                 @Pagina = :pagina, 
                 @Rows = :rows, 
-                @Todo = :todo
+                @Todo = :todo,
+                @IdCliente = :id_cliente
         """)
 
         parametros = {
             "id_orden": id_orden,
             "pagina": pagina,
             "rows": rows,
-            "todo": todo
+            "todo": todo,
+            "id_cliente": id_cliente
         }
 
         resultados = session.exec(statement, params=parametros).all()
