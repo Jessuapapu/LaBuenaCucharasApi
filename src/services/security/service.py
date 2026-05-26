@@ -38,7 +38,7 @@ def generar_token_para_usuario(usuario: Usuario) -> str:
 
 def registrar_usuario(user: str, contra_plano: str, rol: str):
     contra_crifado = hashear_password(contra_plano)
-    nuevo_usuario = Usuario(username=user,password_hash=contra_crifado,rol=rol,activo=True,fecha_creacion=datetime.now())
+    nuevo_usuario = Usuario(username=user,password_hash=contra_crifado,rol=rol,activo=True,fecha_creacion=datetime.datetime.now())
     try:
         with Session(db_engine) as session:
             session.add(nuevo_usuario)
@@ -105,7 +105,7 @@ def obtener_todos_usuarios():
 
                     }
                 )
-                
+
             return listaUsuarios
 
         

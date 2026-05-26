@@ -53,7 +53,7 @@ async def verificar_perfil_actual(usuario_actual: Usuario = Depends(obtener_usua
 
 @router.post("/")
 async def agregar_usuario(payload: UsuarioSchema, usuario_actual: dict = Depends(obtener_usuario_actual)):
-    if usuario_actual.get("rol") != "admin":
+    if usuario_actual.rol  != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No tienes los permisos de administrador requeridos para esta acción."
@@ -63,12 +63,17 @@ async def agregar_usuario(payload: UsuarioSchema, usuario_actual: dict = Depends
     return nuevo_usuario
 
 @router.get("/")
-async def obtener_usuarios():
+async def obtener_usuarios( usuario_actual: dict = Depends(obtener_usuario_actual)):
+    if usuario_actual.rol  != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tienes los permisos de administrador requeridos para esta acción."
+        )
     return auth_service.obtener_todos_usuarios()
 
 @router.put("/")
 async def agregar_usuario(payload: UsuarioSchema, usuario_actual: dict = Depends(obtener_usuario_actual)):
-    if usuario_actual.get("rol") != "admin":
+    if usuario_actual.rol  != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No tienes los permisos de administrador requeridos para esta acción."
@@ -79,7 +84,7 @@ async def agregar_usuario(payload: UsuarioSchema, usuario_actual: dict = Depends
 
 @router.put("/actualizar")
 async def actualizar_usuario(payload: UsuarioSchema, usuario_actual: dict = Depends(obtener_usuario_actual)):
-    if usuario_actual.get("rol") != "admin":
+    if usuario_actual.rol != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No tienes los permisos de administrador requeridos para esta acción."
@@ -90,7 +95,7 @@ async def actualizar_usuario(payload: UsuarioSchema, usuario_actual: dict = Depe
 
 @router.put("/desactivar")
 async def desactivar_usuario(payload: UsuarioSchema, usuario_actual: dict = Depends(obtener_usuario_actual)):
-    if usuario_actual.get("rol") != "admin":
+    if usuario_actual.rol  != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No tienes los permisos de administrador requeridos para esta acción."
