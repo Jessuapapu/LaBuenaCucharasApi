@@ -244,15 +244,3 @@ class MonitorComedor():
             "Mesas": [mesa.to_dict() for mesa in self.Mesas]
         }
     
-
-class Auditoria_Mesas(SQLModel, table=True):
-    IdAuditoria_Mesas: int = Field(primary_key=True)
-    IdMesa: int = Field(nullable=False)
-    IdOrden: int = Field(foreign_key = "ordenes.IdOrdenes", unique=True)
-    HoraEntrada: datetime = Field(nullable=False)
-    HoraSalida: datetime = Field()
-
-class Auditoria_Comedor(SQLModel, table=True):
-    IdAuditoria_Comedor: int = Field(primary_key=True)   
-    HoraApertura: datetime = Field(nullable=False)
-    HoraCerrar: datetime = Field(nullable=False)

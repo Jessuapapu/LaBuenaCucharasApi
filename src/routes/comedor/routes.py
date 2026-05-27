@@ -12,17 +12,19 @@ router = APIRouter()
 Estado = False
 
 @router.put('/abrir')
-async def abrir_comedor():
+async def abrir_comedor(usuario_actual: Usuario = Depends(obtener_usuario_actual)):
+    global Estado
     if Estado:
         return {"msj":"Ya Comedor abierto","status": False}
     
-    comedor.abrir_comedor()
+    comedor.abrir_comedor(username=usuario_actual.username)
     Estado = True
 
     return  {"msj":"Comedor abierto","status": True}
 
 @router.put('/cerrar')
 async def cerrar_comedor(usuario_actual: Usuario = Depends(obtener_usuario_actual)):
+    global Estado
     if not Estado:
         return {"msj":"Comedor aun no abierto","status": False}
     
@@ -53,7 +55,7 @@ async def eliminar_mesa(usuario_actual: Usuario = Depends(obtener_usuario_actual
 
 @router.get("/Estado")
 async def estado():
-    return {"msj":"Comedor aun no abierto","status": False} if not estado else {"msj":"Comedor abierto","status": True}
+    return {"msj":"Comedor aun no abierto","status": False} if not Estado else {"msj":"Comedor abierto","status": True}
 
 @router.get('/')
 async def obtener_estado_comedor():
