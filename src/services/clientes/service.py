@@ -9,6 +9,8 @@ from src.models.clientes.models import (
 from src.models.clientes.types import EstadoContrato
 from sqlmodel import Session, select, text
 from src.config.database import db_engine
+from src.services.auditorias.services import registrar_auditoria_cliente
+from src.models.auditorias.types import TipoDeAccion
 
 
 def listar_clientes():
@@ -47,7 +49,7 @@ def listar_clientes():
 
 
 def crear_cliente(
-    nombre: str, direccion: str, correo: str | None, telefono: str | None
+    nombre: str, direccion: str, correo: str | None, telefono: str | None, username: str | None = None
 ):
     with Session(db_engine) as session:
         try:
@@ -71,6 +73,13 @@ def crear_cliente(
                 nuevo_direccion = ClienteDireccion(IdCliente= nuevo_cliente.IdCliente, Dirreccion= direccion)
                 session.add(nuevo_direccion)
             session.commit()
+
+            # Registrar auditoría si se proporcionó username
+            if username and nuevo_cliente.IdCliente is not None:
+                try:
+                    registrar_auditoria_cliente(username, nuevo_cliente.IdCliente, TipoDeAccion.CREAR)
+                except Exception:
+                    pass
 
             return nuevo_cliente
         except Exception:
@@ -123,6 +132,7 @@ def registrar_contrato_cliente(
     fecha_inicio: datetime.datetime,
     fecha_fin: datetime.datetime,
     presupuesto: float,
+    username: str | None = None,
 ):
     id_cliente = obtener_id_cliente_por_nombre(nombre_cliente)
     if id_cliente is None:
@@ -141,6 +151,12 @@ def registrar_contrato_cliente(
         try:
             session.add(nuevo_contrato)
             session.commit()
+            # Auditoría de creación de cliente/contrato
+            if username and nuevo_contrato.IdCliente is not None:
+                try:
+                    registrar_auditoria_cliente(username, nuevo_contrato.IdCliente, TipoDeAccion.CREAR)
+                except Exception:
+                    pass
         except Exception as e:
             session.rollback()
             raise e
@@ -148,7 +164,7 @@ def registrar_contrato_cliente(
     return nuevo_contrato
 
 
-def actualizar_estado_contrato(numero_contrato: int, nuevo_estado: EstadoContrato):
+def actualizar_estado_contrato(numero_contrato: int, nuevo_estado: EstadoContrato, username: str | None = None):
     with Session(db_engine) as session:
         statement = select(Contrato).where(Contrato.NumeroContrato == numero_contrato)
         contrato = session.exec(statement).first()
@@ -161,6 +177,12 @@ def actualizar_estado_contrato(numero_contrato: int, nuevo_estado: EstadoContrat
         try:
             session.add(contrato)
             session.commit()
+            # Auditoría de actualización
+            if username and contrato.IdCliente is not None:
+                try:
+                    registrar_auditoria_cliente(username, contrato.IdCliente, TipoDeAccion.ACTUALIZAR)
+                except Exception:
+                    pass
         except Exception as e:
             session.rollback()
             raise e

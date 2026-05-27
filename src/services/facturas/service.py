@@ -8,6 +8,11 @@ import datetime
 from sqlmodel import Session
 from sqlalchemy import text
 from src.config.database import db_engine
+from src.services.auditorias.services import registrar_auditoria_factura
+from src.models.auditorias.types import TipoDeAccion
+from src.models.facturas.models import Facturas, FacturasOrdenes
+from src.models.ordenes.models import Ordenes
+from decimal import Decimal
 
 
 def obtener_facturas_ordenes(
@@ -66,7 +71,7 @@ def obtener_facturas_ordenes(
 
 
 def crear_facturas(
-    payLoadDetalles: facturaIn
+    payLoadDetalles: facturaIn, username: str | None = None
 ):
     json_string = payLoadDetalles.model_dump_json()
 
@@ -77,6 +82,13 @@ def crear_facturas(
             id_generado = session.exec(query, {"json_data": json_string}).scalar()
             
             session.commit()
+            # Auditoría: factura creada
+            if username and id_generado:
+                try:
+                    registrar_auditoria_factura(username, int(id_generado), TipoDeAccion.CREAR)
+                except Exception:
+                    pass
+
             return id_generado
             
         except Exception as e:
@@ -85,5 +97,57 @@ def crear_facturas(
     return True
 
 
-def actualizar_factura(IdFactura: int, payLoadDetalles: facturaIn):
-    pass
+def actualizar_factura(IdFactura: int, payLoadDetalles: facturaIn, username: str | None = None):
+    with Session(db_engine) as session:
+        try:
+            factura = session.get(Facturas, IdFactura)
+            if not factura:
+                return None
+
+            # Calcular monto total y cantidad total a partir de las órdenes
+            monto_total = Decimal("0")
+            cantidad_total = 0
+
+            ids_ordenes = [d.IdOrden for d in payLoadDetalles.detalles]
+
+            for id_orden in ids_ordenes:
+                orden = session.get(Ordenes, id_orden)
+                if not orden:
+                    # orden inexistente -> rollback y error
+                    session.rollback()
+                    return None
+                monto_total += Decimal(str(orden.CostoTotal)) if orden.CostoTotal is not None else Decimal("0")
+                cantidad_total += 1
+
+            # Actualizar datos de la factura
+            factura.MontoTotal = monto_total
+            factura.CantidadTotal = cantidad_total
+            factura.Fecha = payLoadDetalles.fecha
+            factura.Estado = payLoadDetalles.Estado
+
+            # Eliminar relaciones previas
+            session.exec(
+                "DELETE FROM facturasordenes WHERE IdFactura = :id_factura",
+                {"id_factura": IdFactura},
+            )
+
+            # Agregar nuevas relaciones
+            for id_orden in ids_ordenes:
+                rel = FacturasOrdenes(IdFactura=IdFactura, IdOrdenes=id_orden)
+                session.add(rel)
+
+            session.add(factura)
+            session.commit()
+
+            # Auditoría: factura actualizada
+            if username:
+                try:
+                    registrar_auditoria_factura(username, IdFactura, TipoDeAccion.ACTUALIZAR)
+                except Exception:
+                    pass
+
+            return True
+        except Exception as e:
+            session.rollback()
+            print(f"Error al actualizar factura: {e}")
+            return None

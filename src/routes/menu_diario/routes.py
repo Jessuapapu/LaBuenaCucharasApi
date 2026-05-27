@@ -1,8 +1,10 @@
 import datetime
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from pydantic import BaseModel
 from src.services.menu_diario import service
 from typing import Optional
+from src.security.dependency import obtener_usuario_actual
+from src.models.Usuarios.models import Usuario
 
 router = APIRouter()
 
@@ -35,10 +37,10 @@ async def obtener_menu_hoy():
 
 
 @router.post("/")
-async def crear_menu(payload: MenuIn):
+async def crear_menu(payload: MenuIn, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     try:
         service.crear_menu_service(
-            day=payload.day, nombre_platillo=payload.nombre_platillo, monto=payload.monto
+            day=payload.day, nombre_platillo=payload.nombre_platillo, monto=payload.monto, username=usuario_actual.username
         )
         return {"detail": "Menu creado con exito"}
     except HTTPException:
@@ -48,10 +50,10 @@ async def crear_menu(payload: MenuIn):
 
 
 @router.put("/{id_menu}")
-async def editar_menu(id_menu: int, payload: MenuUpdate):
+async def editar_menu(id_menu: int, payload: MenuUpdate, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     try:
         service.editar_menu_service(
-            id_menu=id_menu, nombre_platillo=payload.nombre_platillo
+            id_menu=id_menu, nombre_platillo=payload.nombre_platillo, username=usuario_actual.username
         )
         return {"detail": "Menu editado con exito"}
     except HTTPException:

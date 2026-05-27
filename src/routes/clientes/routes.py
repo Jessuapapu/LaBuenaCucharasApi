@@ -1,28 +1,11 @@
-from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel
-from src.models.clientes.types import EstadoContrato
+from fastapi import APIRouter, HTTPException, Query, Depends
 from src.services.clientes import service
+from src.security.dependency import obtener_usuario_actual
+from src.models.Usuarios.models import Usuario
 import datetime
+from src.schemas.clientes import *
 
 router = APIRouter()
-
-class ClientesIn(BaseModel):
-    nombre: str
-    direccion: str
-    telefono: str
-    correo: str
-
-
-class ContratosIn(BaseModel):
-    nombre_cliente: str
-    numero_contrato: int
-    fecha_inicio: datetime.datetime
-    fecha_fin: datetime.datetime
-    presupuesto: float
-
-
-class ContratoUpdateEstadoIn(BaseModel):
-    nuevo_estado: EstadoContrato
 
 
 @router.get("/")
@@ -36,12 +19,13 @@ async def obtener_clientes():
 
 
 @router.post("/")
-async def registrar_cliente(payload: ClientesIn):
+async def registrar_cliente(payload: ClientesIn, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     cliente = service.crear_cliente(
         nombre=payload.nombre,
         direccion=payload.direccion,
         correo=payload.correo,
         telefono=payload.telefono,
+        username=usuario_actual.username,
     )
 
     if cliente is None:
@@ -73,13 +57,14 @@ async def obtener_contratos_clientes_endpoint(
 
 
 @router.post("/contratos")
-async def registrar_contrato_cliente(payload: ContratosIn):
+async def registrar_contrato_cliente(payload: ContratosIn, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     contrato = service.registrar_contrato_cliente(
         payload.nombre_cliente,
         payload.numero_contrato,
         payload.fecha_inicio,
         payload.fecha_fin,
         payload.presupuesto,
+        username=usuario_actual.username,
     )
 
     if contrato is None:
@@ -90,9 +75,9 @@ async def registrar_contrato_cliente(payload: ContratosIn):
 
 @router.put("/contratos/{numero_contrato}/estado")
 async def actualizar_estado_contrato(
-    numero_contrato: int, payload: ContratoUpdateEstadoIn
+    numero_contrato: int, payload: ContratoUpdateEstadoIn, usuario_actual: Usuario = Depends(obtener_usuario_actual)
 ):
-    contrato = service.actualizar_estado_contrato(numero_contrato, payload.nuevo_estado)
+    contrato = service.actualizar_estado_contrato(numero_contrato, payload.nuevo_estado, username=usuario_actual.username)
 
     if contrato is None:
         raise HTTPException(

@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from src.services.pedidos import service as ordenes
 from src.services.comedor import service as comedor
 import datetime
 from src.schemas.ComedorPedidos import OrdenComedorIN
+from src.security.dependency import obtener_usuario_actual
+from src.models.Usuarios.models import Usuario
 from src.config.socket import sio
 
 router = APIRouter()
@@ -20,17 +22,17 @@ async def abrir_comedor():
     return  {"msj":"Comedor abierto","status": True}
 
 @router.put('/cerrar')
-async def cerrar_comedor():
+async def cerrar_comedor(usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     if not Estado:
         return {"msj":"Comedor aun no abierto","status": False}
     
-    comedor.cerrar_comedor()
+    comedor.cerrar_comedor(username=usuario_actual.username)
     Estado = False
 
     return  {"msj":"Comedor cerrado", "status": True}
 
 @router.put('/mesa/agregar')
-async def agregar_mesa():
+async def agregar_mesa(usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     if not comedor.aumentar_mesa():
         return {"msj":"ERROR", "status": False}
     
@@ -40,7 +42,7 @@ async def agregar_mesa():
 
 
 @router.put('/mesa/eliminar')
-async def eliminar_mesa():
+async def eliminar_mesa(usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     if not comedor.eliminar_mesa():
         return {"msj":"ERROR", "status": False}
     
@@ -75,16 +77,16 @@ async def obtener_estado_comedor(IdMesa: int, Estado: bool):
     return mesa
 
 @router.post("/{IdMesa}/{IdOrden}")
-async def guardar_orden_mesa(IdMesa:int, IdOrden: int):
+async def guardar_orden_mesa(IdMesa:int, IdOrden: int, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     if IdMesa not in comedor.obtener_IdMesas():
         return HTTPException(404, 'MESA NO ENCONTRADA')
     
-    if not comedor.guardar_comedor_orden(IdMesa=IdMesa, IdOrden=IdOrden):
+    if not comedor.guardar_comedor_orden(IdMesa=IdMesa, IdOrden=IdOrden, username=usuario_actual.username):
         return HTTPException(500, 'ERROR AL GUARDAR ORDEN')
 
 @router.post("/{IdMesa}")
-async def crear_orden_comedor(IdMesa:int, payload: OrdenComedorIN):
-    if not comedor.generar_orden_comedor(IdMesa=IdMesa,detalles=payload.Detalles):
+async def crear_orden_comedor(IdMesa:int, payload: OrdenComedorIN, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
+    if not comedor.generar_orden_comedor(IdMesa=IdMesa,detalles=payload.Detalles, username=usuario_actual.username):
         return False
     
 @router.get("/NumeroMesas")

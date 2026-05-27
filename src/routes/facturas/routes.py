@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
+from src.security.dependency import obtener_usuario_actual
+from src.models.Usuarios.models import Usuario
 from src.services.facturas import service
 import datetime
 from src.schemas.facturas import facturaIn
@@ -33,8 +35,17 @@ async def obtener_facturas_endpoint(
     return facturas
 
 @router.post("/")
-async def actualizar_factura(payload: facturaIn):
+async def crear_factura(payload: facturaIn, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
 
-    factura = service.crear_facturas(payload)
+    id_generado = service.crear_facturas(payload, username=usuario_actual.username)
+    if not id_generado:
+        raise HTTPException(status_code=500, detail="No se pudo crear la factura")
+    return {"message": "Factura creada", "id": id_generado}
 
-    return factura
+
+@router.put("/{id_factura}")
+async def actualizar_factura(id_factura: int, payload: facturaIn, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
+    resultado = service.actualizar_factura(id_factura, payload, username=usuario_actual.username)
+    if resultado is None:
+        raise HTTPException(status_code=404, detail="Factura o alguna orden no encontrada")
+    return {"message": "Factura actualizada"}

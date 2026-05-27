@@ -4,6 +4,8 @@ from src.config.database import db_engine
 from src.routes import menu_diario
 from src.services.platillos import service
 import datetime
+from src.services.auditorias.services import registrar_auditoria_platillo
+from src.models.auditorias.types import TipoDeAccion
 
 
 def obtener_historial_menu_service():
@@ -54,7 +56,7 @@ def obtener_menu_dia_service(day: datetime.date):
         return Lista
 
 
-def crear_menu_service(day: datetime.date, nombre_platillo: str,monto: float):
+def crear_menu_service(day: datetime.date, nombre_platillo: str,monto: float, username: str | None = None):
     id_platillo = service.obtener_platillo_id_por_nombre(nombre_platillo)
 
     if id_platillo is None:
@@ -69,9 +71,15 @@ def crear_menu_service(day: datetime.date, nombre_platillo: str,monto: float):
         except Exception as e:
             session.rollback()
             return e
+    # Auditoría: creación de menu/platillo en menú diario
+    if username and id_platillo is not None:
+        try:
+            registrar_auditoria_platillo(username, int(id_platillo), TipoDeAccion.CREAR)
+        except Exception:
+            pass
 
 
-def editar_menu_service(id_menu, nombre_platillo: str):
+def editar_menu_service(id_menu, nombre_platillo: str, username: str | None = None):
     id_platillo = service.obtener_platillo_id_por_nombre(nombre_platillo)
 
     if id_platillo is None:
@@ -92,3 +100,9 @@ def editar_menu_service(id_menu, nombre_platillo: str):
         except Exception as e:
             session.rollback()
             return e
+    # Auditoría: actualización de platillo en menú
+    if username and id_platillo is not None:
+        try:
+            registrar_auditoria_platillo(username, int(id_platillo), TipoDeAccion.ACTUALIZAR)
+        except Exception:
+            pass

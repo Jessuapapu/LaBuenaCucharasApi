@@ -4,6 +4,8 @@ from src.config.database import db_engine
 from src.models.pedidos.models import Pedidos, PedidosOrdenes
 from src.models.pedidos.types import TipoPedidoss, EstadoPedido
 from src.services.ordenes import service as ordenesService  # Ajusta si esto también lo cambiaste a funciones
+from src.services.auditorias.services import registrar_auditoria_pedido
+from src.models.auditorias.types import TipoDeAccion
 
 def validar_cliente_lista_ordenes(listaOrdenes: list[int]) -> bool:
     if not listaOrdenes:
@@ -17,7 +19,7 @@ def validar_cliente_lista_ordenes(listaOrdenes: list[int]) -> bool:
             
     return True 
 
-def crear_pedido(listaIdOrdenes: list[int], tipo_pedido: TipoPedidoss) -> bool:
+def crear_pedido(listaIdOrdenes: list[int], tipo_pedido: TipoPedidoss, username: str | None = None) -> bool:
     if not validar_cliente_lista_ordenes(listaOrdenes=listaIdOrdenes):
         return False
 
@@ -38,6 +40,13 @@ def crear_pedido(listaIdOrdenes: list[int], tipo_pedido: TipoPedidoss) -> bool:
                 session.add(nueva_relacion_ordenes)
 
             session.commit()
+            # Auditoría: creación de pedido
+            if username and nuevo_pedido.IdPedido is not None:
+                try:
+                    registrar_auditoria_pedido(username, nuevo_pedido.IdPedido, TipoDeAccion.CREAR)
+                except Exception:
+                    pass
+
             return True
         
         except Exception as e:
@@ -72,7 +81,7 @@ def obtener_pedido_por_id(id_pedido: int):
         pedido = session.exec(select(Pedidos).where(Pedidos.IdPedido == id_pedido)).first()
         return pedido
 
-def modificar_pedido(id_pedido: int, estado: EstadoPedido = None, tipo_pedido: TipoPedidoss = None) -> bool:
+def modificar_pedido(id_pedido: int, estado: EstadoPedido = None, tipo_pedido: TipoPedidoss = None, username: str | None = None) -> bool:
     with Session(db_engine) as session:
         try:
             pedido = session.exec(select(Pedidos).where(Pedidos.IdPedido == id_pedido)).first()
@@ -86,13 +95,20 @@ def modificar_pedido(id_pedido: int, estado: EstadoPedido = None, tipo_pedido: T
                 
             session.add(pedido)
             session.commit()
+            # Auditoría: modificación de pedido
+            if username:
+                try:
+                    registrar_auditoria_pedido(username, id_pedido, TipoDeAccion.ACTUALIZAR)
+                except Exception:
+                    pass
+
             return True
         except Exception as e:
             session.rollback()
             print(f"Error al modificar pedido: {e}")
             return False
 
-def eliminar_pedido(id_pedido: int) -> bool:
+def eliminar_pedido(id_pedido: int, username: str | None = None) -> bool:
     with Session(db_engine) as session:
         try:
             pedido = session.exec(select(Pedidos).where(Pedidos.IdPedido == id_pedido)).first()
@@ -107,6 +123,13 @@ def eliminar_pedido(id_pedido: int) -> bool:
             # 2. Eliminar el pedido padre
             session.delete(pedido)
             session.commit()
+            # Auditoría: eliminación de pedido
+            if username:
+                try:
+                    registrar_auditoria_pedido(username, id_pedido, TipoDeAccion.ELIMINAR)
+                except Exception:
+                    pass
+
             return True
             
         except Exception as e:

@@ -1,6 +1,8 @@
 from src.models import Platillos, CategoriaPlatillos, CatalogoPlatillos
 from sqlmodel import Session, select
 from src.config.database import db_engine
+from src.services.auditorias.services import registrar_auditoria_platillo
+from src.models.auditorias.types import TipoDeAccion
 
 
 def obtener_platillos_service():
@@ -55,7 +57,7 @@ def obtener_categorias_platillos_service():
         return categorias
 
 
-def añadir_platillo(nombre_platillo: str, nombre_categoria: str):
+def añadir_platillo(nombre_platillo: str, nombre_categoria: str, username: str | None = None):
     with Session(db_engine) as session:
         try:
             nuevo_platillo = Platillos(NombrePlatillo=nombre_platillo)
@@ -76,6 +78,13 @@ def añadir_platillo(nombre_platillo: str, nombre_categoria: str):
 
             session.add(categoria)
             session.commit()
+            # Auditoría: creación de platillo
+            if username and nuevo_platillo.IdPlatillo is not None:
+                try:
+                    registrar_auditoria_platillo(username, nuevo_platillo.IdPlatillo, TipoDeAccion.CREAR)
+                except Exception:
+                    pass
+
             return True
         except Exception as e:
             session.rollback()

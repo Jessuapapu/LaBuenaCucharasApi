@@ -4,6 +4,8 @@ from src.models.imagenes.models import *
 from src.services.platillos import service as PlatillosServices
 from sqlmodel import Session, text, select
 import json
+from src.services.auditorias.services import registrar_auditoria_imagen
+from src.models.auditorias.types import TipoDeAccion
 
 
 CantidadPlatillo = {}
@@ -43,7 +45,7 @@ def cargar_json_platillos():
 
 
 
-def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen_content: str, NumeroImagen: int | None = None):
+def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen_content: str, NumeroImagen: int | None = None, username: str | None = None):
     if not CantidadPlatillo.keys():
         cargar_json_platillos()
 
@@ -66,6 +68,12 @@ def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen
         CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] += 1 if not NumeroImagen else 0
 
         Guardar_json()
+        # Auditoría: imagen creada
+        if username:
+            try:
+                registrar_auditoria_imagen(username, nueva_imagen.IdImagen if hasattr(nueva_imagen, 'IdImagen') else 0, TipoDeAccion.CREAR)
+            except Exception:
+                pass
         return True
 
     except Exception as e:
@@ -118,9 +126,9 @@ def obtener_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlati
     return None
 
 def actualizar_imagen(
-        NumeroImagen: int, imagen_bytes: bytes, extension: str, imagen_content: str,
-        IdPlatillo: int | None = None, NombrePlatillo: str | None = None,
-        ):
+    NumeroImagen: int, imagen_bytes: bytes, extension: str, imagen_content: str,
+    IdPlatillo: int | None = None, NombrePlatillo: str | None = None, username: str | None = None,
+    ):
     if not CantidadPlatillo.keys():
         cargar_json_platillos()
     
@@ -136,13 +144,20 @@ def actualizar_imagen(
     if not eliminar_imagen(IdPlatillo=Idplato, NumeroImagen=NumeroImagen):
         return False
     
-    if not subir_imagen(imagen_bytes = imagen_bytes, extension= extension, imagen_content= imagen_content, NombrePlatillo=CantidadPlatillo[str(Idplato)]["NOMBRE"], NumeroImagen=NumeroImagen):
+    if not subir_imagen(imagen_bytes = imagen_bytes, extension= extension, imagen_content= imagen_content, NombrePlatillo=CantidadPlatillo[str(Idplato)]["NOMBRE"], NumeroImagen=NumeroImagen, username=username):
         return True
+
+    # Auditoría: imagen actualizada
+    if username:
+        try:
+            registrar_auditoria_imagen(username, NumeroImagen, TipoDeAccion.ACTUALIZAR)
+        except Exception:
+            pass
     
     return True
 
 
-def eliminar_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlatillo: str | None = None):
+def eliminar_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlatillo: str | None = None, username: str | None = None):
     if not IdPlatillo and not NombrePlatillo:
         return None
     
@@ -162,5 +177,12 @@ def eliminar_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlat
         if NombrePlato in archivo['name']:
             if not ApiSupebase.storage.from_("Platillos").remove(archivo['name']):
                 return False
+
+    # Auditoría: imagen eliminada
+    if username:
+        try:
+            registrar_auditoria_imagen(username, NumeroImagen, TipoDeAccion.ELIMINAR)
+        except Exception:
+            pass
 
     return True

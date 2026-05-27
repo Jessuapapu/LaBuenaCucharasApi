@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from src.schemas.platillos import PlatilloIn, CategoriaIn
 from src.services.platillos import service
+from src.security.dependency import obtener_usuario_actual
+from src.models.Usuarios.models import Usuario
 
 router = APIRouter()
 
@@ -28,10 +30,10 @@ async def obtener_categorias():
 
 
 @router.post("/", response_model=None)
-async def crear_platillo(payload: PlatilloIn):
+async def crear_platillo(payload: PlatilloIn, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     try:
         # Se valida si la funcion retorna un none para decir que no pudo agregar el platillo
-        if not service.añadir_platillo(payload.nombre_platillo, payload.nombre_categoria):
+        if not service.añadir_platillo(payload.nombre_platillo, payload.nombre_categoria, username=usuario_actual.username):
             return {"detail": "Error al agregar el platillo"}
         
         return {"detail": "Platillo añadido con exito"}

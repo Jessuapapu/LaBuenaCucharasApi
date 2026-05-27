@@ -1,17 +1,20 @@
 
-from fastapi import APIRouter, HTTPException, Query, Path
+from fastapi import APIRouter, HTTPException, Query, Path, Depends
 from typing import List, Optional
 import src.services.pedidos.service as pedidosService
 from src.models.pedidos.types import TipoPedidoss, EstadoPedido
 from src.schemas.pedido import *
+from src.security.dependency import obtener_usuario_actual
+from src.models.Usuarios.models import Usuario
 
 router = APIRouter()
 
 @router.post("/", status_code=201)
-def crear_nuevo_pedido(payload: PedidoCreateSchema):
+def crear_nuevo_pedido(payload: PedidoCreateSchema, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     exito = pedidosService.crear_pedido(
         listaIdOrdenes=payload.listaIdOrdenes, 
-        tipo_pedido=payload.TipoPedido
+        tipo_pedido=payload.TipoPedido,
+        username=usuario_actual.username
     )
     if not exito:
         raise HTTPException(
@@ -78,11 +81,12 @@ def obtener_detalles_de_un_pedido(
 
 
 @router.put("/{id_pedido}")
-def actualizar_pedido(payload: PedidoUpdateSchema, id_pedido: int = Path(...)):
+def actualizar_pedido(payload: PedidoUpdateSchema, id_pedido: int = Path(...), usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     exito = pedidosService.modificar_pedido(
         id_pedido=id_pedido,
         estado=payload.Estado,
-        tipo_pedido=payload.TipoPedido
+        tipo_pedido=payload.TipoPedido,
+        username=usuario_actual.username
     )
     if not exito:
         raise HTTPException(status_code=404, detail="Pedido no encontrado o error al actualizar")
@@ -90,8 +94,8 @@ def actualizar_pedido(payload: PedidoUpdateSchema, id_pedido: int = Path(...)):
 
 
 @router.delete("/{id_pedido}")
-def borrar_pedido(id_pedido: int = Path(...)):
-    exito = pedidosService.eliminar_pedido(id_pedido)
+def borrar_pedido(id_pedido: int = Path(...), usuario_actual: Usuario = Depends(obtener_usuario_actual)):
+    exito = pedidosService.eliminar_pedido(id_pedido, username=usuario_actual.username)
     if not exito:
         raise HTTPException(status_code=404, detail="Pedido no encontrado o error al eliminar")
     return {"message": "Pedido y sus relaciones eliminados con éxito"}

@@ -1,6 +1,8 @@
 from typing import Optional
 from src.schemas.pedidos import PedidosIn, PedidosUpdate
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
+from src.security.dependency import obtener_usuario_actual
+from src.models.Usuarios.models import Usuario
 from src.services.ordenes import service
 import datetime
 
@@ -28,9 +30,9 @@ async def obtener_detalle(
     return detalle
 
 @router.post("/")
-async def crear_ordenes(payload: PedidosIn):
+async def crear_ordenes(payload: PedidosIn, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     pedido = service.crear_orden(
-        payload.nombre_cliente, payload.fecha, payload.detalle
+        payload.fecha, payload.detalle, nombre_cliente=payload.nombre_cliente, username=usuario_actual.username
     )
 
     if not pedido:
@@ -42,9 +44,9 @@ async def crear_ordenes(payload: PedidosIn):
 
 
 @router.put("/detalles/{id_orden}")
-async def actualizar_detalles_ordenes(id_orden: int, payload: PedidosUpdate):
+async def actualizar_detalles_ordenes(id_orden: int, payload: PedidosUpdate, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     resultado = service.actualizar_ordenes(
-        id_orden, payload.nombre_cliente, payload.estado, payload.detalles
+        id_orden, payload.estado, payload.detalles, nombre_cliente=payload.nombre_cliente, username=usuario_actual.username
     )
 
     if resultado is None or not resultado:
