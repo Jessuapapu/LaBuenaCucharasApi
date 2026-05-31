@@ -15,3 +15,9 @@ class RegistroDeAbastecimiento(SQLModel, table=True):
     IdProveedor: int | None = Field(default=None, foreign_key="proveedores.IdProveedor")
     CostoTotal: decimal.Decimal = Field(nullable=False)
     Fecha: datetime.datetime = Field(default=datetime.datetime.now())
+
+class DetallesRegistroIngredientes(SQLModel, table=True):
+    IdRegistroAbastecimiento: int | None = Field(default=None, foreign_key="registrodeabastecimiento.IdRegistro", primary_key=True)
+    IdIngrediente: int | None = Field(default=None, foreign_key="ingredientes.IdIngrediente", primary_key=True)
+    TotalIngresado: int = Field(nullable=False)
+    CostoIndividual: decimal.Decimal

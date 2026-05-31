@@ -1,10 +1,11 @@
 from decimal import Decimal
-from sqlmodel import Session, select
+from sqlmodel import Session, select, text
+import json
 from src.config.database import db_engine
 
 from src.models.proveedores.models import (
     Proveedores,
-    RegistroDeAbastecimiento
+    RegistroDeAbastecimiento,
 )
 from src.models.proveedores.types import TipoDeProveedor
 
@@ -58,3 +59,17 @@ def registrar_abastecimiento(
         session.commit()
 
         return nuevo_abastecimiento
+
+
+def obtener_detalles_abastecimiento(id_registro: int) -> dict:
+
+    with Session(db_engine) as session:
+        query = text("EXEC DetallesAbastIngredientes @IdRegistro = :id_param")
+        resultado = session.exec(query, params={"id_param": id_registro})
+        json_string = resultado.scalar()
+        if not json_string:
+            return {"Insumos": [], "Ingredientes": []}
+
+        datos_parseados = json.loads(json_string)
+        
+        return datos_parseados

@@ -8,3 +8,4 @@ from .proveedores import *
 from .comedor import *
 from .imagenes import *
 from .Usuarios import *
+from .ingredientes import *

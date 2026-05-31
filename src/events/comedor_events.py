@@ -46,7 +46,7 @@ async def nueva_orden(sid, data):
         await sio.emit("error_generar",{"MENSAJE": "ERROR AL GENERAR LA ORDEN MESA"}, to=sid)
         comedor.logs.add_log("ERROR AL GENERAR LA ORDEN MESA",'ERROR')
 
-    await sio.emit("orden_generada", data={"IdMesa": NumeroMesa, "IdOrden": nueva_orden.IdOrdenes})
+    await sio.emit("orden_generada", data={"IdMesa": NumeroMesa, "IdOrden": nueva_orden.IdOrdenes}, to=sid)
 
 @sio.on("actualizar_orden")
 async def actualizar_orden(sid, data):
@@ -85,7 +85,7 @@ async def actualizar_orden(sid, data):
         await sio.emit("error_actualizar",{"MENSAJE": "ERROR AL ACTUALIZAR LA ORDEN MESA"}, to=sid)
         comedor.logs.add_log("ERROR AL GENERAR LA ORDEN MESA",'ERROR')
 
-    await sio.emit("orden_actualizar", data={"Status": True})
+    await sio.emit("orden_actualizar", data={"Status": True}, to=sid)
 
 @sio.on("cancelar_orden")
 async def cancelar_orden(sid, data):
@@ -123,7 +123,7 @@ async def cancelar_orden(sid, data):
         await sio.emit("error_actualizar",{"MENSAJE": "ERROR AL ACTUALIZAR LA ORDEN MESA"}, to=sid)
         comedor.logs.add_log("ERROR AL GENERAR LA ORDEN MESA",'ERROR')
 
-    await sio.emit("orden_actualizar", data={"Status": True})
+    await sio.emit("orden_actualizar", data={"Status": True}, to=sid)
 
 @sio.on("guardar_orden")
 async def guardar_estado_orden(sid, data):
@@ -161,7 +161,7 @@ async def guardar_estado_orden(sid, data):
         await sio.emit("error_actualizar",{"MENSAJE": "ERROR AL GUARDAR LA ORDEN MESA"}, to=sid)
         comedor.logs.add_log("ERROR AL GUARDAR LA ORDEN MESA",'ERROR')
 
-    await sio.emit("orden_actualizar", data={"Status": True})
+    await sio.emit("orden_actualizar", data={"Status": True}, to=sid)
 
 
 

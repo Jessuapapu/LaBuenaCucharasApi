@@ -18,3 +18,8 @@ async def registrar_abastecimiento(
         costo_total, id_proveedor, total_ingresado
     )
     return registro
+
+@router.get("/detalles/{IdAbas}")
+async def obtener_historial_abastecimiento(IdAbas: int):
+    historial = service.obtener_detalles_abastecimiento(IdAbas)
+    return historial

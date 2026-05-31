@@ -294,7 +294,6 @@ def anular_orden_service(id_pedido: int, username: str | None = None):
             select(Ordenes, Facturas)
             .select_from(Ordenes)
             .join(Facturas)
-            .join(Facturas)
             .where(Ordenes.IdOrdenes == id_pedido)
         )
 
