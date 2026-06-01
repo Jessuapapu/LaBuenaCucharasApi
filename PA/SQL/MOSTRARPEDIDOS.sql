@@ -5,7 +5,11 @@ CREATE PROC MostrarPedidos
 	@Tipo VARCHAR(8) = NULL,
 	@Pagina  INT = 1,
 	@Rows INT  = 10,
-	@Todo BIT = 0
+	@Todo BIT = 0,
+	@FechaInicio DATETIME = NULL,
+    @FechaFin DATETIME = NULL,
+    @Monto DECIMAL(18,2) = NULL,
+    @MontoFin DECIMAL(18,2) = NULL
 AS 
 BEGIN
 	SET NOCOUNT ON
@@ -26,7 +30,10 @@ BEGIN
 	INNER JOIN clientes C ON O.IdCliente = C.IdCliente
 	WHERE (@IdOrden IS NULL OR O.IdOrdenes = @IdOrden) AND (@IdPedido IS NULL OR P.IdPedido = @IdPedido) 
 	AND (@IdCliente IS NULL OR C.IdCliente = @IdCliente) AND (@Tipo IS NULL OR P.TipoPedidos = @Tipo)
+	AND (@FechaInicio IS NULL OR P.Fecha >= @FechaInicio)
+    AND (@FechaFin IS NULL OR P.Fecha <= @FechaFin)
 	GROUP BY P.IdPedido, O.Estado, C.NombreCliente
+	HAVING (@Monto IS NULL OR SUM(O.CostoTotal) > @Monto) AND (@MontoFin IS NULL OR @MontoFin > SUM(O.CostoTotal))
 	ORDER BY P.IdPedido
 	OFFSET (@Pagina - 1) * @Rows ROWS FETCH NEXT @Rows ROWS ONLY
 

@@ -6,6 +6,7 @@ from src.models.pedidos.types import TipoPedidoss, EstadoPedido
 from src.services.ordenes import service as ordenesService  # Ajusta si esto también lo cambiaste a funciones
 from src.services.auditorias.services import registrar_auditoria_pedido
 from src.models.auditorias.types import TipoDeAccion
+import datetime
 
 def validar_cliente_lista_ordenes(listaOrdenes: list[int]) -> bool:
     if not listaOrdenes:
@@ -54,8 +55,20 @@ def crear_pedido(listaIdOrdenes: list[int], tipo_pedido: TipoPedidoss, username:
             print(f"Error al crear pedido: {e}")
             return False
 
-def listar_pedidos(id_orden: int = None, id_pedido: int = None, id_cliente: int = None, 
-                   tipo: str = None, pagina: int = 1, rows: int = 10, todo: int = 0):
+def listar_pedidos(
+                id_orden: int = None,
+                id_pedido: int = None, 
+                id_cliente: int = None, 
+                tipo: str = None, 
+                pagina: int = 1, 
+                rows: int = 10, 
+                todo: int = 0,
+                fecha_inicio: datetime.datetime | None = None,
+                fecha_fin: datetime.datetime | None = None,
+                monto: float | None = None,
+                monto_fin: float | None = None,
+
+):
     with Session(db_engine) as session:
         query = text("""
             EXEC MostrarPedidos 
@@ -65,12 +78,25 @@ def listar_pedidos(id_orden: int = None, id_pedido: int = None, id_cliente: int 
                 @Tipo = :Tipo, 
                 @Pagina = :Pagina, 
                 @Rows = :Rows, 
-                @Todo = :Todo
+                @Todo = :Todo,
+                @FechaInicio = :fecha_inicio,
+                @FechaFin = :fecha_fin,
+                @Monto = :monto,
+                @MontoFin = :monto_fin
         """)
         
         params = {
-            "IdOrden": id_orden, "IdPedido": id_pedido, "IdCliente": id_cliente,
-            "Tipo": tipo, "Pagina": pagina, "Rows": rows, "Todo": todo
+            "IdOrden": id_orden, 
+            "IdPedido": id_pedido, 
+            "IdCliente": id_cliente,
+            "Tipo": tipo, 
+            "Pagina": pagina, 
+            "Rows": rows,
+            "Todo": todo,
+            "fecha_inicio": fecha_inicio,
+            "fecha_fin": fecha_fin,
+            "monto": monto,
+            "monto_fin": monto_fin
         }
         
         resultados = session.execute(query, params).mappings().all()

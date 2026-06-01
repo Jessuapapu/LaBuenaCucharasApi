@@ -6,10 +6,6 @@ from sqlmodel import select
 import datetime
 
 def autenticar_usuario(username: str, password_plano: str) -> Usuario | None:
-    """
-    Busca al usuario en la BD y verifica que su contraseña coincida 
-    y que su cuenta esté activa.
-    """
     with Session(db_engine) as session:
         statement = select(Usuario).where(Usuario.username == username)
         usuario_bd = session.exec(statement).first()

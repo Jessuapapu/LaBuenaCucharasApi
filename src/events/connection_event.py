@@ -2,7 +2,7 @@ from src.config.socket import sio
 
 
 @sio.event
-async def connect(sid, environ):
+async def connect(sid, environ, auth):
     print(f"✅ Cliente conectado: {sid}")
 
 @sio.event

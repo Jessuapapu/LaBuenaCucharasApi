@@ -16,36 +16,48 @@ from decimal import Decimal
 
 
 def obtener_facturas_ordenes(
+    Id_Facturas: int | None = None,
     id_cliente: int | None = None,
     id_orden: int | None = None,
     fecha_inicio: datetime.datetime | None = None,
     fecha_fin: datetime.datetime | None = None,
     monto: float | None = None,
     monto_fin: float | None = None,
-    cantidad_total: int | None = None
+    cantidad_total: int | None = None,
+    pagina: int = 1, 
+    rows: int = 10, 
+    todo: int = 0
 ) -> list:
     
     with Session(db_engine) as session:
         try:
             query = text("""
                 EXEC MostrarFacturas 
+                    @IdFactura = :id_factura,
                     @IdCliente = :id_cliente,
                     @IdOrden = :id_orden,
                     @FechaInicio = :fecha_inicio,
                     @FechaFin = :fecha_fin,
                     @Monto = :monto,
                     @MontoFin = :monto_fin,
-                    @CantidadTotal = :cantidad_total
+                    @CantidadTotal = :cantidad_total,
+                    @Pagina = :pagina, 
+                    @Rows = :rows, 
+                    @Todo = :todo
             """)
 
             valores = {
+                "id_factura": Id_Facturas,
                 "id_cliente": id_cliente,
                 "id_orden": id_orden,
                 "fecha_inicio": fecha_inicio,
                 "fecha_fin": fecha_fin,
                 "monto": monto,
                 "monto_fin": monto_fin,
-                "cantidad_total": cantidad_total
+                "cantidad_total": cantidad_total,
+                "pagina": pagina,
+                "rows": rows,
+                "todo": todo
             }
 
             resultados = session.exec(query, params=valores).mappings().all()
@@ -53,13 +65,13 @@ def obtener_facturas_ordenes(
             facturas_list = []
             for row in resultados:
                 facturas_list.append({
+                    "Id_factura": row.get("IdFactura"),
                     "monto_total": row.get("MontoTotal"),
                     "cantidad_total": row.get("CantidadTotal"),
                     "estado_factura": row.get("Estado"),
                     "fecha_factura": row.get("Fecha"),
                     "cliente": {
                         "nombre_cliente": row.get("NombreCliente"),
-                        "direccion_cliente": row.get("DireccionCliente", "Sin dirección") 
                     }
                 })
         except:
@@ -102,7 +114,7 @@ def actualizar_factura(IdFactura: int, payLoadDetalles: facturaIn, username: str
         try:
             factura = session.get(Facturas, IdFactura)
             if not factura:
-                return None
+                return False
 
             # Calcular monto total y cantidad total a partir de las órdenes
             monto_total = Decimal("0")
@@ -115,7 +127,7 @@ def actualizar_factura(IdFactura: int, payLoadDetalles: facturaIn, username: str
                 if not orden:
                     # orden inexistente -> rollback y error
                     session.rollback()
-                    return None
+                    return False
                 monto_total += Decimal(str(orden.CostoTotal)) if orden.CostoTotal is not None else Decimal("0")
                 cantidad_total += 1
 
@@ -150,4 +162,18 @@ def actualizar_factura(IdFactura: int, payLoadDetalles: facturaIn, username: str
         except Exception as e:
             session.rollback()
             print(f"Error al actualizar factura: {e}")
-            return None
+            return False
+        
+
+def obtener_detalle(IdFactura: int):
+    with Session(db_engine) as session:
+        query = text("""
+        EXEC MostrarDetalleFactura 
+            @Id = :Id
+        """)
+        params = {
+        "Id": IdFactura
+        }
+        resultado = session.exec(query, params=params)
+
+        return resultado.mappings().all()

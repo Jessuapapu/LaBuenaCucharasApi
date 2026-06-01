@@ -1,14 +1,28 @@
 CREATE PROC MostrarFacturas
+    @IdFactura INT = NULL,
     @IdCliente INT = NULL,
     @IdOrden INT = NULL,
     @FechaInicio DATETIME = NULL,
     @FechaFin DATETIME = NULL,
     @Monto DECIMAL(18,2) = NULL,
     @MontoFin DECIMAL(18,2) = NULL,
-    @CantidadTotal INT = NULL
+    @CantidadTotal INT = NULL,
+    @Pagina INT = 1,
+	@Rows INT  = 10,
+	@Todo BIT = 0
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    IF @Pagina < 0 OR @Rows <= 1
+		BEGIN
+			PRINT ('INGRESE UNA PAGINA O UNA CANTIDAD DE FILAS VALIDAS')
+			RETURN -1
+		END
+	SET @Rows = IIF(@Todo = 1, (SELECT COUNT(IdOrdenes) FROM ordenes), @Rows)
+	-- SI TODO ES 1, SE DEBE INICIAR DESDE LA PAGINA 0
+	SET @Pagina = IIF(@Todo = 1, 1, @Pagina)
+
     IF (@FechaInicio IS NOT NULL AND @FechaFin IS NOT NULL AND @FechaInicio > @FechaFin)
     BEGIN
         print 'Error: La fecha de inicio no puede ser mayor a la fecha fin.';
@@ -26,11 +40,14 @@ BEGIN
     INNER JOIN ordenes O ON FO.IdOrdenes = O.IdOrdenes
     INNER JOIN clientes C ON O.IdCliente = C.IdCliente
     WHERE 
-        (@IdCliente IS NULL OR C.IdCliente = @IdCliente)
+        (@IdFactura IS NULL OR f.IdFactura = @IdFactura)
+        AND (@IdCliente IS NULL OR C.IdCliente = @IdCliente)
         AND (@IdOrden IS NULL OR O.IdOrdenes = @IdOrden)
         AND (@FechaInicio IS NULL OR F.Fecha >= @FechaInicio)
         AND (@FechaFin IS NULL OR F.Fecha <= @FechaFin)
         AND (@Monto IS NULL OR F.MontoTotal >= @Monto)
         AND (@MontoFin IS NULL OR F.MontoTotal <= @MontoFin)
-        AND (@CantidadTotal IS NULL OR F.CantidadTotal = @CantidadTotal);
+        AND (@CantidadTotal IS NULL OR F.CantidadTotal = @CantidadTotal)
+    ORDER BY f.IdFactura
+    OFFSET (@Pagina - 1) * @Rows ROWS FETCH NEXT @Rows ROWS ONLY
 END
