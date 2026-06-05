@@ -5,4 +5,9 @@ class TipoDeAccion(Enum):
     ELIMINAR = 'ELIMINAR'
     ACTUALIZAR = 'ACTUALIZAR'
     MODIFICAR = 'MODIFICAR'
-    
+
+
+class TipoTransacion(Enum):
+    PAGO = "PAGO"
+    REEMBOLSO = "REEMBOLSO"
+

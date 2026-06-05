@@ -33,6 +33,8 @@ from src.models.comedor import models as comedor_models
 from src.models.imagenes import models as imagenes_models   
 from src.models.Usuarios import models as Usuarios_models
 from src.models.ingredientes import modes as Ingredientes_models
+from src.models.auditorias import models as auditoria_models
+from src.models.caja import models as caja_models
 from sqlmodel import SQLModel
 target_metadata = SQLModel.metadata
 

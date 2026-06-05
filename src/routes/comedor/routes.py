@@ -1,7 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query, Depends
-from src.services.pedidos import service as ordenes
 from src.services.comedor import service as comedor
-import datetime
 from src.schemas.ComedorPedidos import OrdenComedorIN
 from src.security.dependency import obtener_usuario_actual
 from src.models.Usuarios.models import Usuario
@@ -17,7 +15,7 @@ async def abrir_comedor(usuario_actual: Usuario = Depends(obtener_usuario_actual
     if Estado:
         return {"msj":"Ya Comedor abierto","status": False}
     
-    comedor.abrir_comedor(username=usuario_actual.username)
+    comedor.abrir_comedor()
     Estado = True
 
     return  {"msj":"Comedor abierto","status": True}

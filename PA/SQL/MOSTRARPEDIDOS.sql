@@ -24,7 +24,7 @@ BEGIN
 	-- SI TODO ES 1, SE DEBE INICIAR DESDE LA PAGINA 0
 	SET @Pagina = IIF(@Todo = 1, 1, @Pagina)
 
-	SELECT P.IdPedido,SUM(O.CostoTotal) MONTO_TOTAL, O.Estado, C.NombreCliente FROM pedidos P 
+	SELECT P.IdPedido, SUM(O.CostoTotal) MONTO_TOTAL, O.Estado, C.NombreCliente FROM pedidos P 
 	INNER JOIN pedidosordenes PO ON P.IdPedido = PO.IdPedido
 	INNER JOIN ordenes O ON PO.IdOrdenes = O.IdOrdenes
 	INNER JOIN clientes C ON O.IdCliente = C.IdCliente

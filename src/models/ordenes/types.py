@@ -5,3 +5,9 @@ class EstadoOrden(str, Enum):
     ENTREGADO = "ENTREGADO"
     PAGADO    = "PAGADO"
     ANULADO   = "ANULADO"
+
+class TipoPago(str, Enum):
+    TRANSFERENCIA = "TRANSFERENCIA"
+    EFECTIVO = "EFECTIVO"
+    TARJETA_CREDITO = "TARJETA_CREDITO"
+    TARJETA_DEBITO = "TARJETA_DEBITO"

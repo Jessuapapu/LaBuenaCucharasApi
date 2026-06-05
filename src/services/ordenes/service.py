@@ -21,7 +21,7 @@ from src.schemas.pedidos import Detalles
 from typing import List
 from decimal import Decimal
 import datetime
-from sqlalchemy import select as sa_select, func, cast
+from sqlalchemy import select as func, cast
 from sqlalchemy.types import Date
 
 from sqlmodel import Session
@@ -32,17 +32,11 @@ from src.models.auditorias.types import TipoDeAccion
 
 def obtener_orden(IdOrden: int):
     with Session(db_engine) as session:
-        query = select(Ordenes.IdOrdenes, Ordenes.IdCliente, Ordenes.Estado, Ordenes.Fecha).select_from(Ordenes).where(Ordenes.IdOrdenes == IdOrden)
-
         try:
-            to_dict= {
-                "IdOrden": Ordenes.IdOrdenes, 
-                "IdCliente": Ordenes.IdCliente, 
-                "Estado": Ordenes.Estado, 
-                "Fecha": Ordenes.Fecha
-            }
-    
-            return to_dict
+            query = select(Ordenes).select_from(Ordenes).where(Ordenes.IdOrdenes == IdOrden)
+            orden = session.exec(query).first()
+
+            return orden    
         
         except:
             return None
@@ -197,13 +191,13 @@ def actualizar_ordenes(
             .where(Ordenes.IdOrdenes == id_pedido)
         )
 
-        stmt_pedido_factura = (
+        stmt_orden = (
             select(Ordenes)
             .where(Ordenes.IdOrdenes == id_pedido)
         )
 
         detalles_actualizar = session.exec(statement).all()
-        resultado = session.exec(stmt_pedido_factura).first()
+        resultado = session.exec(stmt_orden).first()
         nuevo_id_cliente = Id_cliente if Id_cliente else obtener_id_cliente_por_nombre(nombre_cliente)
         
         if not resultado or not nuevo_id_cliente:
@@ -243,6 +237,11 @@ def actualizar_ordenes(
 
             monto_total += costo_fila
             cantidad_total += det.cantidad
+        
+        if estado in EstadoOrden.ANULADO:
+            statement = text("EXEC ActualizarPagos  @IdOrden = :idOrden")
+
+            session.exec(statement=statement, params={'idOrden': pedido.IdOrdenes})
 
         session.commit()
         session.refresh(pedido)
@@ -267,7 +266,6 @@ def pagar_orden_service(id_pedido: int):
 
         resultado = session.exec(statement).first()
 
-        print(resultado)
 
         if not resultado:
             return None
@@ -280,7 +278,7 @@ def pagar_orden_service(id_pedido: int):
         ):
             return None
 
-        pedido.Estado = EstadoPedido.ENTREGADO
+        pedido.Estado = EstadoPedido.ENTREGADO     
 
         session.commit()
         session.refresh(pedido)

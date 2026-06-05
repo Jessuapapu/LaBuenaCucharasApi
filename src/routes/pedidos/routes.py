@@ -86,12 +86,15 @@ def actualizar_pedido(payload: PedidoUpdateSchema, id_pedido: int = Path(...), u
         id_pedido=id_pedido,
         estado=payload.Estado,
         tipo_pedido=payload.TipoPedido,
+        listaIdOrdenes=payload.listaIdOrdenes, 
         username=usuario_actual.username
     )
     if not exito:
-        raise HTTPException(status_code=404, detail="Pedido no encontrado o error al actualizar")
+        raise HTTPException(
+            status_code=400, 
+            detail="No se pudo actualizar el pedido. Verifique reglas de integridad y validación de cliente."
+        )
     return {"message": "Pedido actualizado con éxito"}
-
 
 @router.delete("/{id_pedido}")
 def borrar_pedido(id_pedido: int = Path(...), usuario_actual: Usuario = Depends(obtener_usuario_actual)):

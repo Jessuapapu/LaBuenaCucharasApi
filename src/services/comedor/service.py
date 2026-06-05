@@ -1,23 +1,31 @@
 from src.models.comedor import models as comedor
 from src.models.ordenes import models as orden
+from src.models.ordenes import types as ordenTypes
 from src.schemas.pedidos import Detalles
 from src.services.platillos.service import obtener_platillo_id_por_nombre   
 from sqlmodel import Session
 from src.config.database import db_engine
+
 from datetime import datetime
 MC = comedor.MonitorComedor()
+
 horaApertura = None
 horaCerrar = None
+
+from src.services.auditorias.services import  registrar_auditoria_comedor, registrar_auditoria_orden, registrar_auditoria_mesa
+from src.models.auditorias.types import TipoDeAccion
 
 from logs import logsApp
 logs = logsApp.Logs()
 
 def agregar_orden_comedor(IdMesa: int, IdOrden: int):
-    
+    if not horaApertura:    
+        return False
     if IdMesa > MC.MaxIdGenerado or IdMesa < 0:
         return False
     
     MC.agregar_orden(IdMesa=IdMesa, IdOrden=IdOrden)
+    
     return True
 
 def abrir_comedor():
@@ -29,19 +37,22 @@ def abrir_comedor():
 def cerrar_comedor(username: str | None = None):
     if not horaApertura:    
         return False
-    from src.services.auditorias.services import registrar_auditoria_comedor
-
+    
     try:
-        # Registrar auditoría mediante el helper central
         user = username if username else "system"
-        success = registrar_auditoria_comedor(user, horaApertura, datetime.now())
+        registrar_auditoria_comedor(user, horaApertura, datetime.now())
         logs.add_log("CERRAR COMEDOR", "INFO")
-        return success
+
+
     except Exception as e:
         print(e)
         return False
         
-def guardar_comedor_orden(IdMesa: int, IdOrden: int, username: str | None = None):
+def guardar_comedor_orden(IdMesa: int, IdOrden: int):
+    
+    if not horaApertura:    
+        return False
+    
     orden = MC.guardar_orden(IdMesa=IdMesa, IdOrden=IdOrden)
 
     if not orden:
@@ -49,8 +60,6 @@ def guardar_comedor_orden(IdMesa: int, IdOrden: int, username: str | None = None
 
     with Session(db_engine) as session:
         try: 
-            # Usar la función central de auditoría para consistencia
-            from src.services.auditorias.services import registrar_auditoria_mesa
 
             session.add(comedor.Auditoria_Mesas(IdMesa=IdMesa, IdOrden=IdOrden, HoraEntrada=orden.HoraEntrada, HoraSalida=orden.HoraSalida))
             session.commit()
@@ -68,34 +77,10 @@ def guardar_comedor_orden(IdMesa: int, IdOrden: int, username: str | None = None
             return False
 
 
-def obtener_estado_activas():
-    return MC.obtener_ordenActivas()
-
-def obtener_estado_terminadas():
-    return MC.obtener_ordenTerminadas()
-
-def obtener_estado_orden_mesa_activa(IdMesa: int):
-    return MC.obtener_ordenActiva(IdMesa=IdMesa)
-
-def obtener_estado_orden_mesa_terminadas(IdMesa: int):
-    return MC.obtener_ordenTerminadasMesa(IdMesa=IdMesa)
-
-def aumentar_mesa():
-    return MC.agregar_mesa()
-
-def eliminar_mesa():
-    return MC.eliminar_mesa()
-
-def obtener_estado_total():
-    return MC.to_dict()
-
-def obtener_estado(IdMesa: int):
-    return MC.obtener_orden(IdMesa=IdMesa).to_dict()
-
-def obtener_IdMesas():
-    return MC.mesasId()
-
 def generar_orden_comedor(IdMesa: int, detalles: list[Detalles], username: str | None = None):
+    if not horaApertura:    
+        return False
+    
     nuevo_Orden = orden.Ordenes(IdCliente=1, Fecha=datetime.now(), CostoTotal=0.0)
     with Session(db_engine) as session:
         try:
@@ -135,8 +120,6 @@ def generar_orden_comedor(IdMesa: int, detalles: list[Detalles], username: str |
             session.commit()
             # Registrar auditoría de orden creada si es posible
             try:
-                from src.services.auditorias.services import registrar_auditoria_orden
-                from src.models.auditorias.types import TipoDeAccion
                 user = username if username else "system"
                 registrar_auditoria_orden(user, nuevo_Orden.IdOrdenes, TipoDeAccion.CREAR)
             except Exception:
@@ -148,3 +131,49 @@ def generar_orden_comedor(IdMesa: int, detalles: list[Detalles], username: str |
             session.rollback()
             print(e)
             return None
+        
+def obtener_estado_activas():
+    print(horaApertura)
+    if not horaApertura:    
+        return False
+    return MC.obtener_ordenActivas()
+
+def obtener_estado_terminadas():
+    if not horaApertura:    
+        return False
+    return MC.obtener_ordenTerminadas()
+
+def obtener_estado_orden_mesa_activa(IdMesa: int):
+    if not horaApertura:    
+        return False
+    return MC.obtener_ordenActiva(IdMesa=IdMesa)
+
+def obtener_estado_orden_mesa_terminadas(IdMesa: int):
+    if not horaApertura:    
+        return False
+    return MC.obtener_ordenTerminadasMesa(IdMesa=IdMesa)
+
+def aumentar_mesa():
+    if not horaApertura:    
+        return False
+    return MC.agregar_mesa()
+
+def eliminar_mesa():
+    if not horaApertura:    
+        return False
+    return MC.eliminar_mesa()
+
+def obtener_estado_total():
+    if not horaApertura:    
+        return False
+    return MC.to_dict()
+
+def obtener_estado(IdMesa: int):
+    if not horaApertura:    
+        return False
+    return MC.obtener_orden(IdMesa=IdMesa).to_dict()
+
+def obtener_IdMesas():
+    if not horaApertura:    
+        return False
+    return MC.mesasId()

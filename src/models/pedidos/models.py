@@ -9,10 +9,8 @@ class Pedidos(SQLModel, table=True):
     fecha: datetime.datetime = Field(default=datetime.datetime.now())
     TipoPedidos: TipoPedidoss = Field(nullable=False, default=TipoPedidoss.EVENTO)
 
-
-
 class PedidosOrdenes(SQLModel, table=True):
     IdPedidosOrdenes: int = Field(primary_key=True)
     IdPedido: int = Field(foreign_key = "pedidos.IdPedido")
-    IdOrdenes: int = Field(foreign_key = "ordenes.IdOrdenes")
+    IdOrdenes: int = Field(foreign_key = "ordenes.IdOrdenes", unique=True, nullable=False)
     

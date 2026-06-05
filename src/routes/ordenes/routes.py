@@ -20,7 +20,7 @@ async def obtener_ordenes(
     return pedidos
 
 
-@router.get("/detalle/")
+@router.get("/detalle/")    
 async def obtener_detalle(
     IdPedido: int | None = Query(None, description="Id de Pedido"),
     IdCliente: int | None  = Query(None, description="Id de Cliente")

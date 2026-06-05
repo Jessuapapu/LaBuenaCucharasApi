@@ -5,7 +5,7 @@ from datetime import datetime
 class Usuario(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    username: str = Field(unique=True, index=True, nullable=False)
+    username: str = Field(unique=True, nullable=False)
     password_hash: str = Field(nullable=False)
     rol: str = Field(default="mesero", nullable=False)
     activo: bool = Field(default=True)

@@ -24,10 +24,10 @@ BEGIN
 	INNER JOIN ordenes O ON OD.IdOrdenes = O.IdOrdenes
 	INNER JOIN clientes C ON O.IdCliente = C.IdCliente
 	INNER JOIN clientedireccion CD ON O.IdCliente = CD.IdCliente
-	WHERE (@IdOrden IS NULL OR O.IdOrdenes = @IdOrden) AND 
-	(@IdCliente IS NULL OR O.IdCliente = C.IdCliente)
+	WHERE (@IdOrden IS NULL OR O.IdOrdenes = @IdOrden) 
+	AND (@IdCliente IS NULL OR O.IdCliente = @IdCliente)
 	GROUP BY C.NombreCliente, O.IdOrdenes, O.Fecha, CD.dirreccion, O.Estado
-	ORDER BY O.IdOrdenes
+	ORDER BY O.IdOrdenes DESC
 	OFFSET (@Pagina - 1) * @Rows ROWS FETCH NEXT @Rows ROWS ONLY
 
 END

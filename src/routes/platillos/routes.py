@@ -54,3 +54,26 @@ async def crear_categoria(payload: CategoriaIn):
         raise HTTPException(status_code=500, detail=f"Error: {e}")
 
 
+@router.put("/{nombre}", response_model=None)
+async def actualizar_platillo_por_nombre(nombre: str, payload: PlatilloIn, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
+    try:
+        exito = service.actualizar_platillo_por_nombre(
+            nombre_actual=nombre,
+            nuevo_nombre=payload.nombre_platillo,
+            nombre_categoria=payload.nombre_categoria,
+            username=usuario_actual.username
+        )
+
+        if not exito:
+            raise HTTPException(status_code=404, detail="No se pudo actualizar el platillo (no existe o categoria invalida)")
+
+        return {"detail": "Platillo actualizado con exito"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {e}")
+    
+
+
+
+

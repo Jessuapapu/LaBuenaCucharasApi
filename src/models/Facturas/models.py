@@ -16,3 +16,4 @@ class FacturasOrdenes(SQLModel, table=True):
     IdFactura: int  = Field(foreign_key = "facturas.IdFactura")
     IdOrdenes: int  = Field(foreign_key = "ordenes.IdOrdenes", unique=True)
 
+

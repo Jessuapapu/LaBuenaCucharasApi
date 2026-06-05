@@ -124,3 +124,55 @@ def obtener_categoria_id_por_nombre(nombre_categoria: str):
             raise e
 
 
+def actualizar_platillo_por_nombre(nombre_actual: str, nuevo_nombre: str | None = None, nombre_categoria: str | None = None, username: str | None = None):
+    """
+    Actualiza un platillo identificado por su nombre actual.
+    - Puede actualizar el nombre del platillo y/o su categoria.
+    - Devuelve True si se actualiza correctamente, False si no existe o falla la categoria.
+    """
+    from src.models.platillos.models import Platillos as PlatillosModel, CategoriaPlatillos as CategoriaPlatillosModel
+
+    with Session(db_engine) as session:
+        try:
+            statement = select(PlatillosModel).where(PlatillosModel.NombrePlatillo == nombre_actual)
+            platillo = session.exec(statement).first()
+
+            if not platillo:
+                return False
+
+            # actualizar nombre si se proporciono uno nuevo
+            if nuevo_nombre and nuevo_nombre != platillo.NombrePlatillo:
+                platillo.NombrePlatillo = nuevo_nombre
+
+            # actualizar categoria si se proporciono
+            if nombre_categoria:
+                id_categoria = obtener_categoria_id_por_nombre(nombre_categoria)
+                if id_categoria is None:
+                    return False
+
+                # buscar relacion existente
+                stmt_cat = select(CategoriaPlatillosModel).where(CategoriaPlatillosModel.IdPlatillo == platillo.IdPlatillo)
+                relacion = session.exec(stmt_cat).first()
+                if relacion:
+                    relacion.IdCatalogoPlatillo = id_categoria
+                    session.add(relacion)
+                else:
+                    nueva_rel = CategoriaPlatillosModel(IdPlatillo=platillo.IdPlatillo, IdCatalogoPlatillo=id_categoria)
+                    session.add(nueva_rel)
+
+            session.add(platillo)
+            session.commit()
+
+            # auditoria
+            if username and hasattr(platillo, 'IdPlatillo') and platillo.IdPlatillo is not None:
+                try:
+                    registrar_auditoria_platillo(username, platillo.IdPlatillo, TipoDeAccion.ACTUALIZAR)
+                except Exception:
+                    pass
+
+            return True
+        except Exception as e:
+            session.rollback()
+            raise e
+
+

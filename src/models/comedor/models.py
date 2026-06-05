@@ -1,4 +1,4 @@
-from sqlmodel import Field, SQLModel
+from src.models.caja import models as Caja
 from datetime import datetime
 from logs import logsApp
 import json
@@ -6,6 +6,7 @@ import json
 EstadoAnterior_JSON_path = "./src/models/comedor/estado_anterior.json"
 
 logs = logsApp.Logs()
+
 class OrdenComedor():
     def __init__(self, IdOrden: int):
         self.HoraEntrada = datetime.now() 
@@ -64,6 +65,14 @@ class MonitorComedor():
     
     def eliminar_mesa(self):
         try:
+            if self.NumeroMesas <= 0:
+                return False
+            
+            for orden in self.Mesas[self.NumeroMesas].Ordenes:
+                if orden.Activo:
+                    return False
+
+            self.Mesas.pop(self.NumeroMesas)
             self.NumeroMesas -= 1
             self.Guardar_json(self.NumeroMesas)
             return True
@@ -96,7 +105,7 @@ class MonitorComedor():
             
         return None
     
-    def obtener_orden(self,IdMesa: int, IdOrden: int) -> dict | None:
+    def obtener_orden(self,IdMesa: int , IdOrden: int) -> dict | None:
         if not self.validarIdMesa(IdMesa=IdMesa):
             return False
 
@@ -173,11 +182,17 @@ class MonitorComedor():
             mesa.Ordenes.append(OrdenComedor(IdOrden=IdOrden))
 
 
-    def guardar_orden(self, IdOrden: int, IdMesa: int):
-        if not self.validarIdMesa(IdMesa=IdMesa):
+    def guardar_orden(self, IdOrden: int, IdMesa: int = None):
+        if IdMesa and not self.validarIdMesa(IdMesa=IdMesa):
             return False
 
         self.limpiar_orden()
+
+        IdMesa = self.buscarIdMesa(IdOrden)
+
+        if not IdMesa:
+            return None
+
         mesa = self.Mesas[IdMesa]
         
         if not mesa:
@@ -191,9 +206,14 @@ class MonitorComedor():
                 return orden
         return None
 
-    def eliminar_orden(self, IdOrden: int, IdMesa: int):
-        if not self.validarIdMesa(IdMesa=IdMesa):
+    def eliminar_orden(self, IdOrden: int, IdMesa: int = None):
+        if IdMesa and not self.validarIdMesa(IdMesa=IdMesa):
             return False
+        
+        IdMesa = self.buscarIdMesa(IdOrden)
+
+        if not IdMesa:
+            return None
         
         mesa = self.Mesas[IdMesa]
         if not mesa:
@@ -211,6 +231,14 @@ class MonitorComedor():
             lista.append(i)
 
         return lista
+    
+    def buscarIdMesa(self,IdOrden: int):
+        for mesa in self.Mesas:
+            for orden in mesa.Ordenes:
+                if orden.IdOrden == IdOrden:
+                    return mesa.Id
+                
+        return None
     
     def validarIdMesa(self, IdMesa: int):
         if (IdMesa > self.NumeroMesas) or (IdMesa < 0):
@@ -238,9 +266,11 @@ class MonitorComedor():
             return NumeroMesas
     
 
+
     def to_dict(self):
         return {
             "TotalMesasActivas": self.NumeroMesas,
-            "Mesas": [mesa.to_dict() for mesa in self.Mesas]
+            "Mesas": [mesa.to_dict() for mesa in self.Mesas],
+            "Caja": self.Caja.to_dict()
         }
     

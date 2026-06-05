@@ -10,3 +10,4 @@ class PedidoCreateSchema(BaseModel):
 class PedidoUpdateSchema(BaseModel):
     Estado: Optional[EstadoPedido] = None
     TipoPedido: Optional[TipoPedidoss] = None
+    listaIdOrdenes: Optional[List[int]] = None
