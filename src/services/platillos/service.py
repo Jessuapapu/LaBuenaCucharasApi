@@ -1,5 +1,5 @@
 from src.models import Platillos, CategoriaPlatillos, CatalogoPlatillos
-from sqlmodel import Session, select
+from sqlmodel import Session, select, desc
 from src.config.database import db_engine
 from src.services.auditorias.services import registrar_auditoria_platillo
 from src.models.auditorias.types import TipoDeAccion
@@ -9,12 +9,14 @@ def obtener_platillos_service():
     with Session(db_engine) as session:
         statement = (
             select(
+                Platillos.IdPlatillo,
                 Platillos.NombrePlatillo,
                 CatalogoPlatillos.NombreCatalogoPlatillo,
             )
             .select_from(Platillos)
             .join(CategoriaPlatillos)
             .join(CatalogoPlatillos)
+            .order_by(desc(Platillos.IdPlatillo))
         )
 
         platillos_query = session.exec(statement).all()
@@ -24,7 +26,7 @@ def obtener_platillos_service():
 
         platillos = []
 
-        for nombre_platillo, nombre_categoria in platillos_query:
+        for id_platillo, nombre_platillo, nombre_categoria in platillos_query:
             platillos.append(
                 {
                     "nombre_platillo": nombre_platillo,
@@ -176,3 +178,5 @@ def actualizar_platillo_por_nombre(nombre_actual: str, nuevo_nombre: str | None 
             raise e
 
 
+def relacion_platillo_categoria():
+    pass

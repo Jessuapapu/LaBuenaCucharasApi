@@ -8,7 +8,7 @@ router = APIRouter()
 @router.post("/{NombrePlatillo}")
 async def crear_imagenes(NombrePlatillo: str, file: UploadFile = File(...), usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     imagen_byte = await file.read()
-
+    print('------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
     extension = file.filename.split(".")[-1]    
     FileContent = file.content_type
     

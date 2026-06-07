@@ -1,9 +1,6 @@
-from src.models.pedidos.models import (
-    Pedidos
-)
 
 from src.models.facturas.models import (
-    Facturas, FacturasOrdenes
+    Facturas
 )
 
 from src.models.ordenes.models import Ordenes, DetallesOrdenes
@@ -21,7 +18,7 @@ from src.schemas.pedidos import Detalles
 from typing import List
 from decimal import Decimal
 import datetime
-from sqlalchemy import select as func, cast
+from sqlalchemy import select, func, cast
 from sqlalchemy.types import Date
 
 from sqlmodel import Session
@@ -379,12 +376,12 @@ def obtener_contador_platillos():
         statement = (
             select(
                 Platillos.NombrePlatillo,
-                func.SUM(DetallesOrdenes.CantidadPlatillo).label("total_vendido"),
+                func.sum(DetallesOrdenes.CantidadPlatillo).label("total_vendido"),
             )
             .select_from(DetallesOrdenes)
             .join(Platillos)
             .group_by(Platillos.NombrePlatillo)
-            .order_by(func.SUM(DetallesOrdenes.CantidadPlatillo).desc())
+            .order_by(func.sum(DetallesOrdenes.CantidadPlatillo).desc())
         )
 
         query = session.exec(statement).all()

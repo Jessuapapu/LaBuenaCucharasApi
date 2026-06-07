@@ -45,40 +45,39 @@ def cargar_json_platillos():
 
 
 
-def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen_content: str, NumeroImagen: int | None = None, username: str | None = None):
+def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen_content: str, NumeroImagen: int | None = 0, username: str | None = None):
     if not CantidadPlatillo.keys():
         cargar_json_platillos()
 
-    try:
-        IdPlatillo = PlatillosServices.obtener_platillo_id_por_nombre(NombrePlatillo)
-        if not IdPlatillo:
-            return False
+    #try:
+    IdPlatillo = PlatillosServices.obtener_platillo_id_por_nombre(NombrePlatillo)
+    if not IdPlatillo:
+        return False
+    
+    NumeroDeImagen = CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] if NumeroImagen == 0 else NumeroImagen
+    print(NumeroImagen)
+    NombreDeArchivo = f"{NombrePlatillo}{NumeroDeImagen}.{extension}"
+    ApiSupebase.storage.from_("Platillos").upload(file=imagen_bytes, path=NombreDeArchivo, file_options={"content-type": imagen_content})
+    url_publica = ApiSupebase.storage.from_("Platillos").get_public_url(NombreDeArchivo)
+    print(url_publica)
+    nueva_imagen = ImagenesPlatillos(IdPlatillo=IdPlatillo,UrlImagen=url_publica)
+    with Session(db_engine) as session:
+        session.add(nueva_imagen)
+        session.commit()
+    CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] += 1 if not NumeroImagen else 0
+    Guardar_json()
+    # Auditoría: imagen creada
+    if username:
+        try:
+            registrar_auditoria_imagen(username, nueva_imagen.IdImagen if hasattr(nueva_imagen, 'IdImagen') else 0, TipoDeAccion.CREAR)
+        except Exception:
+            pass
         
-        NumeroDeImagen = CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] if not NumeroImagen else NumeroImagen
-        print(NumeroImagen)
-        NombreDeArchivo = f"{NombrePlatillo}{NumeroDeImagen}.{extension}"
-        ApiSupebase.storage.from_("Platillos").upload(file=imagen_bytes, path=NombreDeArchivo, file_options={"content-type": imagen_content})
-        url_publica = ApiSupebase.storage.from_("Platillos").get_public_url(NombreDeArchivo)
+    return True
 
-        nueva_imagen = ImagenesPlatillos(IdPlatillo=IdPlatillo,UrlImagen=url_publica)
-        with Session(db_engine) as session:
-            session.add(nueva_imagen)
-            session.commit()
-
-        CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] += 1 if not NumeroImagen else 0
-
-        Guardar_json()
-        # Auditoría: imagen creada
-        if username:
-            try:
-                registrar_auditoria_imagen(username, nueva_imagen.IdImagen if hasattr(nueva_imagen, 'IdImagen') else 0, TipoDeAccion.CREAR)
-            except Exception:
-                pass
-        return True
-
-    except Exception as e:
-        print(e)
-        return False    
+    #except Exception as e:
+    #    print(e)
+    #    return False    
     
 def obtener_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlatillo: str | None = None) -> str | None: 
     if not IdPlatillo and not NombrePlatillo:

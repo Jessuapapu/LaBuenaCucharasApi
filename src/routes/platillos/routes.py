@@ -73,7 +73,3 @@ async def actualizar_platillo_por_nombre(nombre: str, payload: PlatilloIn, usuar
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {e}")
     
-
-
-
-
