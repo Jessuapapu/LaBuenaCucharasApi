@@ -24,7 +24,7 @@ def validar_cliente_lista_ordenes(listaOrdenes: list[int]) -> bool:
 def crear_pedido(listaIdOrdenes: list[int], tipo_pedido: TipoPedidoss, username: str | None = None) -> bool:
     if not validar_cliente_lista_ordenes(listaOrdenes=listaIdOrdenes):
         return False
-
+    
     with Session(db_engine) as session:
         try:
             

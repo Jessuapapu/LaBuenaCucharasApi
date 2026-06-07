@@ -60,6 +60,10 @@ def obtener_categorias_platillos_service():
 
 
 def añadir_platillo(nombre_platillo: str, nombre_categoria: str, username: str | None = None):
+    # HP DAVID NO LO TENIA VALIDADO
+    if obtener_platillo_id_por_nombre(nombre_platillo):
+        return False
+
     with Session(db_engine) as session:
         try:
             nuevo_platillo = Platillos(NombrePlatillo=nombre_platillo)
