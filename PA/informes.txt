@@ -1,0 +1,89 @@
+/*
+1. RendimientoPorSegmento (Salud Financiera General)
+Compara el rendimiento macro del restaurante dividiéndolo en sus dos principales fuentes de ingresos: el día a día (COMEDOR) y los servicios programados (EVENTO/CONTRATO).
+
+TotalOrdenes: Cantidad bruta de tickets generados en el sistema (sin importar si se cobraron o anularon).
+
+Completadas: Tickets que se cobraron y entregaron exitosamente (dinero real).
+
+Anuladas: Tickets que se cancelaron por errores, clientes que se fueron o fallos en cocina.
+
+IngresoBruto: Sumatoria total del dinero facturado de las órdenes completadas.
+
+TicketPromedio: Lo que gasta en promedio una sola mesa o un evento. (Fórmula: Ingreso Bruto / Órdenes Completadas).
+
+TasaCancelacionPorcentaje: El porcentaje de órdenes que fracasan. Insight de Negocio: Si en el comedor este número supera el 5%, hay un problema operativo grave (meseros equivocándose o cocina muy lenta).
+
+2. AnalisisDeFidelidad (Valor de la Cartera de Clientes)
+Mide el impacto económico de tener a la gente registrada en la base de datos frente a los clientes anónimos.
+
+SegmentoCliente: Divide entre Clientes Fidelizados (Id > 1) y Consumidor De Paso (Id = 1).
+
+VolumenOperaciones: Cuántas veces te compró ese segmento.
+
+ValorGenerado: Cuánto dinero aportó a la caja. Insight de Negocio: Sirve para justificar si vale la pena invertir en tarjetas de descuento o programas VIP. Si los fidelizados gastan el triple que los de paso, la estrategia funciona.
+
+3. PerfilDeConsumo (Segmentación de Tickets - Clustering)
+Analiza el comportamiento de gasto para saber qué tipo de restaurante eres económicamente hablando.
+
+OrdenesDeConsumoBajo (< 300): Compras rápidas, posiblemente solo bebidas o postres.
+
+OrdenesDeConsumoMedio (300 - 1000): El ticket estándar de una comida completa.
+
+OrdenesVIP_ConsumoAlto (> 1000): Mesas grandes, familias o celebraciones.
+
+PromedioArticulosPorBandeja: Promedio de platillos por cada orden. Insight de Negocio: Si es cercano a 1, el mesero no está ofreciendo bebidas ni extras (baja venta cruzada). Si es 3 o más, el up-selling es excelente.
+
+4. RendimientoPorDiaSemana (Mapa de Calor Acumulado)
+Agrupa todo el rango de fechas consultado por el nombre del día para identificar patrones de tráfico.
+
+Dia: Lunes, Martes, Miércoles, etc.
+
+FlujoDeOrdenes: Tráfico total de mesas/clientes en esos días.
+
+DineroIngresado: Facturación acumulada. Insight de Negocio: Útil para asignar personal. Si los viernes tienen el triple de flujo que los martes, sabes exactamente qué días necesitas programar más meseros y cocineros.
+
+5. EficienciaDeRotacion (Auditoría de Mesas)
+Métricas críticas para medir la velocidad del servicio en el local físico (Comedor).
+
+MesasDiferentesAtendidas: Cuántas mesas físicas se usaron.
+
+TotalServiciosEnMesa: Cuántas veces se ocuparon en total.
+
+EstadiaPromedioMinutos: Tiempo promedio que un cliente pasa sentado.
+
+EstadiaMasLargaRegistradaMinutos: El pico máximo de tiempo. Insight de Negocio: Si la estadía promedio es muy alta (ej. 150 minutos) pero el ticket promedio es bajo, los clientes están haciendo mucha "sobremesa" sin consumir, bloqueando la entrada de nuevos clientes.
+
+6. PlatillosMasVendidosPorSegmento (Ingeniería de Menú)
+El Top 5 de los productos estrella del negocio.
+
+SegmentoNegocio: Comedor o Eventos.
+
+NombrePlatillo: El nombre del producto.
+
+CantidadTotal: Unidades físicas vendidas.
+
+IngresoTotal: Dinero que aportó a la caja. Insight de Negocio: Un platillo puede venderse mucho (alta cantidad) pero generar poco dinero (bajo ingreso). Esto te permite identificar cuáles son las "Estrellas" (venden mucho y son caras) y cuáles los "Caballitos de batalla" (venden mucho pero son baratos).
+
+7 y 8. Top10_Comedor y Top10_Eventos (Récords de Facturación)
+Un listado puro de las 10 transacciones más grandes registradas en el rango de fechas.
+
+Muestra el OrdenId, la Fecha exacta, quién fue el Cliente y el MontoFacturado. Es ideal para tener a mano en el dashboard para auditorías rápidas o para premiar a los mejores clientes de eventos.
+
+9. DesgloseSemanal (Cronología de Series de Tiempo)
+El arreglo ideal para alimentar gráficos de líneas o barras en tu Front-end (como Chart.js o Recharts).
+
+Periodo: Etiqueta en texto (ej. "Semana del 01/05 al 07/05") lista para usar como título en el eje X de tu gráfico.
+
+RendimientoPorDiaSemana: Un sub-arreglo que contiene el día exacto (Fecha), el nombre (Dia), cuántas ventas hubo (FlujoDeOrdenes) y el dinero exacto de ese día (DineroIngresado). Te permite graficar la tendencia de crecimiento o caída del negocio semana a semana.
+
+10. ResumenEstadisticoFechas (Hitos y Predicciones)
+Métricas aisladas diseñadas para colocarse en "Tarjetas de Resumen" (Cards) en la parte superior de tu panel de administración.
+
+MejorDiaFacturacionAbsoluta: El día exacto (fecha) donde la caja registró su pico máximo de dinero.
+
+DiaConMejorPromedioDeVenta: El día en que se vendió menos cantidad, pero más caro (el ticket promedio más alto). Indica cuándo van los clientes con mayor poder adquisitivo.
+
+MejorDiaDeLaSemanaGeneral: Agarra la historia completa y te dice qué día de la semana (ej. Viernes) es históricamente el líder indiscutible en ventas, sumando su flujo total.
+
+*/

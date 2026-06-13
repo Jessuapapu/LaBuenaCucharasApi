@@ -1,22 +1,12 @@
 import datetime
 from fastapi import APIRouter, HTTPException, Query, Depends
-from pydantic import BaseModel
+from src.schemas.menus import *
 from src.services.menu_diario import service
 from typing import Optional
 from src.security.dependency import obtener_usuario_actual
 from src.models.Usuarios.models import Usuario
 
 router = APIRouter()
-
-class MenuIn(BaseModel):
-    day: datetime.date
-    nombre_platillo: str
-    monto: float
-
-
-class MenuUpdate(BaseModel):
-    nombre_platillo: str
-
 
 @router.get("/")
 async def obtener_menu(day: Optional[datetime.date] = Query(default=None)):

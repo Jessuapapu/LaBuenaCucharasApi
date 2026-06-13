@@ -27,7 +27,8 @@ class CatalogoPlatillos(SQLModel, table=True):
     IdCatalogoPlatillo: int | None = Field(default=None, primary_key=True)
     NombreCatalogoPlatillo: str = Field(nullable=False)
 
-class PlatillosIngredientes(SQLModel, table=True):
-    IdPlatillo: int | None = Field(default=None, foreign_key="platillos.IdPlatillo", primary_key=True)
-    IdIngrediente: int | None = Field(default=None, foreign_key="ingredientes.IdIngrediente", primary_key=True)
+class PlatillosEIngredientes(SQLModel, table=True):
+    IdRelacion: int = Field(primary_key=True)
+    IdPlatillo: int | None = Field(default=None, foreign_key="platillos.IdPlatillo")
+    IdIngrediente: int | None = Field(default=None, foreign_key="ingredientes.IdIngrediente")
 

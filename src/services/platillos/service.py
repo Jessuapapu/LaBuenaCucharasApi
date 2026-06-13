@@ -136,11 +136,10 @@ def actualizar_platillo_por_nombre(nombre_actual: str, nuevo_nombre: str | None 
     - Puede actualizar el nombre del platillo y/o su categoria.
     - Devuelve True si se actualiza correctamente, False si no existe o falla la categoria.
     """
-    from src.models.platillos.models import Platillos as PlatillosModel, CategoriaPlatillos as CategoriaPlatillosModel
 
     with Session(db_engine) as session:
         try:
-            statement = select(PlatillosModel).where(PlatillosModel.NombrePlatillo == nombre_actual)
+            statement = select(Platillos).where(Platillos.NombrePlatillo == nombre_actual)
             platillo = session.exec(statement).first()
 
             if not platillo:
@@ -157,13 +156,13 @@ def actualizar_platillo_por_nombre(nombre_actual: str, nuevo_nombre: str | None 
                     return False
 
                 # buscar relacion existente
-                stmt_cat = select(CategoriaPlatillosModel).where(CategoriaPlatillosModel.IdPlatillo == platillo.IdPlatillo)
+                stmt_cat = select(CategoriaPlatillos).where(CategoriaPlatillos.IdPlatillo == platillo.IdPlatillo)
                 relacion = session.exec(stmt_cat).first()
                 if relacion:
                     relacion.IdCatalogoPlatillo = id_categoria
                     session.add(relacion)
                 else:
-                    nueva_rel = CategoriaPlatillosModel(IdPlatillo=platillo.IdPlatillo, IdCatalogoPlatillo=id_categoria)
+                    nueva_rel = CategoriaPlatillos(IdPlatillo=platillo.IdPlatillo, IdCatalogoPlatillo=id_categoria)
                     session.add(nueva_rel)
 
             session.add(platillo)
@@ -182,5 +181,5 @@ def actualizar_platillo_por_nombre(nombre_actual: str, nuevo_nombre: str | None 
             raise e
 
 
-def relacion_platillo_categoria():
+def relacion_platillo_ingredientes():
     pass

@@ -139,7 +139,7 @@ def validarNuevosArchivos():
         for archivo in archivos:
             if '.sql' in archivo:
 
-                with open( RUTA_INICIO + 'SQL/' + archivo, 'r') as sql:
+                with open( RUTA_INICIO + 'SQL/' + archivo, 'r' , encoding='utf-8-sig') as sql:
                     
                     # El nombre se obtiene directamente desde el contenido del archivo y no del nombre para evitar inconsistencias 
                     NombreProceso =  sql.readline()

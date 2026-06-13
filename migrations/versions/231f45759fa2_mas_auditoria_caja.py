@@ -9,7 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-
+import sqlmodel
 
 # revision identifiers, used by Alembic.
 revision: str = '231f45759fa2'
@@ -30,9 +30,9 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_auditoria_transaciones_IdAuditoria_Transaciones'), 'auditoria_transaciones', ['IdAuditoria_Transaciones'], unique=False)
     op.alter_column('pago', 'MetodoPagos',
-               existing_type=sa.VARCHAR(length=13, collation='Modern_Spanish_CI_AS'),
+               existing_type=sa.VARCHAR(length=50, collation='Modern_Spanish_CI_AS'),
                type_=sa.Enum('TRANSFERENCIA', 'EFECTIVO', 'TARJETA_CREDITO', 'TARJETA_DEBITO', name='tipopago'),
-               nullable=False)
+               )
     # ### end Alembic commands ###
 
 
