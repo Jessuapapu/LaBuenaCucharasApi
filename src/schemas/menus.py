@@ -5,6 +5,7 @@ class MenuIn(BaseModel):
     day: datetime.date
     nombre_platillo: str
     monto: float
+    hora: datetime.time
 
 
 class MenuUpdate(BaseModel):

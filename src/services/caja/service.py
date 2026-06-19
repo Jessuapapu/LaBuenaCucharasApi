@@ -7,6 +7,8 @@ from src.config.database import db_engine
 import decimal
 from src.services.auditorias.services import registrar_auditoria_Caja
 from src.models.auditorias.types import TipoDeAccion
+from src.services.ordenes.service import obtener_orden
+from src.models.ordenes.types import EstadoOrden
 
 CajaMonitor = Caja()
 
@@ -118,7 +120,14 @@ def Reembolsar(IdOrden: int, Monto: float, razon: str):
 
             nuevoReembolso = Reembolsos(IdOrden=IdOrden, Monto=decimal.Decimal(Monto), Razones=razon)
             session.add(nuevoReembolso)
+            orden_a_cambiar = obtener_orden(IdOrden)
+
             session.commit()
+
+            
+            Anular_Cuenta(IdOrden)
+
+
             return True
         except Exception as e:
             session.rollback()

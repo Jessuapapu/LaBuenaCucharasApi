@@ -2,12 +2,11 @@ from decimal import Decimal
 from sqlmodel import Session, select, text
 import json
 from src.config.database import db_engine
+from src.models.insumos.models import DetallesRegistroInsumos
 
-from src.models.proveedores.models import (
-    Proveedores,
-    RegistroDeAbastecimiento,
-)
+from src.models.proveedores.models import *
 from src.models.proveedores.types import TipoDeProveedor
+from src.schemas.abastecimineto import *
 
 
 def obtener_proveedores():
@@ -46,7 +45,7 @@ def obtener_historial_abastecimiento():
 
 
 def registrar_abastecimiento(
-    costo_total: Decimal, id_proveedor: int, total_ingresado: int
+    costo_total: Decimal, id_proveedor: int, total_ingresado: int, Detalleabatecimiento: AbateciminetoIN
 ):
     with Session(db_engine) as session:
         nuevo_abastecimiento = RegistroDeAbastecimiento(
@@ -56,8 +55,30 @@ def registrar_abastecimiento(
         )
 
         session.add(nuevo_abastecimiento)
-        session.commit()
+        session.flush()
 
+        nuevo_detalle_insumo_lista = []
+
+        for insumo in Detalleabatecimiento.listaInsumos:
+            nuevo_detalle_insumo_lista.append(
+                DetallesRegistroInsumos(
+                    IdRegistroAbastecimiento=nuevo_abastecimiento.IdRegistro, IdInsumo= insumo.IdInsumo, TotalIngresado=insumo.TotalIngresado, CostoIndividual=insumo.CostoIndividual
+                )
+            )
+            
+        
+        nuevo_detalle_ingrediente_lista = []
+        for ingrediente in Detalleabatecimiento.listaIngredientes:
+            nuevo_detalle_ingrediente_lista.append(
+                DetallesRegistroIngredientes(
+                    IdRegistroAbastecimiento=nuevo_abastecimiento.IdRegistro,IdIngrediente=ingrediente.IdIngrediente,TotalIngresado=ingrediente.TotalIngresado, CostoIndividual= ingrediente.CostoIndividual
+                )
+            )
+        
+        session.add_all(nuevo_detalle_insumo_lista)
+        session.add_all(nuevo_detalle_ingrediente_lista)
+        session.commit()
+        
         return nuevo_abastecimiento
 
 

@@ -1,0 +1,23 @@
+{
+    "CambiosDeHora": {
+        "desayuno": {
+            "nombre": "desayuno",
+            "HoraInicio": "06:00:00",
+            "HoraFinal": "09:00:00",
+            "estado": true
+        },
+        "hola2": {
+            "nombre": "hola",
+            "HoraInicio": "01:29:00",
+            "HoraFinal": "23:00:00",
+            "estado": true
+        },
+        "hola": {
+            "nombre": "hola",
+            "HoraInicio": "00:00:00",
+            "HoraFinal": "01:28:00",
+            "estado": true
+        }
+    },
+    "PlatillosPredefinidosLista": {}
+}

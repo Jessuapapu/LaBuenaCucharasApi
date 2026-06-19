@@ -15,6 +15,9 @@ class MenuDiario(SQLModel, table=True):
     )
     Fecha: datetime.date = Field(nullable=False)
     Monto: int = Field(nullable=False, default=0)
+    Hora: datetime.time = Field()
+
+
 
 class CategoriaPlatillos(SQLModel, table=True):
     Id: int = Field(default=None, primary_key=True)

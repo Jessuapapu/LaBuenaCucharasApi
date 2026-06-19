@@ -20,7 +20,7 @@ async def health():
 app_router.include_router(auth.router)
 app_router.include_router(menu_diario.router, prefix="/menu")
 app_router.include_router(imagenes.router, prefix="/imagenes")
-app_router.include_router(comedor.router, prefix="/comedor")
+app_router.include_router(comedor.router, prefix="/comedor")    
 app_router.include_router(ordenes.router, prefix="/ordenes")
 
 

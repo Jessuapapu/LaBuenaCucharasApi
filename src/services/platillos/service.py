@@ -29,6 +29,7 @@ def obtener_platillos_service():
         for id_platillo, nombre_platillo, nombre_categoria in platillos_query:
             platillos.append(
                 {
+                    "id_platillo": id_platillo,
                     "nombre_platillo": nombre_platillo,
                     "nombre_categoria": nombre_categoria,
                 }
