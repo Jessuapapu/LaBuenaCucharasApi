@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from sqlmodel import Session, text
-
+import calendar
 from src.config.database import db_engine
 
 
@@ -19,7 +19,12 @@ def obtener_rango_semana(fecha_texto):
     
     return str(inicio_semana.date()), str(fin_semana.date())
 
+def obtener_mes():
+    fecha = datetime.now()
+    dias_maximos = calendar.monthrange(fecha.year, fecha.month)[1]
 
+    return (dias_maximos,fecha.month,fecha.year)
+    
 
 def obtener_plato_mas_vendido(FechaInicio: datetime | None = None, FechaFinal: datetime | None = None):
     with Session(db_engine) as session:
@@ -54,3 +59,41 @@ def obtener_plato_mas_vendido(FechaInicio: datetime | None = None, FechaFinal: d
             return None
 
         return listaPlatillos
+    
+def obtener_horas_mas_vendidas(FechaInicio: datetime | None = None, FechaFinal: datetime | None = None):
+    with Session(db_engine) as session:
+        try:
+            query = text("""
+                EXEC pa_Analitica_Top5_Horas_Comedor
+                    @FechaInicio = :fecha_inicio,
+                    @FechaFin = :fecha_fin
+            """)
+            if not FechaInicio and not FechaFinal:
+                dias_maximos, mes, año = obtener_mes()
+                print(dias_maximos,mes,año, date(año,mes,dias_maximos))
+
+                FechaInicio, FechaFinal = (date(año,mes,1), date(año,mes,dias_maximos))
+
+            elif FechaInicio and not FechaFinal:
+                FechaFinal = datetime.now()
+
+            valores = {
+                "fecha_inicio": FechaInicio,
+                "fecha_fin": FechaFinal,          
+            }
+
+            resultados = session.exec(query, params=valores).mappings().all()
+            listaHoras = []
+            for row in resultados:
+                listaHoras.append({
+                    'hora': row.HoraDelDia,
+                    'TotalOrdenes': row.TotalOrdenesHistoricas,
+                    'DiasLaborados': row.DiasLaboradosEnEsaHora,
+                    'PromedioOrdenes': row.PromedioOrdenesPorDia
+                })
+
+
+        except:
+           return None
+
+        return listaHoras

@@ -1,5 +1,5 @@
 from decimal import Decimal
-from sqlmodel import Session, select, text
+from sqlmodel import Session, select, text, desc
 import json
 from src.config.database import db_engine
 from src.models.insumos.models import DetallesRegistroInsumos
@@ -38,7 +38,7 @@ def registrar_proveedor(nombre: str, direccion: str, tipo: TipoDeProveedor):
 
 def obtener_historial_abastecimiento():
     with Session(db_engine) as session:
-        statement = select(RegistroDeAbastecimiento)
+        statement = select(RegistroDeAbastecimiento).order_by(desc(RegistroDeAbastecimiento.IdRegistro))
         historial = session.exec(statement).all()
 
         return historial

@@ -5,6 +5,7 @@ from src.security.dependency import obtener_usuario_actual
 from src.models.Usuarios.models import Usuario
 from src.services.ordenes import service
 import datetime
+import calendar
 
 router = APIRouter()
 
@@ -63,6 +64,24 @@ async def obtener_conteo_Ordenes_semanal():
 
 
 @router.get("/platillos/conteo")
-async def obtener_platillos_populares():
-    platillos = service.obtener_contador_platillos()
+async def obtener_platillos_populares(
+    fechaInicio: datetime.date | None = Query(None, description="Fecha Inicio"),
+    fechaFinal: datetime.date | None  = Query(None, description="Fecha final")
+    ):
+
+    if not fechaFinal and not fechaInicio:
+        # Fecha de referencia (ejemplo: fecha actual)
+        fecha_actual = datetime.datetime.now()
+
+        # 1. Obtener la fecha de inicio de mes
+        inicio_mes = fecha_actual.replace(day=1)
+
+        # 2. Obtener el número de días del mes para el año y mes dados
+        _, ultimo_dia = calendar.monthrange(fecha_actual.year, fecha_actual.month)
+        fin_mes = fecha_actual.replace(day=ultimo_dia)
+
+        platillos = service.obtener_contador_platillos(inicio_mes, fin_mes)
+        return platillos
+    
+    platillos = service.obtener_contador_platillos(fechaInicio, fechaFinal)
     return platillos

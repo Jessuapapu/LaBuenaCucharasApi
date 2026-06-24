@@ -48,6 +48,6 @@ BEGIN
         AND (@Monto IS NULL OR F.MontoTotal >= @Monto)
         AND (@MontoFin IS NULL OR F.MontoTotal <= @MontoFin)
         AND (@CantidadTotal IS NULL OR F.CantidadTotal = @CantidadTotal)
-    ORDER BY f.IdFactura
+    ORDER BY f.IdFactura DESC
     OFFSET (@Pagina - 1) * @Rows ROWS FETCH NEXT @Rows ROWS ONLY
 END

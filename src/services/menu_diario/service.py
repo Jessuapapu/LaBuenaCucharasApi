@@ -112,9 +112,8 @@ def obtener_menu_dia_hoy():
 
             horaActual = datetime.datetime.now().time()
             for cambios in config_dict.CambiosDeHora.values():
-                
-                print(horaActual, cambios.HoraInicio, horaActual, cambios.HoraFinal)
-                print(horaActual >= cambios.HoraInicio, horaActual < cambios.HoraFinal)
+                if not cambios.estado:
+                    continue
 
                 if horaActual >= cambios.HoraInicio and horaActual < cambios.HoraFinal:
                     RangoDeHora = cambios
@@ -152,7 +151,6 @@ def crear_menu_service(day: datetime.date, hora:datetime.time, nombre_platillo: 
         raise ValueError("El platillo con el nombre ingresado no existe")
 
     nuevo_menu = MenuDiario(Fecha=day, IdPlatillo=id_platillo,Monto=monto, Hora=hora)
-    print(nuevo_menu)
     with Session(db_engine) as session:
         try:
             session.add(nuevo_menu)
@@ -200,6 +198,13 @@ def editar_menu_service(id_menu, hora:datetime.time, nombre_platillo: str, usern
 
 def nuevo_cambio_de_hora(Nombre: str, HoraInicio: datetime.datetime.hour, HoraFinal: datetime.datetime.hour):
     cargar_json_menu_config()
+    for cambio in config_dict.CambiosDeHora.values():
+        if not cambio.estado:
+            continue
+
+        if HoraInicio >= cambio.HoraInicio and HoraFinal < cambio.HoraFinal:
+            return False
+    
     config_dict.CambiosDeHora[Nombre] = CambioDeHoraModel(nombre=Nombre,HoraInicio=HoraInicio, HoraFinal=HoraFinal)
 
     Guardar_json()
@@ -208,28 +213,45 @@ def editar_cambio_de_hora(
         Nombre: str, NombreNuevo:str = None, HoraInicio: datetime.datetime.hour = None, HoraFinal: datetime.datetime.hour = None,
         Estado: bool = None
         ):
+    
     cargar_json_menu_config()
-    if NombreNuevo:
-        config_dict.CambiosDeHora[NombreNuevo] = config_dict.CambiosDeHora[Nombre]
-        config_dict.CambiosDeHora[NombreNuevo].HoraInicio = HoraInicio if HoraInicio else config_dict.CambiosDeHora[Nombre].HoraInicio
-        config_dict.CambiosDeHora[NombreNuevo].HoraFinal= HoraFinal if HoraFinal else config_dict.CambiosDeHora[Nombre].HoraFinal
-        config_dict.CambiosDeHora[NombreNuevo].estado = Estado if Estado else config_dict.CambiosDeHora[Nombre].estado
 
-        config_dict.CambiosDeHora.pop(Nombre)
+    try:
+        for cambios in config_dict.CambiosDeHora.values():
+            if not cambios.estado:
+                continue
+            
+            if (cambios.nombre != Nombre and
+                ((HoraInicio and (HoraInicio >= cambios.HoraInicio and HoraInicio < cambios.HoraFinal)) or 
+                 (HoraFinal and (HoraFinal >= cambios.HoraInicio and HoraFinal < cambios.HoraFinal)))):
+                return False
+        
+
+        if NombreNuevo:
+            config_dict.CambiosDeHora[NombreNuevo] = NombreNuevo
+            config_dict.CambiosDeHora[NombreNuevo].HoraInicio = HoraInicio if HoraInicio else config_dict.CambiosDeHora[Nombre].HoraInicio
+            config_dict.CambiosDeHora[NombreNuevo].HoraFinal= HoraFinal if HoraFinal else config_dict.CambiosDeHora[Nombre].HoraFinal
+            config_dict.CambiosDeHora[NombreNuevo].estado = Estado if Estado else config_dict.CambiosDeHora[Nombre].estado
+
+            config_dict.CambiosDeHora.pop(Nombre)
+            Guardar_json()
+            return True
+
+        config_dict.CambiosDeHora[Nombre].HoraInicio = HoraInicio if HoraInicio else config_dict.CambiosDeHora[Nombre].HoraInicio
+        config_dict.CambiosDeHora[Nombre].HoraFinal = HoraFinal if HoraFinal else config_dict.CambiosDeHora[Nombre].HoraFinal
+        config_dict.CambiosDeHora[Nombre].estado = Estado if Estado else config_dict.CambiosDeHora[Nombre].estado
         Guardar_json()
         return True
+    
 
-    config_dict.CambiosDeHora[Nombre].HoraInicio = HoraInicio if HoraInicio else config_dict.CambiosDeHora[Nombre].HoraInicio
-    config_dict.CambiosDeHora[Nombre].HoraFinal = HoraFinal if HoraFinal else config_dict.CambiosDeHora[Nombre].HoraFinal
-    config_dict.CambiosDeHora[Nombre].estado = Estado if Estado else config_dict.CambiosDeHora[Nombre].estado
-    Guardar_json()
-    return True
+    except:
+        return False
 
 
 def eliminar_cambio_de_hora(Nombre: str):
     cargar_json_menu_config()
     try:
-        config_dict.CambiosDeHora.popitem(config_dict.CambiosDeHora[Nombre])
+        config_dict.CambiosDeHora.pop(config_dict.CambiosDeHora[Nombre])
         return True
     
     except:

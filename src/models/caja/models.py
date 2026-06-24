@@ -144,8 +144,10 @@ class Caja():
     def CancelarOrden(self, IdOrden: int):
         if not self.validarId(IdOrden):
             return False
+        
         if self.obtener_monto(IdOrden).get('MontoRestante', 1) > 0:
             return False # No se puede dar por cancelada/pagada si aún debe
+        
         self.ListaOrdenesAtendidas[IdOrden] = self.ListaOrdenesAtender.pop(IdOrden)
         return self.ListaOrdenesAtendidas[IdOrden].to_dict()
 

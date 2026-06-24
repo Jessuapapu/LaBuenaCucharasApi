@@ -3,6 +3,7 @@ from src.models.facturas.models import (
     Facturas
 )
 
+import calendar
 from src.models.ordenes.models import Ordenes, DetallesOrdenes
 from src.models.ordenes.types import EstadoOrden
 from fastapi import HTTPException
@@ -371,29 +372,39 @@ def conteo_Ordenes_semanal():
         return conteo_semanal
 
 
-def obtener_contador_platillos():
-    with Session(db_engine) as session:
-        statement = (
-            select(
-                Platillos.NombrePlatillo,
-                func.sum(DetallesOrdenes.CantidadPlatillo).label("total_vendido"),
-            )
-            .select_from(DetallesOrdenes)
-            .join(Platillos)
-            .group_by(Platillos.NombrePlatillo)
-            .order_by(func.sum(DetallesOrdenes.CantidadPlatillo).desc())
-        )
+def obtener_contador_platillos(diaInicio: datetime.date | None = None, diaFinal: datetime.date| None = None):
+    try:
+        if diaFinal == None:
+            diaFinal = datetime.datetime.now().date()
 
-        query = session.exec(statement).all()
-
-        platillos_populares = []
-
-        for nombre_platillo, total_vendido in query:
-            platillos_populares.append(
-                {
-                    "nombre_platillo": nombre_platillo,
-                    "total_vendido": total_vendido,
-                }
+        with Session(db_engine) as session:
+            statement = (
+                select(
+                    Platillos.NombrePlatillo,
+                    func.sum(DetallesOrdenes.CantidadPlatillo).label("total_vendido"),
+                )
+                .select_from(DetallesOrdenes)
+                .join(Platillos)
+                .join(Ordenes)
+                .where(cast(Ordenes.Fecha, Date).between(diaInicio, diaFinal))
+                .group_by(Platillos.NombrePlatillo)
+                .order_by(func.sum(DetallesOrdenes.CantidadPlatillo).desc())
             )
 
-        return platillos_populares
+
+        
+            query = session.exec(statement).all()
+
+            platillos_populares = []
+
+            for nombre_platillo, total_vendido in query:
+                platillos_populares.append(
+                    {
+                        "nombre_platillo": nombre_platillo,
+                        "total_vendido": total_vendido,
+                    }
+                )
+
+            return platillos_populares
+    except: 
+        return None

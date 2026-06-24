@@ -21,6 +21,7 @@ async def obtener_menu(day: Optional[datetime.date] = Query(default=None)):
 
 @router.get("/hoy")
 async def obtener_menu_hoy():    
+    print(datetime.datetime.now().date())
     menu = service.obtener_menu_dia_hoy()
     return menu
 

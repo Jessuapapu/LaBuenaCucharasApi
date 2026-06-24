@@ -17,6 +17,7 @@ def listar_clientes():
     with Session(db_engine) as session:
         statement = (
             select(
+                Clientes.IdCliente,
                 Clientes.NombreCliente,
                 ClienteCorreo.CorreoElectronico,
                 ClienteDireccion.Dirreccion,
@@ -35,13 +36,14 @@ def listar_clientes():
 
         clientes = []
 
-        for nombre_cliente, direccion_cliente, correo, telefono in clientes_query:
+        for id_cliente, nombre_cliente, correo, direccion_cliente, telefono in clientes_query:
             clientes.append(
                 {
+                    "IdCliente": id_cliente,
                     "nombre": nombre_cliente,
                     "direccion": direccion_cliente,
                     "correo": correo,
-                    "telefono": telefono,
+                    "telefono": telefono
                 }
             )
 
