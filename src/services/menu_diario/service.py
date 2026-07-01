@@ -158,6 +158,7 @@ def crear_menu_service(day: datetime.date, hora:datetime.time, nombre_platillo: 
         except Exception as e:
             session.rollback()
             return e
+            
     # Auditoría: creación de menu/platillo en menú diario
     if username and id_platillo is not None:
         try:

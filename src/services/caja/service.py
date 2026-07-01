@@ -1,4 +1,5 @@
-from src.models.ordenes import models as orden
+from src.models.ordenes.models import *
+from src.models.ordenes.types import *
 from src.models.caja.models import Reembolsos, Caja, Pago, ReferenciaPago
 from src.services.ordenes import service as OrdenesServices
 from src.models.ordenes.types import *
@@ -43,7 +44,12 @@ def Mandar_a_caja(IdOrden: int, Monto: float) -> dict | None:
 def Pagar_cuenta(IdOrden: int, Monto: float, Metodo: str, Referencia: str = ""):
     if not CajaMonitor.HoraApertura:    
         return False
-    return CajaMonitor.Pagar(IdOrden=IdOrden, Monto=Monto, metodoPago=Metodo, referencia=Referencia)
+    estado = CajaMonitor.Pagar(IdOrden=IdOrden, Monto=Monto, metodoPago=Metodo, referencia=Referencia)
+    if not estado:
+        return False
+    
+    if estado <= 0.0:
+        return Cancelar_Cuenta(IdOrden=IdOrden)
     
 def Cancelar_Cuenta(IdOrden: int):
     # Esto ocurre cuando la cuenta ya llegó a 0 y se manda a guardar en BD
@@ -66,7 +72,17 @@ def Cancelar_Cuenta(IdOrden: int):
                         Nueva_Referencia = ReferenciaPago(IdPago=Nuevo_pago.IdPago, referencia=pago['referencia'])
                         session.add(Nueva_Referencia)
 
+            statement = select(Ordenes).where(Ordenes.IdOrdenes == IdOrden)
+            orden_cancelada = session.exec(statement).first()
+
+            if not orden_cancelada:
+                return None
+            
+            orden_cancelada.Estado = EstadoOrden.ENTREGADO
+            session.add(orden_cancelada)
+            
             session.commit()
+
             return True
 
         except Exception as e:

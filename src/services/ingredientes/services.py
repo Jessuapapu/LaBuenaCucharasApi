@@ -1,12 +1,12 @@
 from src.models.ingredientes.modes import Ingredientes
 from src.models.platillos.models import *
 from src.services.platillos.service import *
-from sqlmodel import Session, select
+from sqlmodel import Session, select,desc
 from src.config.database import db_engine
 
 def obtener_ingredientes():
     with Session(db_engine) as session:
-        statement = select(Ingredientes)
+        statement = select(Ingredientes).order_by(desc(Ingredientes.IdIngrediente))
 
         result = session.exec(statement).all()
 
@@ -108,8 +108,6 @@ def crear_relacion_platillo_ingrediente(listaIngrediente: list[int], IdPlatillo:
 
                 listaIngrediente.append(PlatillosEIngredientes(IdPlatillo=IdPlatillo,IdIngrediente=id))
 
-
-            
             session.add_all(listaRelaciones)
             session.commit()
             

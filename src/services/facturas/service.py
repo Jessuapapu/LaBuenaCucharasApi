@@ -70,9 +70,8 @@ def obtener_facturas_ordenes(
                     "cantidad_total": row.get("CantidadTotal"),
                     "estado_factura": row.get("Estado"),
                     "fecha_factura": row.get("Fecha"),
-                    "cliente": {
-                        "nombre_cliente": row.get("NombreCliente"),
-                    }
+                    "nombre_cliente": row.get("NombreCliente"),
+                    
                 })
         except:
             HTTPException(404,{"NO ENCONTRADO"})
