@@ -101,7 +101,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('IdAuditoria_Platillos')
     )
     op.create_index(op.f('ix_auditoria_pagos_IdAuditoria_Platillos'), 'auditoria_pagos', ['IdAuditoria_Platillos'], unique=False)
-    op.drop_table('sysdiagrams')
+#     op.drop_table('sysdiagrams')
     op.add_column('auditoria_comedor', sa.Column('Username', sqlmodel.sql.sqltypes.AutoString(), nullable=False))
     op.create_index(op.f('ix_auditoria_comedor_IdAuditoria_Comedor'), 'auditoria_comedor', ['IdAuditoria_Comedor'], unique=False)
     op.create_index(op.f('ix_auditoria_mesas_IdAuditoria_Mesas'), 'auditoria_mesas', ['IdAuditoria_Mesas'], unique=False)
