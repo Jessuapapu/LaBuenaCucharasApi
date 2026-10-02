@@ -11,3 +11,4 @@ class Usuario(SQLModel, table=True):
     rol: Rol
     activo: bool = Field(default=True)
     fecha_creacion: datetime = Field(default_factory=datetime.utcnow)
+    correo: str = Field(nullable= False, max_length=350)
