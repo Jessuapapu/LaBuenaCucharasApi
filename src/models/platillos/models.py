@@ -5,7 +5,7 @@ import decimal
 
 class Platillos(SQLModel, table=True):
     IdPlatillo: int | None = Field(default=None, primary_key=True)
-    NombrePlatillo: str = Field(nullable=False)
+    NombrePlatillo: str = Field(nullable=False, max_length=200)
 
 
 class MenuDiario(SQLModel, table=True):
@@ -18,7 +18,6 @@ class MenuDiario(SQLModel, table=True):
     Hora: datetime.time = Field()
 
 
-
 class CategoriaPlatillos(SQLModel, table=True):
     Id: int = Field(default=None, primary_key=True)
     IdPlatillo: int | None = Field(default=None, foreign_key="platillos.IdPlatillo")
@@ -28,10 +27,5 @@ class CategoriaPlatillos(SQLModel, table=True):
 
 class CatalogoPlatillos(SQLModel, table=True):
     IdCatalogoPlatillo: int | None = Field(default=None, primary_key=True)
-    NombreCatalogoPlatillo: str = Field(nullable=False)
-
-class PlatillosEIngredientes(SQLModel, table=True):
-    IdRelacion: int = Field(primary_key=True)
-    IdPlatillo: int | None = Field(default=None, foreign_key="platillos.IdPlatillo")
-    IdIngrediente: int | None = Field(default=None, foreign_key="ingredientes.IdIngrediente")
+    NombreCatalogoPlatillo: str = Field(nullable=False, max_length=150)
 

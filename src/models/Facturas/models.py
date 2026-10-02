@@ -10,7 +10,6 @@ class Facturas(SQLModel, table=True):
     CantidadTotal: int = Field(nullable=False)
     Estado: EstadoFactura = Field(nullable=False)
 
-
 class FacturasOrdenes(SQLModel, table=True):
     Id: int  = Field(primary_key=True)
     IdFactura: int  = Field(foreign_key = "facturas.IdFactura")
