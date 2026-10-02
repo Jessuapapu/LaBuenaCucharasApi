@@ -8,8 +8,8 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY_API")
 ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = 480
 
+ACCESS_TOKEN_EXPIRE_MINUTES = 480
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hashear_password(password: str) -> str:

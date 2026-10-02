@@ -7,7 +7,7 @@ from src.services.ordenes import service
 import datetime
 import calendar
 
-router = APIRouter()
+router = APIRouter(tags=["Ordenes"])
 
 
 @router.get("/")

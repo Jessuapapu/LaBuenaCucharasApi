@@ -4,8 +4,7 @@ from src.models.imagenes.models import *
 from src.services.platillos import service as PlatillosServices
 from sqlmodel import Session, text, select
 import json
-from src.services.auditorias.services import registrar_auditoria_imagen
-from src.models.auditorias.types import TipoDeAccion
+
 
 
 CantidadPlatillo = {}
@@ -55,23 +54,17 @@ def subir_imagen(extension: str, NombrePlatillo:str, imagen_bytes: bytes, imagen
         return False
     
     NumeroDeImagen = CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] if NumeroImagen == 0 else NumeroImagen
-    print(NumeroImagen)
     NombreDeArchivo = f"{NombrePlatillo}{NumeroDeImagen}.{extension}"
     ApiSupebase.storage.from_("Platillos").upload(file=imagen_bytes, path=NombreDeArchivo, file_options={"content-type": imagen_content})
     url_publica = ApiSupebase.storage.from_("Platillos").get_public_url(NombreDeArchivo)
-    print(url_publica)
+
     nueva_imagen = ImagenesPlatillos(IdPlatillo=IdPlatillo,UrlImagen=url_publica)
     with Session(db_engine) as session:
         session.add(nueva_imagen)
         session.commit()
     CantidadPlatillo[str(IdPlatillo)]["CANTIDAD"] += 1 if not NumeroImagen else 0
     Guardar_json()
-    # Auditoría: imagen creada
-    if username:
-        try:
-            registrar_auditoria_imagen(username, nueva_imagen.IdImagen if hasattr(nueva_imagen, 'IdImagen') else 0, TipoDeAccion.CREAR)
-        except Exception:
-            pass
+
         
     return True
 
@@ -146,12 +139,7 @@ def actualizar_imagen(
     if not subir_imagen(imagen_bytes = imagen_bytes, extension= extension, imagen_content= imagen_content, NombrePlatillo=CantidadPlatillo[str(Idplato)]["NOMBRE"], NumeroImagen=NumeroImagen, username=username):
         return True
 
-    # Auditoría: imagen actualizada
-    if username:
-        try:
-            registrar_auditoria_imagen(username, NumeroImagen, TipoDeAccion.ACTUALIZAR)
-        except Exception:
-            pass
+
     
     return True
 
@@ -177,11 +165,6 @@ def eliminar_imagen(NumeroImagen: int, IdPlatillo: int | None = None, NombrePlat
             if not ApiSupebase.storage.from_("Platillos").remove(archivo['name']):
                 return False
 
-    # Auditoría: imagen eliminada
-    if username:
-        try:
-            registrar_auditoria_imagen(username, NumeroImagen, TipoDeAccion.ELIMINAR)
-        except Exception:
-            pass
+
 
     return True

@@ -1,16 +1,13 @@
 import datetime
 from src.models.clientes.models import (
     Clientes,
-    ClienteCorreo,
-    ClienteTelefono,
     ClienteDireccion,
     Contrato
 )
 from src.models.clientes.types import EstadoContrato
 from sqlmodel import Session, select, text
 from src.config.database import db_engine
-from src.services.auditorias.services import registrar_auditoria_cliente
-from src.models.auditorias.types import TipoDeAccion
+
 
 
 def listar_clientes():
@@ -19,14 +16,10 @@ def listar_clientes():
             select(
                 Clientes.IdCliente,
                 Clientes.NombreCliente,
-                ClienteCorreo.CorreoElectronico,
-                ClienteDireccion.Dirreccion,
-                ClienteTelefono.Telefono,
             )
             .select_from(Clientes)
-            .join(ClienteCorreo)
-            .join(ClienteTelefono)
             .join(ClienteDireccion)
+
         )
 
         clientes_query = session.exec(statement).all()
@@ -35,13 +28,12 @@ def listar_clientes():
             return None
 
         clientes = []
-
-        for id_cliente, nombre_cliente, correo, direccion_cliente, telefono in clientes_query:
+        print(clientes_query)
+        for id_cliente, nombre_cliente, correo, telefono in clientes_query:
             clientes.append(
                 {
                     "IdCliente": id_cliente,
                     "nombre": nombre_cliente,
-                    "direccion": direccion_cliente,
                     "correo": correo,
                     "telefono": telefono
                 }
@@ -55,33 +47,15 @@ def crear_cliente(
 ):
     with Session(db_engine) as session:
         try:
-            nuevo_cliente = Clientes(NombreCliente=nombre)
-            session.add(nuevo_cliente)
-            session.flush()
-
-            if correo is not None and nuevo_cliente.IdCliente is not None:
-                nuevo_correo = ClienteCorreo(
-                    IdCliente=nuevo_cliente.IdCliente, CorreoElectronico=correo
-                )
-                session.add(nuevo_correo)
-
-            if telefono is not None and nuevo_cliente.IdCliente is not None:
-                nuevo_telefono = ClienteTelefono(
-                    IdCliente=nuevo_cliente.IdCliente, Telefono=telefono
-                )
-                session.add(nuevo_telefono)
+            nuevo_cliente = Clientes(NombreCliente=nombre, Telefono=telefono, CorreoElectronico=correo)
+            session.add(nuevo_cliente) 
+            session.flush() 
 
             if direccion is not None and nuevo_cliente.IdCliente is not None:
                 nuevo_direccion = ClienteDireccion(IdCliente= nuevo_cliente.IdCliente, Dirreccion= direccion)
                 session.add(nuevo_direccion)
             session.commit()
 
-            # Registrar auditoría si se proporcionó username
-            if username and nuevo_cliente.IdCliente is not None:
-                try:
-                    registrar_auditoria_cliente(username, nuevo_cliente.IdCliente, TipoDeAccion.CREAR)
-                except Exception:
-                    pass
 
             return nuevo_cliente
         except Exception:
@@ -152,12 +126,6 @@ def registrar_contrato_cliente(
         try:
             session.add(nuevo_contrato)
             session.commit()
-            # Auditoría de creación de cliente/contrato
-            if username and nuevo_contrato.IdCliente is not None:
-                try:
-                    registrar_auditoria_cliente(username, nuevo_contrato.IdCliente, TipoDeAccion.CREAR)
-                except Exception:
-                    pass
         except Exception as e:
             session.rollback()
             raise e
@@ -178,12 +146,7 @@ def actualizar_estado_contrato(numero_contrato: int, nuevo_estado: EstadoContrat
         try:
             session.add(contrato)
             session.commit()
-            # Auditoría de actualización
-            if username and contrato.IdCliente is not None:
-                try:
-                    registrar_auditoria_cliente(username, contrato.IdCliente, TipoDeAccion.ACTUALIZAR)
-                except Exception:
-                    pass
+
         except Exception as e:
             session.rollback()
             raise e

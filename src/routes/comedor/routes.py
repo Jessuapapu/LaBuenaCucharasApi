@@ -5,7 +5,7 @@ from src.security.dependency import obtener_usuario_actual
 from src.models.Usuarios.models import Usuario
 from src.config.socket import sio
 
-router = APIRouter()
+router = APIRouter(tags=["Comedor"])
 
 Estado = False
 

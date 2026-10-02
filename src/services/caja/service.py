@@ -7,7 +7,6 @@ from sqlmodel import Session, text, select
 from src.config.database import db_engine
 import decimal
 from src.services.auditorias.services import registrar_auditoria_Caja
-from src.models.auditorias.types import TipoDeAccion
 from src.services.ordenes.service import obtener_orden
 from src.models.ordenes.types import EstadoOrden
 

@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 import jwt
-from sqlmodel import Session
+from sqlmodel import Session, select
 from src.config.database import db_engine
 from src.models.Usuarios import Usuario
 from .security import SECRET_KEY, ALGORITHM
@@ -20,19 +20,20 @@ async def obtener_usuario_actual(
     )
     
     try:
-        # Decodificamos el token JWT
+    #Decodificamos el token JWT
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         usuario_id: str = payload.get("sub")
-        
         if usuario_id is None:
             raise credenciales_exception
-            
-    except jwt.PyJWTError:
-        raise credenciales_exception
 
+    except jwt.PyJWTError as e:
+        raise credenciales_exception
+    
     # Consulta directa a la base de datos usando SQLModel por ID
     with Session(db_engine) as session:
-        usuario = session.get(Usuario, int(usuario_id))
+        statement = select(Usuario).where(Usuario.id == usuario_id)
+        usuario = session.exec(statement).first()
+
     
     # Si el token es válido pero el usuario ya no existe en la BD
     if usuario is None:

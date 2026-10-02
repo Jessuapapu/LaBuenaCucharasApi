@@ -7,7 +7,7 @@ from src.security.dependency import obtener_usuario_actual
 from src.models.Usuarios.models import Usuario
 from src.models.platillos.types import *
 
-router = APIRouter()
+router = APIRouter(tags=["Insumos"])
 
 @router.get("/")
 async def obtener_menu(day: Optional[datetime.date] = Query(default=None)):
@@ -21,7 +21,6 @@ async def obtener_menu(day: Optional[datetime.date] = Query(default=None)):
 
 @router.get("/hoy")
 async def obtener_menu_hoy():    
-    print(datetime.datetime.now().date())
     menu = service.obtener_menu_dia_hoy()
     return menu
 
@@ -30,7 +29,6 @@ async def obtener_menu_hoy():
 @router.post("/")
 async def crear_menu(payload: MenuIn, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     try:
-        print(payload.hora)
         service.crear_menu_service(
             day=payload.day, nombre_platillo=payload.nombre_platillo, hora=payload.hora, monto=payload.monto, username=usuario_actual.username
         )

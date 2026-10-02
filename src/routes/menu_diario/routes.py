@@ -7,7 +7,7 @@ from src.security.dependency import obtener_usuario_actual
 from src.models.Usuarios.models import Usuario
 from src.models.platillos.types import *
 
-router = APIRouter()
+router = APIRouter(tags=["Menus"])
 
 @router.get("/")
 async def obtener_menu(day: Optional[datetime.date] = Query(default=None)):

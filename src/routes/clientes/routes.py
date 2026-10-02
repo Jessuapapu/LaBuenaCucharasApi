@@ -5,7 +5,7 @@ from src.models.Usuarios.models import Usuario
 import datetime
 from src.schemas.clientes import *
 
-router = APIRouter()
+router = APIRouter(tags=["Clientes"])
 
 
 @router.get("/")

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query
 from src.services.ingredientes import services as serviceIngredientes
 from src.schemas.ingredientes import *
 
-router = APIRouter()
+router = APIRouter(tags=["Ingredientes"])
 
 @router.get('/')
 def obtener_ingredientes(IdIngrediente: int | None = Query(description='Id del Ingrediente', default=None),

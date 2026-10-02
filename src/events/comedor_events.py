@@ -1,13 +1,12 @@
 from src.config.socket import sio
 from src.services.ordenes import service as ordenesService
 from src.services.comedor import service as comedorService
-from src.services.caja import service as cajaService # 🆕 Importamos el servicio de Caja
+from src.services.caja import service as cajaService 
 from src.models.comedor import models as comedor
 from src.schemas.ComedorPedidos import OrdenComedorIN
 from src.schemas.pedidos import Detalles
 from src.models.ordenes.types import EstadoOrden
-from src.services.auditorias.services import registrar_auditoria_orden
-from src.models.auditorias.types import TipoDeAccion
+
 from decimal import Decimal
 import datetime
 
@@ -35,11 +34,6 @@ async def nueva_orden(sid, data):
 
         nueva_orden = ordenesService.crear_orden(datetime.datetime.now(), detalle=Detalles, Id_cliente=1)
         MC.agregar_orden(int(nueva_orden.IdOrdenes), NumeroMesa)
-
-        try:
-            registrar_auditoria_orden(username, nueva_orden.IdOrdenes, TipoDeAccion.CREAR)
-        except Exception:
-            pass
 
         if not nueva_orden:
             await sio.emit("error_generar", {"MENSAJE": "ERROR AL GENERAR LA ORDEN"}, to=sid)
@@ -76,10 +70,6 @@ async def actualizar_orden(sid, data):
                 cajaService.Actualizar_Monto(id_orden, total_nuevo)
                 await sio.emit("actualizar_caja", cajaService.obtener_Caja()) # Avisamos a la caja del cambio
 
-        try:
-            registrar_auditoria_orden(username, id_orden, TipoDeAccion.ACTUALIZAR)
-        except Exception:
-            pass
 
         if not orden_actualizada:
             await sio.emit("error_actualizar", {"MENSAJE": "ERROR AL ACTUALIZAR LA BD"}, to=sid)
@@ -113,11 +103,6 @@ async def cancelar_orden(sid, data):
         MC.eliminar_orden(IdMesa= NumeroMesa, IdOrden=id_orden)
         cajaService.CajaMonitor.AnularOrden(id_orden)
 
-        # Auditoría: cancelación/eliminación desde websocket
-        try:
-            registrar_auditoria_orden(username, id_orden, TipoDeAccion.ELIMINAR)
-        except Exception:
-            pass
         if not orden_actualizado:
             await sio.emit("error_actualizar",{"MENSAJE": "ERROR AL ACTUALIZAR LA ORDEN MESA"}, to=sid)
             comedor.logs.add_log("ERROR AL GENERAR LA ORDEN MESA PUEDE SER LOS DATOS",'ERROR')

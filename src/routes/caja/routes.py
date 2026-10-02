@@ -8,7 +8,7 @@ from src.config.socket import sio
 from src.services.comedor import service as comedorService
 MC = comedorService.MC
 
-router = APIRouter()
+router = APIRouter(tags=["Caja"])
 
 @router.put('/abrir')
 async def abrir_Caja(usuario_actual: Usuario = Depends(obtener_usuario_actual)):

@@ -7,7 +7,7 @@ from src.schemas.facturas import facturaIn
 
 
 
-router = APIRouter()
+router = APIRouter(tags=["Facturas"])
 
 @router.get("/")
 async def obtener_facturas_endpoint(

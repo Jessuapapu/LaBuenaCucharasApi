@@ -1,5 +1,6 @@
 from sqlmodel import Session, select
 from src.models.Usuarios import Usuario
+from src.models.Usuarios.types import Rol
 from src.security.security import verificar_password, crear_token_acceso, hashear_password
 from src.config.database import db_engine
 from sqlmodel import select
@@ -28,13 +29,13 @@ def generar_token_para_usuario(usuario: Usuario) -> str:
     payload = {
         "sub": str(usuario.id),
         "username": usuario.username,
-        "rol": usuario.rol
+        "rol": usuario.rol.value if hasattr(usuario.rol, 'value') else usuario.rol
     }
     return crear_token_acceso(data=payload)
 
-def registrar_usuario(user: str, contra_plano: str, rol: str):
+def registrar_usuario(user: str, contra_plano: str, rol: str, correo: str):
     contra_crifado = hashear_password(contra_plano)
-    nuevo_usuario = Usuario(username=user,password_hash=contra_crifado,rol=rol,activo=True,fecha_creacion=datetime.datetime.now())
+    nuevo_usuario = Usuario(username=user,password_hash=contra_crifado,rol=rol,activo=True,fecha_creacion=datetime.datetime.now(), correo=correo)
     try:
         with Session(db_engine) as session:
             session.add(nuevo_usuario)
@@ -104,4 +105,8 @@ def obtener_todos_usuarios():
 
             return listaUsuarios
 
-        
+def validar_rol(usuario: dict, rol: Rol | str, detalle: str):
+    if usuario.rol  != rol:
+            return True
+
+    return False

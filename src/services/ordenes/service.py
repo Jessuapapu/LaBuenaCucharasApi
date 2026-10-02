@@ -3,7 +3,6 @@ from src.models.facturas.models import (
     Facturas
 )
 
-import calendar
 from src.models.ordenes.models import Ordenes, DetallesOrdenes
 from src.models.ordenes.types import EstadoOrden
 from fastapi import HTTPException
@@ -25,8 +24,7 @@ from sqlalchemy.types import Date
 from sqlmodel import Session
 from sqlalchemy import text
 from src.config.database import db_engine
-from src.services.auditorias.services import registrar_auditoria_orden
-from src.models.auditorias.types import TipoDeAccion
+
 
 def obtener_orden(IdOrden: int) -> Ordenes | None:
     with Session(db_engine) as session:
@@ -164,12 +162,7 @@ def crear_orden( fecha: datetime.date, detalle: List[Detalles], Id_cliente: int 
 
             session.commit()
             session.refresh(nuevo_Orden)
-            # Auditoría: creación de orden
-            if username and nuevo_Orden.IdOrdenes is not None:
-                try:
-                    registrar_auditoria_orden(username, nuevo_Orden.IdOrdenes, TipoDeAccion.CREAR)
-                except Exception:
-                    pass
+
 
             return nuevo_Orden
 
@@ -244,12 +237,6 @@ def actualizar_ordenes(
         session.commit()
         session.refresh(pedido)
 
-        # Auditoría: actualización de orden
-        if username:
-            try:
-                registrar_auditoria_orden(username, id_pedido, TipoDeAccion.ACTUALIZAR)
-            except Exception:
-                pass
 
         return True
 
@@ -315,12 +302,7 @@ def anular_orden_service(id_pedido: int, username: str | None = None):
         session.refresh(pedido)
         session.refresh(factura)
 
-        # Auditoría: eliminación/anulación de orden
-        if username:
-            try:
-                registrar_auditoria_orden(username, id_pedido, TipoDeAccion.ELIMINAR)
-            except Exception:
-                pass
+
 
         return True
 

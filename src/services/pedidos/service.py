@@ -5,8 +5,7 @@ from typing import List, Optional
 from src.models.pedidos.models import Pedidos, PedidosOrdenes
 from src.models.pedidos.types import TipoPedidoss, EstadoPedido
 from src.services.ordenes import service as ordenesService  # Ajusta si esto también lo cambiaste a funciones
-from src.services.auditorias.services import registrar_auditoria_pedido
-from src.models.auditorias.types import TipoDeAccion
+
 import datetime
 
 def validar_cliente_lista_ordenes(listaOrdenes: list[int]) -> bool:
@@ -50,12 +49,7 @@ def crear_pedido(listaIdOrdenes: list[int], tipo_pedido: TipoPedidoss, username:
                 session.add(nueva_relacion_ordenes)
 
             session.commit()
-            # Auditoría: creación de pedido
-            if username and nuevo_pedido.IdPedido is not None:
-                try:
-                    registrar_auditoria_pedido(username, nuevo_pedido.IdPedido, TipoDeAccion.CREAR)
-                except Exception:
-                    pass
+        
 
             return True
         
@@ -171,11 +165,7 @@ def modificar_pedido(
             session.add(pedido)
             session.commit()
             
-            if username:
-                try:
-                    registrar_auditoria_pedido(username, id_pedido, TipoDeAccion.ACTUALIZAR)
-                except Exception:
-                    pass
+            
 
             return True
         except Exception as e:
@@ -198,12 +188,7 @@ def eliminar_pedido(id_pedido: int, username: str | None = None) -> bool:
             # 2. Eliminar el pedido padre
             session.delete(pedido)
             session.commit()
-            # Auditoría: eliminación de pedido
-            if username:
-                try:
-                    registrar_auditoria_pedido(username, id_pedido, TipoDeAccion.ELIMINAR)
-                except Exception:
-                    pass
+
 
             return True
             

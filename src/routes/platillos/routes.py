@@ -4,7 +4,7 @@ from src.services.platillos import service
 from src.security.dependency import obtener_usuario_actual
 from src.models.Usuarios.models import Usuario
 
-router = APIRouter()
+router = APIRouter(tags=["Platillos"])
 
 @router.get("/", response_model=None)
 async def obtener_platillos():

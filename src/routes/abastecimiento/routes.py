@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from src.services.proveedores import service
 from src.schemas.abastecimineto import *
 
-router = APIRouter()
+router = APIRouter(tags=["Abastecimiento"])
 
 @router.get("/")
 async def obtener_historial_abastecimiento():

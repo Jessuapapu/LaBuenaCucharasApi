@@ -7,6 +7,7 @@ from src.models import platillos
 
 from . import auth, analytics ,menu_diario, platillos, clientes, pedidos, proveedores, abastecimiento, facturas, comedor, imagenes, ordenes, caja, ingredientes
 
+from src.models.Usuarios.types import Rol
 app_router = APIRouter()
 
 @app_router.get("/")
@@ -27,7 +28,7 @@ app_router.include_router(ordenes.router, prefix="/ordenes")
 # ============================================================
 # RUTAS PROTEGIDAS NIVEL: ADMIN + MESERO
 # ============================================================
-dependencia_operativa = [Depends(RequireRole(["admin", "mesero"]))]
+dependencia_operativa = [Depends(RequireRole([Rol.ADMIN, Rol.MESERO]))]
 
 app_router.include_router(clientes.router, prefix="/clientes", dependencies=dependencia_operativa)
 app_router.include_router(pedidos.router, prefix="/pedidos", dependencies=dependencia_operativa)
@@ -40,14 +41,18 @@ app_router.include_router(platillos.router, prefix="/platillos")"""
 # ============================================================
 # RUTAS PROTEGIDAS NIVEL: SOLO ADMIN
 # ============================================================
-dependencia_admin = [Depends(RequireRole(["admin"]))]
+dependencia_admin = [Depends(RequireRole([Rol.ADMIN]))]
 
 app_router.include_router(proveedores.router, prefix="/proveedores", dependencies=dependencia_admin)
 app_router.include_router(abastecimiento.router, prefix="/bodega", dependencies=dependencia_admin)
 app_router.include_router(facturas.router, prefix="/facturas", dependencies=dependencia_admin)
-app_router.include_router(caja.router, prefix='/caja', dependencies=dependencia_admin)
 app_router.include_router(ingredientes.router, prefix='/ingrediente', dependencies=dependencia_admin)
 app_router.include_router(analytics.router, prefix='/informe', dependencies=dependencia_admin)
+
+
+
+dependencia_cajero = [Depends(RequireRole([Rol.CAJERO, Rol.ADMIN]))]
+app_router.include_router(caja.router, prefix='/caja', dependencies=dependencia_cajero)
 
 """app_router.include_router(proveedores.router, prefix="/proveedores")
 app_router.include_router(abastecimiento.router, prefix="/bodega")

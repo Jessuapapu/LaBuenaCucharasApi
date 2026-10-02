@@ -6,3 +6,4 @@ class UsuarioSchema(BaseModel):
     user: str
     contra_plano: str
     rol: str
+    correo: str

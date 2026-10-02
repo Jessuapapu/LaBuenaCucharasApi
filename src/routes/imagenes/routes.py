@@ -3,12 +3,12 @@ from src.services.imagenes import service as imagenes
 from src.security.dependency import obtener_usuario_actual
 from src.models.Usuarios.models import Usuario
 
-router = APIRouter()
+router = APIRouter(tags=["Imagenes"])
 
 @router.post("/{NombrePlatillo}")
 async def crear_imagenes(NombrePlatillo: str, file: UploadFile = File(...), usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     imagen_byte = await file.read()
-    print('------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
+    
     extension = file.filename.split(".")[-1]    
     FileContent = file.content_type
     

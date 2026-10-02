@@ -8,7 +8,7 @@ class ProveedorIn(BaseModel):
     direccion: str
     tipo: TipoDeProveedor
 
-router = APIRouter()
+router = APIRouter(tags=["Proveedores"])
 
 @router.get("/")
 async def obtener_proveedores():

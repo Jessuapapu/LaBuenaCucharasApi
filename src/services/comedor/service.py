@@ -12,8 +12,7 @@ MC = comedor.MonitorComedor()
 horaApertura = None
 horaCerrar = None
 
-from src.services.auditorias.services import  registrar_auditoria_comedor, registrar_auditoria_orden, registrar_auditoria_mesa
-from src.models.auditorias.types import TipoDeAccion
+from src.services.auditorias.services import  registrar_auditoria_comedor, registrar_auditoria_mesa
 
 from logs import logsApp
 logs = logsApp.Logs()
@@ -118,12 +117,6 @@ def generar_orden_comedor(IdMesa: int, detalles: list[Detalles], username: str |
             nuevo_Orden.CostoTotal = monto_total
 
             session.commit()
-            # Registrar auditoría de orden creada si es posible
-            try:
-                user = username if username else "system"
-                registrar_auditoria_orden(user, nuevo_Orden.IdOrdenes, TipoDeAccion.CREAR)
-            except Exception:
-                pass
 
             return nuevo_Orden.model_dump_json()
 
@@ -133,7 +126,7 @@ def generar_orden_comedor(IdMesa: int, detalles: list[Detalles], username: str |
             return None
         
 def obtener_estado_activas():
-    print(horaApertura)
+
     if not horaApertura:    
         return False
     return MC.obtener_ordenActivas()

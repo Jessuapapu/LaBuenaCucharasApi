@@ -5,8 +5,7 @@ from src.config.database import db_engine
 import os
 from src.services.platillos import service
 import datetime
-from src.services.auditorias.services import registrar_auditoria_platillo
-from src.models.auditorias.types import TipoDeAccion
+
 import json
 from fastapi.encoders import jsonable_encoder
 
@@ -159,12 +158,6 @@ def crear_menu_service(day: datetime.date, hora:datetime.time, nombre_platillo: 
             session.rollback()
             return e
             
-    # Auditoría: creación de menu/platillo en menú diario
-    if username and id_platillo is not None:
-        try:
-            registrar_auditoria_platillo(username, int(id_platillo), TipoDeAccion.CREAR)
-        except Exception:
-            pass
 
 
 def editar_menu_service(id_menu, hora:datetime.time, nombre_platillo: str, username: str | None = None):
@@ -189,12 +182,7 @@ def editar_menu_service(id_menu, hora:datetime.time, nombre_platillo: str, usern
         except Exception as e:
             session.rollback()
             return e
-    # Auditoría: actualización de platillo en menú
-    if username and id_platillo is not None:
-        try:
-            registrar_auditoria_platillo(username, int(id_platillo), TipoDeAccion.ACTUALIZAR)
-        except Exception:
-            pass
+
 
 
 def nuevo_cambio_de_hora(Nombre: str, HoraInicio: datetime.datetime.hour, HoraFinal: datetime.datetime.hour):

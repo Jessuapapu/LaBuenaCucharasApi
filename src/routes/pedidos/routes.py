@@ -7,7 +7,7 @@ from src.schemas.pedido import *
 from src.security.dependency import obtener_usuario_actual
 from src.models.Usuarios.models import Usuario
 
-router = APIRouter()
+router = APIRouter(tags=["Pedidos"])
 
 @router.post("/", status_code=201)
 def crear_nuevo_pedido(payload: PedidoCreateSchema, usuario_actual: Usuario = Depends(obtener_usuario_actual)):

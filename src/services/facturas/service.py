@@ -8,8 +8,7 @@ import datetime
 from sqlmodel import Session
 from sqlalchemy import text
 from src.config.database import db_engine
-from src.services.auditorias.services import registrar_auditoria_factura
-from src.models.auditorias.types import TipoDeAccion
+
 from src.models.facturas.models import Facturas, FacturasOrdenes
 from src.models.ordenes.models import Ordenes
 from decimal import Decimal
@@ -93,12 +92,7 @@ def crear_facturas(
             id_generado = session.exec(query, {"json_data": json_string}).scalar()
             
             session.commit()
-            # Auditoría: factura creada
-            if username and id_generado:
-                try:
-                    registrar_auditoria_factura(username, int(id_generado), TipoDeAccion.CREAR)
-                except Exception:
-                    pass
+
 
             return id_generado
             
@@ -150,12 +144,6 @@ def actualizar_factura(IdFactura: int, payLoadDetalles: facturaIn, username: str
             session.add(factura)
             session.commit()
 
-            # Auditoría: factura actualizada
-            if username:
-                try:
-                    registrar_auditoria_factura(username, IdFactura, TipoDeAccion.ACTUALIZAR)
-                except Exception:
-                    pass
 
             return True
         except Exception as e:
