@@ -16,6 +16,8 @@ def listar_clientes():
             select(
                 Clientes.IdCliente,
                 Clientes.NombreCliente,
+                Clientes.Telefono,
+                ClienteDireccion.Dirreccion
             )
             .select_from(Clientes)
             .join(ClienteDireccion)
@@ -28,14 +30,13 @@ def listar_clientes():
             return None
 
         clientes = []
-        print(clientes_query)
-        for id_cliente, nombre_cliente, correo, telefono in clientes_query:
+        for id_cliente, nombre_cliente, Telefono, direccion in clientes_query:
             clientes.append(
                 {
                     "IdCliente": id_cliente,
                     "nombre": nombre_cliente,
-                    "correo": correo,
-                    "telefono": telefono
+                    "Telefono": Telefono,
+                    'direccion': direccion
                 }
             )
 
