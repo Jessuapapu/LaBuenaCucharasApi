@@ -11,6 +11,7 @@ __pycache__/
 estado_anterior.json
 platillos_imagenes.json
 config_menu.json
+perecederos_config.json
 
 # Distribution / packaging
 .Python

@@ -3,8 +3,7 @@ from sqlmodel import Session, select, text, desc
 import json
 from typing import Optional
 from src.config.database import db_engine
-from src.models.insumos.models import DetallesRegistroInsumos
-from src.models.proveedores.models import RegistroDeAbastecimiento, DetallesRegistroIngredientes
+from src.models.proveedores.models import RegistroDeAbastecimiento, DetallesRegistroIngredientes, DetallesRegistroInsumos
 from src.schemas.abastecimiento import AbastecimientoCreateSchema
 
 def obtener_historial_abastecimiento():

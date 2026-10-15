@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Path, Query, Depends
 from typing import Optional
-from src.services.insumos import service as insumosService
+from src.services.insumos import services as insumosService
 from src.schemas.insumos import InsumoCreateSchema, InsumoUpdateSchema
 from src.security.dependency import obtener_usuario_actual
 from src.models.Usuarios.models import Usuario

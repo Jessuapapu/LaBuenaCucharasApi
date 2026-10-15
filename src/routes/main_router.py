@@ -5,7 +5,9 @@ from src.security.dependency import RequireRole
 
 from src.models import platillos
 
-from . import auth, analytics ,menu_diario, platillos, clientes, pedidos, proveedores, abastecimiento, facturas, comedor, imagenes, ordenes, caja, ingredientes
+from . import (auth, analytics ,menu_diario, platillos, clientes, pedidos, proveedores, abastecimiento, facturas, 
+               comedor, imagenes, ordenes, caja, ingredientes, insumos
+               )
 
 from src.models.Usuarios.types import Rol
 app_router = APIRouter()
@@ -47,6 +49,7 @@ app_router.include_router(proveedores.router, prefix="/proveedores", dependencie
 app_router.include_router(abastecimiento.router, prefix="/bodega", dependencies=dependencia_admin)
 app_router.include_router(facturas.router, prefix="/facturas", dependencies=dependencia_admin)
 app_router.include_router(ingredientes.router, prefix='/ingrediente', dependencies=dependencia_admin)
+app_router.include_router(insumos.router, prefix='/insumo', dependencies=dependencia_admin)
 app_router.include_router(analytics.router, prefix='/informe', dependencies=dependencia_admin)
 app_router.include_router(ordenes.router, prefix="/ordenes", dependencies=dependencia_admin)
 

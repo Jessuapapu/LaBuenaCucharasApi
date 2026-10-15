@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Path, Query, Depends
 from typing import Optional
-from src.services.ingredientes.services import service as ingredientesService
+from src.services.ingredientes import services as ingredientesService
 from src.schemas.ingredientes import IngredienteCreateSchema, IngredienteUpdateSchema
 from src.security.dependency import obtener_usuario_actual
 from src.models.Usuarios.models import Usuario

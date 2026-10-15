@@ -2,7 +2,6 @@ from decimal import Decimal
 from sqlmodel import Session, select, text, desc
 import json
 from src.config.database import db_engine
-from src.models.insumos.models import DetallesRegistroInsumos
 
 from src.models.proveedores.models import *
 from src.models.proveedores.types import TipoDeProveedor
