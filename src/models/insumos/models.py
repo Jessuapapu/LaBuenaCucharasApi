@@ -9,8 +9,4 @@ class Insumos(SQLModel, table=True):
     Stock: int = Field(nullable=False)          
     Prioridad: PrioridadInsumo 
 
-class DetallesRegistroInsumos(SQLModel, table=True):
-    IdRegistroAbastecimiento: int | None = Field(default=None, foreign_key="registrodeabastecimiento.IdRegistro", primary_key=True)
-    IdInsumo: int | None = Field(default=None, foreign_key="insumos.IdInsumo", primary_key=True)
-    TotalIngresado: int = Field(nullable=False)
-    CostoIndividual: decimal.Decimal = Field(nullable=False)
+

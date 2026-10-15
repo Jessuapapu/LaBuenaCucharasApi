@@ -1,31 +1,37 @@
-from sqlmodel import Session, select
-from fastapi import HTTPException
-from src.models.proveedores.models import Proveedores
+from decimal import Decimal
+from sqlmodel import Session, select, text, desc
+import json
+from src.config.database import db_engine
+from src.models.insumos.models import DetallesRegistroInsumos
 
-def crear_proveedor(session: Session, proveedor: Proveedores):
-    session.add(proveedor)
-    session.commit()
-    session.refresh(proveedor)
-    return proveedor
+from src.models.proveedores.models import *
+from src.models.proveedores.types import TipoDeProveedor
+from src.schemas.abastecimiento import *
 
-def listar_proveedores(session: Session):
-    return session.exec(select(Proveedores)).all()
 
-def actualizar_proveedor(session: Session, id_prov: int, datos: dict):
-    proveedor = session.get(Proveedores, id_prov)
-    if not proveedor:
-        raise HTTPException(status_code=404, detail="Proveedor no encontrado")
-    for key, value in datos.items():
-        setattr(proveedor, key, value)
-    session.add(proveedor)
-    session.commit()
-    session.refresh(proveedor)
-    return proveedor
+def obtener_proveedores():
+    with Session(db_engine) as session:
+        statement = select(Proveedores)
+        proveedores = session.exec(statement).all()
 
-def eliminar_proveedor(session: Session, id_prov: int):
-    proveedor = session.get(Proveedores, id_prov)
-    if not proveedor:
-        raise HTTPException(status_code=404, detail="Proveedor no encontrado")
-    session.delete(proveedor)
-    session.commit()
-    return {"mensaje": "Proveedor eliminado exitosamente"}
+        return proveedores
+
+
+def obtener_proveedor_por_nombre(nombre: str):
+    with Session(db_engine) as session:
+        statement = select(Proveedores).where(Proveedores.NombreProveedor == nombre)
+        proveedores = session.exec(statement).first()
+
+        return proveedores
+
+
+def registrar_proveedor(nombre: str, direccion: str, tipo: TipoDeProveedor):
+    nuevo_proveedor = Proveedores(
+        NombreProveedor=nombre, Direccion=direccion, Tipo=tipo
+    )
+    with Session(db_engine) as session:
+        session.add(nuevo_proveedor)
+        session.commit()
+
+    return nuevo_proveedor
+
