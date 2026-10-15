@@ -1,123 +1,80 @@
-from src.models.insumos.models import *
-from src.models.platillos.models import *
-from src.services.platillos.service import *
-from sqlmodel import Session, select, desc
-from src.config.database import db_engine
+from sqlmodel import Session, select
+from typing import Optional
+from src.config.database import get_session_context
+from src.models.insumos.models import Insumos
+from src.schemas.insumos import InsumoCreateSchema, InsumoUpdateSchema
 
-def obtener_ingredientes():
-    with Session(db_engine) as session:
-        statement = select(Insumos, CategoriasInsumos.NombreCategoriaInsumo).join(CategoriasInsumos).order_by(desc(Insumos.IdInsumo))
-
-        result = session.exec(statement).all()
-
-        if not result:
-            return []
-        
-        ListInsumo = []
-        for insumo, categoria in result:
-            ListInsumo.append({
-                "id_insumo": insumo.IdInsumo,
-                'Nombre': insumo.NombreInsumo,
-                'categoria': categoria
-            })
-
-        return ListInsumo
-    
-def crear_ingrediente(Nombre: str):
-    if not Nombre:
-        return False
-
-    with Session(db_engine) as session:
+def listar_insumos(pagina: int = 1, rows: int = 10, todo: int = 0):
+    with get_session_context() as session:
         try:
-            nuevo_ingrediente = Ingredientes(NombreIngrediente=Nombre, StockIngredientes= 0)
+            query = select(Insumos)
+            
+            if not todo:
+                offset = (pagina - 1) * rows
+                query = query.offset(offset).limit(rows)
+                
+            resultados = session.exec(query).all()
+            return resultados
+        except Exception as e:
+            print(f"Error al listar insumos: {e}")
+            return None
 
-            session.add(nuevo_ingrediente)
+def obtener_insumo_por_id(id_insumo: int):
+    with get_session_context() as session:
+        try:
+            insumo = session.get(Insumos, id_insumo)
+            return insumo
+        except Exception as e:
+            print(f"Error al obtener insumo: {e}")
+            return None
 
+def crear_insumo(payload: InsumoCreateSchema, username: Optional[str] = None) -> bool:
+    with get_session_context() as session:
+        try:
+            nuevo_insumo = Insumos(
+                NombreInsumo=payload.NombreInsumo,
+                Stock=payload.Stock,
+                Prioridad=payload.Prioridad
+            )
+            session.add(nuevo_insumo)
             session.commit()
-
+            return True
         except Exception as e:
             session.rollback()
-            return e
-        
-    return True
+            print(f"Error al crear insumo: {e}")
+            return False
 
-
-def actualizar_Ingrediente(IdIngrediente: int, NombreNuevo: str, stock: int):
-    if not IdIngrediente or not NombreNuevo:
-        return False
-    
-    with Session(db_engine) as session:
+def actualizar_insumo(id_insumo: int, payload: InsumoUpdateSchema, username: Optional[str] = None) -> bool:
+    with get_session_context() as session:
         try:
-            statemed = select(Ingredientes).where(Ingredientes.IdIngrediente == IdIngrediente)
-
-            ingrediente = session.exec(statemed).first()
-
-            if not ingrediente:
+            insumo = session.get(Insumos, id_insumo)
+            if not insumo:
                 return False
             
-
-            ingrediente.NombreIngrediente = NombreNuevo
-            ingrediente.StockIngredientes = stock
-
-            session.add(ingrediente)
+            # Extraer solo los datos enviados en la petición
+            update_data = payload.dict(exclude_unset=True)
+            for key, value in update_data.items():
+                setattr(insumo, key, value)
+                
+            session.add(insumo)
             session.commit()
-            session.refresh(ingrediente)
-
-
+            return True
         except Exception as e:
             session.rollback()
-            return e
-        
-    return True
+            print(f"Error al actualizar insumo: {e}")
+            return False
 
-def obtener_ingrediente(IdIngrediente: int = None, Nombre: str = None):
-    if not IdIngrediente and not Nombre:
-        return None
-
-    with Session(db_engine) as session:
+def eliminar_insumo(id_insumo: int, username: Optional[str] = None) -> bool:
+    with get_session_context() as session:
         try:
-            validacion = (Ingredientes.IdIngrediente == IdIngrediente) if IdIngrediente else (Ingredientes.NombreIngrediente == Nombre)
-            statemed = select(Ingredientes).where(validacion)
-
-            ingrediente = session.exec(statemed).first()
-
-            return ingrediente
-        
-        except Exception as e:
-            session.rollback()
-            return e
-
-
-def crear_relacion_platillo_ingrediente(listaIngrediente: list[int], IdPlatillo: int | None = None, NombrePlatillo: str | None = None):
-    if not IdPlatillo and not NombrePlatillo:
-        return False
-    
-
-    IdPlatillo = IdPlatillo if IdPlatillo else obtener_platillo_id_por_nombre(NombrePlatillo)
-
-    if not IdPlatillo:
-        return False
-
-    with Session(db_engine) as session:
-        try:
-            listaRelaciones = []
-
-            for id in listaIngrediente:
-                if not obtener_ingrediente(IdIngrediente=id):
-                    return False
-
-                listaIngrediente.append(PlatillosEIngredientes(IdPlatillo=IdPlatillo,IdIngrediente=id))
-
-
+            insumo = session.get(Insumos, id_insumo)
+            if not insumo:
+                return False
             
-            session.add_all(listaRelaciones)
+            session.delete(insumo)
             session.commit()
-            
-
-
+            return True
         except Exception as e:
             session.rollback()
-            return e
-    
-    return True
-    
+            print(f"Error al eliminar insumo: {e}")
+            return False
