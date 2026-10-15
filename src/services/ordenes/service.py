@@ -42,18 +42,22 @@ def listar_historial_Ordenes(
     pagina: int = 1, 
     rows: int = 10, 
     todo: int = 0,
-    NombreCliente: str = None
+    NombreCliente: str = None,
+    fechaInicio: datetime.date = None,
+    fechaFinal: datetime.date = None
 ):
     id_cliente = obtener_id_cliente_por_nombre(NombreCliente)
     with Session(db_engine) as session:
-  
+        
         statement = text("""
             EXEC MostrarOrdenes 
                 @IdOrden = :id_orden, 
                 @Pagina = :pagina, 
                 @Rows = :rows, 
                 @Todo = :todo,
-                @IdCliente = :id_cliente
+                @IdCliente = :id_cliente,
+                @FechaInicio = :fechaInicio,
+                @FechaFin = :fechaFinal
         """)
 
         parametros = {
@@ -61,7 +65,9 @@ def listar_historial_Ordenes(
             "pagina": pagina,
             "rows": rows,
             "todo": todo,
-            "id_cliente": id_cliente
+            "id_cliente": id_cliente,
+            "fechaInicio": fechaInicio,
+            "fechaFinal": fechaFinal
         }
 
         resultados = session.exec(statement, params=parametros).all()
@@ -77,9 +83,7 @@ def listar_historial_Ordenes(
                     "nombre_cliente": row.NombreCliente,
                     "direccion_cliente" : row.dirreccion
                 },
-                "estado_pedido": row.Estado,
-                "detalles": detalle_Ordenes(id_orden=row.IdOrdenes)
-
+                "estado_pedido": row.Estado
             })
 
         return historial

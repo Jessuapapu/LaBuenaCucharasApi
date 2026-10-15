@@ -19,7 +19,7 @@ class OrdenComedor():
             "IdOrden": self.IdOrden,
             "HoraEntrada": self.HoraEntrada.isoformat(),
             "HoraSalida": self.HoraSalida.isoformat() if self.HoraSalida else None,
-            "Activo": self.Activo
+             "Activo": self.Activo
         }
 
 class Mesa():
@@ -131,11 +131,8 @@ class MonitorComedor():
             return False
 
         self.limpiar_orden()
-        if IdMesa > self.NumeroMesas or IdMesa < self.NumeroMesas:
-            return None
         
         mesa = self.Mesas[IdMesa]
-        # Lista de Ordenes Activas
 
         for orden in mesa.Ordenes:
             if orden.Activo:
@@ -181,6 +178,8 @@ class MonitorComedor():
         if mesa:
             mesa.Ordenes.append(OrdenComedor(IdOrden=IdOrden))
 
+        return True
+
 
     def guardar_orden(self, IdOrden: int, IdMesa: int = None):
         if IdMesa and not self.validarIdMesa(IdMesa=IdMesa):
@@ -204,6 +203,7 @@ class MonitorComedor():
                 orden.Activo = False
         
                 return orden
+            
         return None
 
     def eliminar_orden(self, IdOrden: int, IdMesa: int = None):
@@ -224,7 +224,7 @@ class MonitorComedor():
                 mesa.Ordenes.remove(orden)
                 return True
         return False
-
+    
     def mesasId(self):
         lista = []
         for i in range(0,self.NumeroMesas):
@@ -265,8 +265,6 @@ class MonitorComedor():
             json.dump(EstadoActual,archivo,indent=4)
             return NumeroMesas
     
-
-
     def to_dict(self):
         return {
             "TotalMesasActivas": self.NumeroMesas,

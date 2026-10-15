@@ -1,6 +1,6 @@
 from src.models.comedor import models as comedor
 from src.models.ordenes import models as orden
-from src.models.ordenes import types as ordenTypes
+from src.services.ordenes.service import detalle_Ordenes
 from src.schemas.pedidos import Detalles
 from src.services.platillos.service import obtener_platillo_id_por_nombre   
 from sqlmodel import Session
@@ -20,10 +20,9 @@ logs = logsApp.Logs()
 def agregar_orden_comedor(IdMesa: int, IdOrden: int):
     if not horaApertura:    
         return False
-    if IdMesa > MC.MaxIdGenerado or IdMesa < 0:
+
+    if not MC.agregar_orden(IdMesa=IdMesa, IdOrden=IdOrden):
         return False
-    
-    MC.agregar_orden(IdMesa=IdMesa, IdOrden=IdOrden)
     
     return True
 
@@ -41,7 +40,6 @@ def cerrar_comedor(username: str | None = None):
         user = username if username else "system"
         registrar_auditoria_comedor(user, horaApertura, datetime.now())
         logs.add_log("CERRAR COMEDOR", "INFO")
-
 
     except Exception as e:
         print(e)
@@ -126,47 +124,65 @@ def generar_orden_comedor(IdMesa: int, detalles: list[Detalles], username: str |
             return None
         
 def obtener_estado_activas():
-
     if not horaApertura:    
         return False
+    
     return MC.obtener_ordenActivas()
 
 def obtener_estado_terminadas():
     if not horaApertura:    
         return False
+    
     return MC.obtener_ordenTerminadas()
 
 def obtener_estado_orden_mesa_activa(IdMesa: int):
     if not horaApertura:    
         return False
+    
     return MC.obtener_ordenActiva(IdMesa=IdMesa)
 
 def obtener_estado_orden_mesa_terminadas(IdMesa: int):
     if not horaApertura:    
         return False
+    
     return MC.obtener_ordenTerminadasMesa(IdMesa=IdMesa)
+
+def obtener_detalle_orden_mesa(IdOrden: int):
+    if not horaApertura:    
+        return None
+
+    IdMesa = MC.buscarIdMesa()
+    if not IdMesa or not MC.obtener_orden(IdOrden= IdOrden, IdMesa=IdMesa):
+        return None
+
+    return detalle_Ordenes(IdOrden)
 
 def aumentar_mesa():
     if not horaApertura:    
         return False
+    
     return MC.agregar_mesa()
 
 def eliminar_mesa():
     if not horaApertura:    
         return False
+    
     return MC.eliminar_mesa()
 
 def obtener_estado_total():
     if not horaApertura:    
         return False
+    
     return MC.to_dict()
 
 def obtener_estado(IdMesa: int):
     if not horaApertura:    
         return False
+    
     return MC.obtener_orden(IdMesa=IdMesa).to_dict()
 
 def obtener_IdMesas():
     if not horaApertura:    
         return False
+    
     return MC.mesasId()

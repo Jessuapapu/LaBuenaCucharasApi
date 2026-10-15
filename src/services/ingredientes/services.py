@@ -1,4 +1,4 @@
-from src.models.ingredientes.modes import Ingredientes
+from src.models.ingredientes.models import Ingredientes
 from src.models.platillos.models import *
 from src.services.platillos.service import *
 from sqlmodel import Session, select,desc
@@ -88,7 +88,7 @@ def obtener_ingrediente(IdIngrediente: int = None, Nombre: str = None):
             return e
 
 
-def crear_relacion_platillo_ingrediente(listaIngrediente: list[int], IdPlatillo: int | None = None, NombrePlatillo: str | None = None):
+"""def crear_relacion_platillo_ingrediente(listaIngrediente: list[int], IdPlatillo: int | None = None, NombrePlatillo: str | None = None):
     if not IdPlatillo and not NombrePlatillo:
         return False
     
@@ -117,5 +117,5 @@ def crear_relacion_platillo_ingrediente(listaIngrediente: list[int], IdPlatillo:
             session.rollback()
             return e
     
-    return True
+    return True"""
     

@@ -105,8 +105,8 @@ def obtener_todos_usuarios():
 
             return listaUsuarios
 
-def validar_rol(usuario: dict, rol: Rol | str, detalle: str):
-    if usuario.rol  != rol:
+def validar_rol(usuario: dict, rol: Rol | str):
+    if usuario.rol == rol:
             return True
 
     return False

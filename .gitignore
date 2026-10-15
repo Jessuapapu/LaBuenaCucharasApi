@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+# archivos de config
+
+estado_anterior.json
+platillos_imagenes.json
+config_menu.json
+
 # Distribution / packaging
 .Python
 build/

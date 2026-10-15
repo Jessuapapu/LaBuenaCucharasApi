@@ -16,8 +16,10 @@ async def obtener_ordenes(
     rows: int = Query(10, description="Filas por página"), 
     todo: bool = Query(False, description="Traer todo sin paginar"),
     nombeCliente: str = Query(None, description="Nombre del Cliente"),
-):
-    pedidos = service.listar_historial_Ordenes(pagina=pagina, rows=rows, todo=todo, NombreCliente=nombeCliente)
+    fechaInicio: datetime.date | None = Query(None, description="Fecha Inicio"),
+    fechaFinal: datetime.date | None  = Query(None, description="Fecha final")
+):  
+    pedidos = service.listar_historial_Ordenes(pagina=pagina, rows=rows, todo=todo, NombreCliente=nombeCliente, fechaInicio=fechaInicio, fechaFinal= fechaFinal)
     return pedidos
 
 

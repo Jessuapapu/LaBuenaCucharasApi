@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from src.services.comedor import service as comedor
 from src.schemas.ComedorPedidos import OrdenComedorIN
 from src.security.dependency import obtener_usuario_actual
@@ -59,8 +59,8 @@ async def estado():
 async def obtener_estado_comedor():
     return comedor.obtener_estado_total()
 
-@router.get('/mesa/{IdMesa}/{Estado}')
-async def obtener_estado_comedor(IdMesa: int, Estado: bool):
+@router.get('/{IdMesa}/{Estado}')
+async def obtener_orden_mesa(IdMesa: int, Estado: bool):
     if not IdMesa:
         return HTTPException(400,"falta el id de mesa")
 
@@ -75,6 +75,16 @@ async def obtener_estado_comedor(IdMesa: int, Estado: bool):
         return HTTPException(400,"mesa no encontrada")
     
     return mesa
+
+@router.get('/detalle/{IdOrden}')
+async def obtener_detalle_orden_comedor(IdOrden: int):
+    lista = comedor.obtener_detalle_orden_mesa(IdOrden)
+
+    if not lista:
+        return HTTPException(404, 'NO EXISTE LA ORDEN')
+
+    return lista
+
 
 @router.post("/{IdMesa}/{IdOrden}")
 async def guardar_orden_mesa(IdMesa:int, IdOrden: int, usuario_actual: Usuario = Depends(obtener_usuario_actual)):

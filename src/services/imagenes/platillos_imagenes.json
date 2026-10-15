@@ -1,286 +1,126 @@
 {
     "1": {
-        "CANTIDAD": 3,
-        "NOMBRE": "Arroz a la valenciana"
+        "CANTIDAD": 0,
+        "NOMBRE": "Gallo Pinto con Huevo y Queso"
     },
     "2": {
-        "CANTIDAD": 3,
-        "NOMBRE": "Consume"
+        "CANTIDAD": 0,
+        "NOMBRE": "Nacatamal Tradicional"
     },
     "3": {
-        "CANTIDAD": 1,
-        "NOMBRE": "Numero 2"
+        "CANTIDAD": 0,
+        "NOMBRE": "Vigor\u00f3n de Granada"
     },
     "4": {
-        "CANTIDAD": 5,
-        "NOMBRE": "Omelet"
-    },
-    "5": {
-        "CANTIDAD": 1,
-        "NOMBRE": "Numero 1"
-    },
-    "6": {
         "CANTIDAD": 0,
         "NOMBRE": "Indio Viejo"
     },
-    "7": {
-        "CANTIDAD": 3,
+    "5": {
+        "CANTIDAD": 0,
         "NOMBRE": "Sopa de Queso"
+    },
+    "6": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Baho"
+    },
+    "7": {
+        "CANTIDAD": 0,
+        "NOMBRE": "Quesillo Boaque\u00f1o"
     },
     "8": {
         "CANTIDAD": 0,
-        "NOMBRE": "Sopa de Mondongo"
+        "NOMBRE": "Carne Asada con Tajadas"
     },
     "9": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Carne Res Asada"
+        "CANTIDAD": 0,
+        "NOMBRE": "Pollo Asado con Papas"
     },
     "10": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Cerdo Asado"
+        "CANTIDAD": 0,
+        "NOMBRE": "Sopas de Res con Verduras"
     },
     "11": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Pollo Frito"
+        "CANTIDAD": 0,
+        "NOMBRE": "Sopa de Mondongo"
     },
     "12": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Alitas de Pollo"
+        "CANTIDAD": 0,
+        "NOMBRE": "Salpic\u00f3n con Arroz"
     },
     "13": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Carne Tapada"
+        "CANTIDAD": 0,
+        "NOMBRE": "Pescado Frito a la Tipitapa"
     },
     "14": {
-        "CANTIDAD": 6,
-        "NOMBRE": "Churrasco"
+        "CANTIDAD": 0,
+        "NOMBRE": "Cerdo Asado"
     },
     "15": {
         "CANTIDAD": 0,
-        "NOMBRE": "Pollo Asado"
+        "NOMBRE": "Churrasco con Chimichurri"
     },
     "16": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Carne Desmenuzada "
+        "CANTIDAD": 0,
+        "NOMBRE": "Hamburguesa Cl\u00e1sica UNI"
     },
     "17": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Tacos de pollo Fritos"
+        "CANTIDAD": 0,
+        "NOMBRE": "Hamburguesa Doble Carne"
     },
     "18": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Salpicon"
+        "CANTIDAD": 0,
+        "NOMBRE": "Pizza de Pepperoni (Personal)"
     },
     "19": {
         "CANTIDAD": 0,
-        "NOMBRE": "Jalape\u00f1o de res"
+        "NOMBRE": "Tacos de Pollo (3)"
     },
     "20": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Nacatamal"
+        "CANTIDAD": 0,
+        "NOMBRE": "Enchiladas Nicarag\u00fcenses"
     },
     "21": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Tacos de Res Fritos"
+        "CANTIDAD": 0,
+        "NOMBRE": "Repollo Relleno"
     },
     "22": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Pollo tapado"
+        "CANTIDAD": 0,
+        "NOMBRE": "Macarrones con Queso"
     },
     "23": {
-        "CANTIDAD": 2,
-        "NOMBRE": "Bistec"
+        "CANTIDAD": 0,
+        "NOMBRE": "Fresco de Cacao"
     },
     "24": {
-        "CANTIDAD": 1,
-        "NOMBRE": "Filete de Curvina"
+        "CANTIDAD": 0,
+        "NOMBRE": "Fresco de Chicha"
     },
     "25": {
-        "CANTIDAD": 3,
-        "NOMBRE": "Pollo a la plancha"
+        "CANTIDAD": 0,
+        "NOMBRE": "Fresco de Cebada"
     },
     "26": {
-        "CANTIDAD": 1,
-        "NOMBRE": "Sopa de Hueso"
+        "CANTIDAD": 0,
+        "NOMBRE": "Fresco de Tamarindo"
     },
     "27": {
-        "CANTIDAD": 3,
-        "NOMBRE": "Churrasco"
+        "CANTIDAD": 0,
+        "NOMBRE": "Fresco de Grama"
     },
     "28": {
         "CANTIDAD": 0,
-        "NOMBRE": "Churrasco con Chimichurri"
+        "NOMBRE": "Caf\u00e9 Negro / Americano"
     },
     "29": {
         "CANTIDAD": 0,
-        "NOMBRE": "Jalape\u00f1o Steak"
+        "NOMBRE": "P\u00edo V"
     },
     "30": {
-        "CANTIDAD": 3,
-        "NOMBRE": "Fajitas de Pollo"
-    },
-    "31": {
-        "CANTIDAD": 1,
-        "NOMBRE": "Fajitas de Res"
-    },
-    "32": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Hamburguesa Cl\u00e1sica"
-    },
-    "33": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Hamburguesa Doble Queso"
-    },
-    "34": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Alitas Picantes (Buffalo)"
-    },
-    "35": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Dedos de Pollo (Tenders)"
-    },
-    "36": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Pizza Hawaiana"
-    },
-    "37": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Pizza de Pepperoni"
-    },
-    "38": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Pasta Fettuccine Alfredo"
-    },
-    "39": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Ensalada C\u00e9sar con Pollo"
-    },
-    "40": {
         "CANTIDAD": 0,
         "NOMBRE": "Tres Leches"
     },
-    "41": {
-        "CANTIDAD": 0,
-        "NOMBRE": "P\u00edo Quinto"
-    },
-    "42": {
+    "31": {
         "CANTIDAD": 0,
         "NOMBRE": "Atolillo"
-    },
-    "43": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Arroz con Leche"
-    },
-    "44": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Cajeta de Coco"
-    },
-    "45": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Bu\u00f1uelos con Miel"
-    },
-    "46": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Refresco de Cacao"
-    },
-    "47": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Refresco de Tiste"
-    },
-    "48": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Refresco de Grama"
-    },
-    "49": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Limonada con Hierbabuena"
-    },
-    "50": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Chicha de Ma\u00edz"
-    },
-    "51": {
-        "CANTIDAD": 0,
-        "NOMBRE": "pipi"
-    },
-    "52": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Pepito"
-    },
-    "53": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Papitas "
-    },
-    "54": {
-        "CANTIDAD": 0,
-        "NOMBRE": "prueb5"
-    },
-    "55": {
-        "CANTIDAD": 0,
-        "NOMBRE": "prueba"
-    },
-    "56": {
-        "CANTIDAD": 0,
-        "NOMBRE": "jaaja"
-    },
-    "57": {
-        "CANTIDAD": 0,
-        "NOMBRE": "jajaja"
-    },
-    "58": {
-        "CANTIDAD": 0,
-        "NOMBRE": "mi"
-    },
-    "59": {
-        "CANTIDAD": 0,
-        "NOMBRE": "kyrsa"
-    },
-    "60": {
-        "CANTIDAD": 0,
-        "NOMBRE": "KyrsaPrueb2"
-    },
-    "61": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Mateo Cochon"
-    },
-    "62": {
-        "CANTIDAD": 0,
-        "NOMBRE": "sipirili"
-    },
-    "63": {
-        "CANTIDAD": 0,
-        "NOMBRE": "popiop"
-    },
-    "64": {
-        "CANTIDAD": 0,
-        "NOMBRE": "pruebas7"
-    },
-    "65": {
-        "CANTIDAD": 0,
-        "NOMBRE": "[poere"
-    },
-    "66": {
-        "CANTIDAD": 1,
-        "NOMBRE": "15634"
-    },
-    "67": {
-        "CANTIDAD": 1,
-        "NOMBRE": "15634"
-    },
-    "68": {
-        "CANTIDAD": 0,
-        "NOMBRE": "Kyrsa Asada "
-    },
-    "69": {
-        "CANTIDAD": 0,
-        "NOMBRE": "PruebaSi"
-    },
-    "70": {
-        "CANTIDAD": 1,
-        "NOMBRE": "Prueba09l"
-    },
-    "71": {
-        "CANTIDAD": 1,
-        "NOMBRE": "Prueba09l"
     }
 }
