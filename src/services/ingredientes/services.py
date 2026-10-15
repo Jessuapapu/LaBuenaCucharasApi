@@ -1,121 +1,85 @@
-from src.models.ingredientes.models import Ingredientes
-from src.models.platillos.models import *
-from src.services.platillos.service import *
-from sqlmodel import Session, select,desc
-from src.config.database import db_engine
+from sqlmodel import Session, select
+from datetime import datetime, timedelta
+import math
+from typing import Optional
+from src.config.database import get_session_context
+from src.models.proveedores.models import Ingredientes, RegistroDeAbastecimiento, DetallesRegistroIngredientes
+from src.schemas.ingredientes import IngredienteCreateSchema, IngredienteUpdateSchema
 
-def obtener_ingredientes():
-    with Session(db_engine) as session:
-        statement = select(Ingredientes).order_by(desc(Ingredientes.IdIngrediente))
 
-        result = session.exec(statement).all()
 
-        if not result:
-            return []
-        
-        ListIngrediente = []
-        for ingrediente in result:
-            ListIngrediente.append({
-                "id": ingrediente.IdIngrediente,
-                'Nombre': ingrediente.NombreIngrediente,
-                'stock': ingrediente.StockIngredientes
-            })
-
-        return ListIngrediente
-    
-def crear_ingrediente(Nombre: str):
-    if not Nombre:
-        return False
-
-    with Session(db_engine) as session:
+def analisis_inventario_perecederos(self, id_ingrediente: Optional[int] = None):
+    with get_session_context() as session:
         try:
-            nuevo_ingrediente = Ingredientes(NombreIngrediente=Nombre, StockIngredientes= 0)
+            ahora = datetime.now()
+            configuraciones = obtener_toda_la_configuracion()
+            reporte = []
 
-            session.add(nuevo_ingrediente)
-
-            session.commit()
-
-        except Exception as e:
-            session.rollback()
-            return e
-        
-    return True
-
-
-def actualizar_Ingrediente(IdIngrediente: int, NombreNuevo: str, stock: int):
-    if not IdIngrediente or not NombreNuevo:
-        return False
-    
-    with Session(db_engine) as session:
-        try:
-            statemed = select(Ingredientes).where(Ingredientes.IdIngrediente == IdIngrediente)
-
-            ingrediente = session.exec(statemed).first()
-
-            if not ingrediente:
-                return False
+            # 1. Obtener el ÚLTIMO ingreso de cada ingrediente (LIFO de abastecimiento)
+            statement = (
+                select(DetallesRegistroIngredientes, RegistroDeAbastecimiento.Fecha)
+                .join(RegistroDeAbastecimiento)
+                .order_by(RegistroDeAbastecimiento.Fecha.desc())
+            )
             
-
-            ingrediente.NombreIngrediente = NombreNuevo
-            ingrediente.StockIngredientes = stock
-
-            session.add(ingrediente)
-            session.commit()
-            session.refresh(ingrediente)
-
-
-        except Exception as e:
-            session.rollback()
-            return e
-        
-    return True
-
-def obtener_ingrediente(IdIngrediente: int = None, Nombre: str = None):
-    if not IdIngrediente and not Nombre:
-        return None
-
-    with Session(db_engine) as session:
-        try:
-            validacion = (Ingredientes.IdIngrediente == IdIngrediente) if IdIngrediente else (Ingredientes.NombreIngrediente == Nombre)
-            statemed = select(Ingredientes).where(validacion)
-
-            ingrediente = session.exec(statemed).first()
-
-            return ingrediente
-        
-        except Exception as e:
-            session.rollback()
-            return e
-
-
-"""def crear_relacion_platillo_ingrediente(listaIngrediente: list[int], IdPlatillo: int | None = None, NombrePlatillo: str | None = None):
-    if not IdPlatillo and not NombrePlatillo:
-        return False
-    
-
-    IdPlatillo = IdPlatillo if IdPlatillo else obtener_platillo_id_por_nombre(NombrePlatillo)
-
-    if not IdPlatillo:
-        return False
-
-    with Session(db_engine) as session:
-        try:
-            listaRelaciones = []
-
-            for id in listaIngrediente:
-                if not obtener_ingrediente(IdIngrediente=id):
-                    return False
-
-                listaIngrediente.append(PlatillosEIngredientes(IdPlatillo=IdPlatillo,IdIngrediente=id))
-
-            session.add_all(listaRelaciones)
-            session.commit()
+            if id_ingrediente:
+                statement = statement.where(DetallesRegistroIngredientes.IdIngrediente == id_ingrediente)
             
+            resultados = session.exec(statement).all()
+            
+            # Filtramos en memoria para quedarnos solo con el más reciente
+            ultimos_ingresos = {}
+            for detalle, fecha_ingreso in resultados:
+                if detalle.IdIngrediente not in ultimos_ingresos:
+                    ultimos_ingresos[detalle.IdIngrediente] = {
+                        "detalle": detalle,
+                        "fecha": fecha_ingreso
+                    }
 
+            # 2. Calcular estado de caducidad y stock
+            for id_ing, info in ultimos_ingresos.items():
+                conf = configuraciones.get(str(id_ing))
+                if not conf: continue # Si no está en el JSON, no lo analizamos
+                    
+                vida_util = conf.get("vida_util_semanas", 1)
+                consumo_semana = conf.get("consumo_semanal", 1)
+                fecha_ingreso = info["fecha"]
+                
+                # A. Matemáticas de Caducidad
+                fecha_caducidad = fecha_ingreso + timedelta(weeks=vida_util)
+                estado_caducidad = "VIGENTE"
+                if ahora > fecha_caducidad:
+                    estado_caducidad = "CADUCADO"
+                elif (fecha_caducidad - ahora).days <= 3:
+                    estado_caducidad = "POR_VENCER"
+                
+                # B. Matemáticas de Consumo (Stock estimado restante)
+                semanas_desde_ingreso = (ahora - fecha_ingreso).days / 7.0
+                consumido_estimado = math.floor(semanas_desde_ingreso * consumo_semana)
+                
+                stock_inicial_lote = info["detalle"].TotalIngresado
+                stock_restante = max(0, stock_inicial_lote - consumido_estimado)
+                
+                semanas_restantes = stock_restante / consumo_semana if consumo_semana > 0 else 0
+                
+                estado_stock = "NORMAL"
+                if stock_restante <= 0:
+                    estado_stock = "AGOTADO"
+                elif semanas_restantes <= 1:
+                    estado_stock = "POR_ACABAR"
 
+                reporte.append({
+                    "IdIngrediente": id_ing,
+                    "FechaUltimoIngreso": fecha_ingreso,
+                    "FechaEstimadaCaducidad": fecha_caducidad,
+                    "StockIngresadoEnLote": stock_inicial_lote,
+                    "StockEstimadoRestante": stock_restante,
+                    "DiasEstimadosParaAgotar": math.floor(semanas_restantes * 7),
+                    "EstadoCaducidad": estado_caducidad,
+                    "EstadoStock": estado_stock
+                })
+                
+            return reporte
         except Exception as e:
-            session.rollback()
-            return e
-    
-    return True"""
-    
+            print(f"Error en análisis de inventario: {e}")
+            return None
