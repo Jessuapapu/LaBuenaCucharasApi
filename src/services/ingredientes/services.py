@@ -1,4 +1,4 @@
-from sqlmodel import select
+from sqlmodel import select, Session
 from datetime import datetime, timedelta
 import math
 from typing import Optional
@@ -60,31 +60,31 @@ def obtener_configuracion_perecedero(id_ingrediente: int) -> dict | None:
 # ------------------------------------------------------------------------------
 
 def listar_ingredientes(pagina: int = 1, rows: int = 10, todo: int = 0):
-    with db_engine() as session:
+    with Session(db_engine) as session:
         try:
             query = select(Ingredientes)
             if not todo:
                 offset = (pagina - 1) * rows
-                query = query.offset(offset).limit(rows)
+                query = query.order_by(Ingredientes.IdIngrediente).offset(offset).limit(rows)
             resultados = session.exec(query).all()
-            
+
             lista_enriquecida = []
             configuraciones = obtener_toda_la_configuracion()
-            
+
             for ingrediente in resultados:
                 ing_dict = ingrediente.dict()
                 conf = configuraciones.get(str(ingrediente.IdIngrediente), {})
                 ing_dict["VidaUtilSemanas"] = conf.get("vida_util_semanas")
                 ing_dict["ConsumoSemanalAprox"] = conf.get("consumo_semanal")
                 lista_enriquecida.append(ing_dict)
-                
+
             return lista_enriquecida
         except Exception as e:
             print(f"Error al listar ingredientes: {e}")
             return None
 
 def obtener_ingrediente_por_id(id_ingrediente: int):
-    with db_engine() as session:
+    with Session(db_engine) as session:
         try:
             ingrediente = session.get(Ingredientes, id_ingrediente)
             if not ingrediente: return None
@@ -100,7 +100,7 @@ def obtener_ingrediente_por_id(id_ingrediente: int):
             return None
 
 def crear_ingrediente(payload: IngredienteCreateSchema, username: Optional[str] = None) -> bool:
-    with db_engine() as session:
+    with Session(db_engine) as session:
         try:
             nuevo_ingrediente = Ingredientes(
                 NombreIngrediente=payload.NombreIngrediente,
@@ -123,7 +123,7 @@ def crear_ingrediente(payload: IngredienteCreateSchema, username: Optional[str] 
             return False
 
 def actualizar_ingrediente(id_ingrediente: int, payload: IngredienteUpdateSchema, username: Optional[str] = None) -> bool:
-    with db_engine() as session:
+    with Session(db_engine) as session:
         try:
             ingrediente = session.get(Ingredientes, id_ingrediente)
             if not ingrediente: return False
@@ -149,7 +149,7 @@ def actualizar_ingrediente(id_ingrediente: int, payload: IngredienteUpdateSchema
             return False
 
 def eliminar_ingrediente(id_ingrediente: int, username: Optional[str] = None) -> bool:
-    with db_engine() as session:
+    with Session(db_engine) as session:
         try:
             ingrediente = session.get(Ingredientes, id_ingrediente)
             if not ingrediente: return False
@@ -165,7 +165,7 @@ def eliminar_ingrediente(id_ingrediente: int, username: Optional[str] = None) ->
             return False
 
 def analisis_inventario_perecederos(id_ingrediente: Optional[int] = None):
-    with db_engine() as session:
+    with Session(db_engine) as session:
         try:
             ahora = datetime.now()
             configuraciones = obtener_toda_la_configuracion()

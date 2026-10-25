@@ -32,15 +32,15 @@ def obtener_todos_los_ingredientes(
     rows: int = Query(10, ge=2),
     todo: int = Query(0, ge=0, le=1)
 ):
-    try:
-        data = ingredientesService.listar_ingredientes(pagina=pagina, rows=rows, todo=todo)
+    #try:
+    data = ingredientesService.listar_ingredientes(pagina=pagina, rows=rows, todo=todo)
+    
+    if data is None:
+        raise HTTPException(status_code=500, detail="Error al recuperar la lista de ingredientes")
         
-        if data is None:
-            raise HTTPException(status_code=500, detail="Error al recuperar la lista de ingredientes")
-            
-        return {"success": True, "data": data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {"success": True, "data": data}
+    #except Exception as e:
+    #    raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/analisis-perecederos")
 def obtener_analisis_de_inventario(

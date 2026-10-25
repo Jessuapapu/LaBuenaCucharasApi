@@ -11,6 +11,7 @@ router = APIRouter(tags=["Menus"])
 
 @router.get("/")
 async def obtener_menu(day: Optional[datetime.date] = Query(default=None), usuario_actual: Usuario = Depends(obtener_usuario_actual)):
+    
     if day is not None:
         menu = service.obtener_menu_dia_service(day)
         return menu
