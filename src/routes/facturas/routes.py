@@ -42,6 +42,14 @@ async def obtener_facturas_endpoint(
 
     return facturas
 
+@router.get("/ordenes-facturables")
+def ordenes_facturables(
+    nombre: str = Query(..., min_length=2, description="Nombre (o parte) del cliente"),
+    usuario_actual: Usuario = Depends(obtener_usuario_actual),
+):
+    """Órdenes activas y aún sin factura de los clientes que coinciden con `nombre`."""
+    return service.listar_ordenes_facturables(nombre)
+
 @router.post("/")
 async def crear_factura(payload: facturaIn, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
 

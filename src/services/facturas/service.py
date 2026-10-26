@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from sqlmodel import Session
+from sqlmodel import Session, col, select
 from src.config.database import db_engine
 from src.schemas.facturas import facturaIn
 import datetime
@@ -12,6 +12,9 @@ from src.config.database import db_engine
 from src.models.facturas.models import Facturas, FacturasOrdenes
 from src.models.ordenes.models import Ordenes
 from decimal import Decimal
+from src.models.clientes.models import Clientes
+from src.models.ordenes.types import EstadoOrden
+from src.models.facturas.types import EstadoFactura
 
 
 def obtener_facturas_ordenes(
@@ -77,15 +80,99 @@ def obtener_facturas_ordenes(
             return None
 
         return facturas_list
-    
+
+# Búsqueda de órdenes a facturar (la que usa el modal de facturación)
+
+def listar_ordenes_facturables(nombre_cliente: str, limite: int = 50) -> list[dict]:
+    """
+    Órdenes activas de clientes cuyo nombre contiene `nombre_cliente`.
+    Activa = no anulada y todavía sin factura (FacturasOrdenes.IdOrdenes es unique).
+    """
+    nombre = (nombre_cliente or "").strip()
+    if not nombre:
+        return []
+ 
+    with Session(db_engine) as session:
+        stmt = (
+            select(
+                Ordenes.IdOrdenes,
+                Ordenes.IdCliente,
+                Ordenes.CostoTotal,
+                Ordenes.Fecha,
+                Clientes.NombreCliente,
+            )
+            .select_from(Ordenes)
+            .join(Clientes, Clientes.IdCliente == Ordenes.IdCliente)
+            .outerjoin(FacturasOrdenes, FacturasOrdenes.IdOrdenes == Ordenes.IdOrdenes)
+            .where(
+                col(Clientes.NombreCliente).ilike(f"%{nombre}%"),
+                col(FacturasOrdenes.IdOrdenes).is_(None),   # aún sin factura
+                Ordenes.Estado != EstadoOrden.ANULADO,
+            )
+            .order_by(col(Ordenes.Fecha).desc())
+            .limit(limite)
+        )
+ 
+        filas = session.exec(stmt).all()
+ 
+        return [
+            {
+                "id_orden": f.IdOrdenes,
+                "id_cliente": f.IdCliente,
+                "nombre_cliente": f.NombreCliente,
+                "monto_total": float(f.CostoTotal or 0),
+                "fecha": f.Fecha,
+            }
+            for f in filas
+        ]
+
+def _ids_ordenes(payload: facturaIn) -> list[int]:
+    ids = [d.IdOrden for d in payload.detalles]
+    if not ids:
+        raise HTTPException(status_code=400, detail="Debe incluir al menos una orden")
+    if len(set(ids)) != len(ids):
+        raise HTTPException(status_code=400, detail="Hay órdenes repetidas en la factura")
+    return ids
+ 
+#Validaciones paar crear y actualizar, se que ya existen, pero siguen dando fallo y no quiero tocar eso todavia xd
+def _validar_ordenes_facturables(
+    session: Session, ids_ordenes: list[int], id_factura_actual: int | None = None
+) -> dict[int, Ordenes]:
+    ordenes = session.exec(
+        select(Ordenes).where(col(Ordenes.IdOrdenes).in_(ids_ordenes))
+    ).all()
+    por_id = {o.IdOrdenes: o for o in ordenes}
+ 
+    faltantes = [i for i in ids_ordenes if i not in por_id]
+    if faltantes:
+        raise HTTPException(status_code=404, detail=f"Órdenes no encontradas: {faltantes}")
+ 
+    anuladas = [i for i, o in por_id.items() if o.Estado == EstadoOrden.ANULADO]
+    if anuladas:
+        raise HTTPException(status_code=409, detail=f"Órdenes anuladas: {anuladas}")
+ 
+    # Una orden solo puede estar en una factura (IdOrdenes es unique)
+    stmt = select(FacturasOrdenes.IdOrdenes).where(
+        col(FacturasOrdenes.IdOrdenes).in_(ids_ordenes)
+    )
+    if id_factura_actual is not None:
+        stmt = stmt.where(FacturasOrdenes.IdFactura != id_factura_actual)
+    ya_facturadas = session.exec(stmt).all()
+    if ya_facturadas:
+        raise HTTPException(
+            status_code=409, detail=f"Órdenes ya facturadas: {sorted(ya_facturadas)}"
+        )
+
 
 
 def crear_facturas(
     payLoadDetalles: facturaIn, username: str | None = None
-):
+)-> int:
+    ids_ordenes = _ids_ordenes(payLoadDetalles)
     json_string = payLoadDetalles.model_dump_json()
 
     with Session(db_engine) as session:
+        _validar_ordenes_facturables(session, ids_ordenes)
         try:
 
             query = text("EXEC GenerarFactura @PayloadJson = :json_data")
@@ -102,8 +189,18 @@ def crear_facturas(
     return True
 
 
-def actualizar_factura(IdFactura: int, payLoadDetalles: facturaIn, username: str | None = None):
+def actualizar_factura(IdFactura: int, payLoadDetalles: facturaIn, username: str | None = None)-> bool:
+    ids_ordenes = _ids_ordenes(payLoadDetalles)
     with Session(db_engine) as session:
+        factura = session.get(Facturas, IdFactura)
+        if not factura:
+            raise HTTPException(status_code=404, detail="Factura no encontrada")
+        if factura.Estado == EstadoFactura.ANULADA:
+            raise HTTPException(status_code=409, detail="No se puede modificar una factura anulada")
+ 
+        ordenes = _validar_ordenes_facturables(
+            session, ids_ordenes, id_factura_actual=IdFactura
+        )
         try:
             factura = session.get(Facturas, IdFactura)
             if not factura:
