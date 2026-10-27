@@ -1,8 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 
-# Asegúrate de importar tu Enum TipoDeProveedor desde donde lo tengas definido
-from src.models.types import TipoDeProveedor 
+from src.models.proveedores.types import TipoDeProveedor 
 
 class ProveedorIn(BaseModel):
     NombreProveedor: str = Field(..., max_length=150, description="Nombre comercial o legal del proveedor")

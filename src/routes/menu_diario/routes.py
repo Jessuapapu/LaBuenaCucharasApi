@@ -10,7 +10,7 @@ from src.models.platillos.types import *
 router = APIRouter(tags=["Menus"])
 
 @router.get("/")
-async def obtener_menu(day: Optional[datetime.date] = Query(default=None)):
+async def obtener_menu(day: Optional[datetime.date] = Query(default=None), usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     if day is not None:
         menu = service.obtener_menu_dia_service(day)
         return menu
@@ -53,20 +53,20 @@ async def editar_menu(id_menu: int, payload: MenuUpdate, usuario_actual: Usuario
         raise HTTPException(status_code=500, detail=f"Error: {e}")
 
 @router.get('/horarios')
-async def obtener_horarios_menu(Nombre: str = Query(default=None)):
+async def obtener_horarios_menu(Nombre: str = Query(default=None), usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     if not Nombre:
         return service.obtener_cambios_de_hora()
     
     return service.obtener_cambio_de_hora(Nombre)
 
 @router.post('/horarios')
-async def crear_horarios_menu(payload: CambioDeHoraModel):
+async def crear_horarios_menu(payload: CambioDeHoraModel, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     return service.nuevo_cambio_de_hora(payload.nombre, payload.HoraInicio, payload.HoraFinal)
 
-@router.put('/horarios/si')
-async def editar_horarios_menu(payload: CambioDeHoraModelEditar):
+@router.put('/horarios/')
+async def editar_horarios_menu(payload: CambioDeHoraModelEditar, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     return service.editar_cambio_de_hora(payload.nombre,payload.nombreNuevo, payload.HoraInicio, payload.HoraFinal)
 
 @router.delete('/horarios/{Nombre}')
-async def borrar_horarios_menu(Nombre: str):
+async def borrar_horarios_menu(Nombre: str, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
     return service.eliminar_cambio_de_hora(Nombre)

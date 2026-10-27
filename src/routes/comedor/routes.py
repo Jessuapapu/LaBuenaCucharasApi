@@ -104,7 +104,8 @@ async def obtener_numero_mesas():
     return comedor.obtener_IdMesas()
 
 @router.post("/NumeroMesas/{numeroid}")
-async def aumentar_mesas(numeroid: int):
+async def aumentar_mesas(numeroid: int, usuario_actual: Usuario = Depends(obtener_usuario_actual)):
+    #hacer que aumenten las mesas
     return 
 
 @router.get("/{IdMesa}/historial")
