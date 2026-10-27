@@ -151,7 +151,7 @@ def obtener_detalle_orden_mesa(IdOrden: int):
     if not horaApertura:    
         return None
 
-    IdMesa = MC.buscarIdMesa()
+    IdMesa = MC.buscarIdMesa(IdOrden)
     if not IdMesa or not MC.obtener_orden(IdOrden= IdOrden, IdMesa=IdMesa):
         return None
 

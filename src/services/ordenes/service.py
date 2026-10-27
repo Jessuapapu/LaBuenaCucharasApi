@@ -175,42 +175,36 @@ def crear_orden( fecha: datetime.date, detalle: List[Detalles], Id_cliente: int 
             print(e)
             return None
 
-
 def actualizar_ordenes(
-    id_pedido: int, estado: EstadoOrden, detalles: List[Detalles], Id_cliente: int | None = None, nombre_cliente: str | None = None, username: str | None = None
+    id_pedido: int, 
+    estado: EstadoOrden, 
+    detalles: list[Detalles], 
+    Id_cliente: int | None = None, 
+    nombre_cliente: str | None = None, 
+    username: str | None = None
 ):
     with Session(db_engine) as session:
-        statement = (
-            select(DetallesOrdenes)
-            .join(Ordenes, Ordenes.IdOrdenes == DetallesOrdenes.IdOrdenes)
-            .where(Ordenes.IdOrdenes == id_pedido)
-        )
-
-        stmt_orden = (
-            select(Ordenes)
-            .where(Ordenes.IdOrdenes == id_pedido)
-        )
-
-        detalles_actualizar = session.exec(statement).all()
-        resultado = session.exec(stmt_orden).first()
         nuevo_id_cliente = Id_cliente if Id_cliente else obtener_id_cliente_por_nombre(nombre_cliente)
         
-        if not resultado or not nuevo_id_cliente:
+        orden = session.get(Ordenes, id_pedido)
+        
+        if not orden or not nuevo_id_cliente:
             return None
 
-        pedido = resultado
-
-        if pedido.Estado == EstadoOrden.ANULADO:
+        if orden.Estado == EstadoOrden.ANULADO:
             return None
 
-        pedido.IdCliente = nuevo_id_cliente
-        pedido.Estado = estado
+        orden.IdCliente = nuevo_id_cliente
+        orden.Estado = estado
+
+        detalles_actualizar = session.execute(
+            select(DetallesOrdenes).where(DetallesOrdenes.IdOrdenes == id_pedido)
+        ).scalars().all()
 
         for d in detalles_actualizar:
             session.delete(d)
 
         monto_total = Decimal("0")
-        cantidad_total = 0
 
         for det in detalles:
             id_platillo = obtener_platillo_id_por_nombre(det.nombre_platillo)
@@ -229,18 +223,16 @@ def actualizar_ordenes(
                     CostoTotal=costo_fila
                 )
             )
-
             monto_total += costo_fila
-            cantidad_total += det.cantidad
         
-        if estado in EstadoOrden.ANULADO:
-            statement = text("EXEC ActualizarPagos  @IdOrden = :idOrden")
-
-            session.exec(statement=statement, params={'idOrden': pedido.IdOrdenes})
+        orden.CostoTotal = monto_total
+        
+        if estado == EstadoOrden.ANULADO:
+            statement_sp = text("EXEC ActualizarPagos @IdOrden = :idOrden")
+            session.exec(statement_sp, params={'idOrden': orden.IdOrdenes})
 
         session.commit()
-        session.refresh(pedido)
-
+        session.refresh(orden)
 
         return True
 

@@ -6,6 +6,7 @@ import datetime
 class OrdenComedorIN(BaseModel):
     IdMesa: int
     Detalles: list[Detalles]
+    Mesero: str
 
 
     

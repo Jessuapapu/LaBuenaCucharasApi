@@ -8,18 +8,20 @@ EstadoAnterior_JSON_path = "./src/models/comedor/estado_anterior.json"
 logs = logsApp.Logs()
 
 class OrdenComedor():
-    def __init__(self, IdOrden: int):
+    def __init__(self, IdOrden: int, Mesero: str):
         self.HoraEntrada = datetime.now() 
         self.HoraSalida: datetime | None = None
         self.IdOrden: int = IdOrden
         self.Activo: bool = True
+        self.Mesero: str = Mesero
 
     def to_dict(self):
         return {
             "IdOrden": self.IdOrden,
             "HoraEntrada": self.HoraEntrada.isoformat(),
             "HoraSalida": self.HoraSalida.isoformat() if self.HoraSalida else None,
-             "Activo": self.Activo
+            "Activo": self.Activo,
+            "Mesero": self.Mesero
         }
 
 class Mesa():
@@ -110,8 +112,9 @@ class MonitorComedor():
             return False
 
         mesa = self.Mesas[IdMesa] 
-
-        return (orden for orden in mesa.Ordenes if orden.IdOrden == IdOrden)
+        orden = (orden for orden in mesa.Ordenes if orden.IdOrden == IdOrden)
+        print(orden , '----------------------------------------------------------------------------')
+        return orden
     
     def obtener_ordenActivas(self):
         self.limpiar_orden()
@@ -168,7 +171,7 @@ class MonitorComedor():
             
         return LOT
 
-    def agregar_orden(self, IdOrden: int, IdMesa: int): 
+    def agregar_orden(self, IdOrden: int, IdMesa: int, Mesero: str): 
         if not self.validarIdMesa(IdMesa=IdMesa):
             return False
 
@@ -176,7 +179,7 @@ class MonitorComedor():
         mesa = self.Mesas[IdMesa]
 
         if mesa:
-            mesa.Ordenes.append(OrdenComedor(IdOrden=IdOrden))
+            mesa.Ordenes.append(OrdenComedor(IdOrden=IdOrden,Mesero=Mesero))
 
         return True
 
@@ -269,6 +272,5 @@ class MonitorComedor():
         return {
             "TotalMesasActivas": self.NumeroMesas,
             "Mesas": [mesa.to_dict() for mesa in self.Mesas],
-            "Caja": self.Caja.to_dict()
         }
     
