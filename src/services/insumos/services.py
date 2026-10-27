@@ -5,13 +5,13 @@ from src.models.insumos.models import Insumos
 from src.schemas.insumos import InsumoCreateSchema, InsumoUpdateSchema
 
 def listar_insumos(pagina: int = 1, rows: int = 10, todo: int = 0):
-    with db_engine() as session:
+    with Session(db_engine) as session:
         try:
             query = select(Insumos)
             
             if not todo:
                 offset = (pagina - 1) * rows
-                query = query.offset(offset).limit(rows)
+                query = query.order_by(Insumos.IdInsumo).offset(offset).limit(rows)
                 
             resultados = session.exec(query).all()
             return resultados
@@ -20,7 +20,7 @@ def listar_insumos(pagina: int = 1, rows: int = 10, todo: int = 0):
             return None
 
 def obtener_insumo_por_id(id_insumo: int):
-    with db_engine() as session:
+    with Session(db_engine) as session:
         try:
             insumo = session.get(Insumos, id_insumo)
             return insumo
@@ -29,7 +29,7 @@ def obtener_insumo_por_id(id_insumo: int):
             return None
 
 def crear_insumo(payload: InsumoCreateSchema, username: Optional[str] = None) -> bool:
-    with db_engine() as session:
+    with Session(db_engine) as session:
         try:
             nuevo_insumo = Insumos(
                 NombreInsumo=payload.NombreInsumo,
@@ -45,7 +45,7 @@ def crear_insumo(payload: InsumoCreateSchema, username: Optional[str] = None) ->
             return False
 
 def actualizar_insumo(id_insumo: int, payload: InsumoUpdateSchema, username: Optional[str] = None) -> bool:
-    with db_engine() as session:
+    with Session(db_engine) as session:
         try:
             insumo = session.get(Insumos, id_insumo)
             if not insumo:
@@ -65,7 +65,7 @@ def actualizar_insumo(id_insumo: int, payload: InsumoUpdateSchema, username: Opt
             return False
 
 def eliminar_insumo(id_insumo: int, username: Optional[str] = None) -> bool:
-    with db_engine() as session:
+    with Session(db_engine) as session:
         try:
             insumo = session.get(Insumos, id_insumo)
             if not insumo:

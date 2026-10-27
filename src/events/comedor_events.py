@@ -30,16 +30,16 @@ async def nueva_orden(sid, data):
         datos_validados = OrdenComedorIN(**data)
         Detalles = datos_validados.Detalles
         NumeroMesa = datos_validados.IdMesa
-        username = "system"
-
+        Mesero = datos_validados.Mesero
+        print(Mesero + '-------------------')
         nueva_orden = ordenesService.crear_orden(datetime.datetime.now(), detalle=Detalles, Id_cliente=1)
-        MC.agregar_orden(int(nueva_orden.IdOrdenes), NumeroMesa)
+        MC.agregar_orden(int(nueva_orden.IdOrdenes), NumeroMesa, Mesero)
 
         if not nueva_orden:
             await sio.emit("error_generar", {"MENSAJE": "ERROR AL GENERAR LA ORDEN"}, to=sid)
             return
 
-        await sio.emit("orden_actualizada", data={'IdMesa': NumeroMesa})
+        await sio.emit("orden_actualizada", data={'IdMesa': NumeroMesa, 'Mesero': Mesero})
         await sio.emit("orden_generada", data={"IdMesa": NumeroMesa, "IdOrden": nueva_orden.IdOrdenes}, to=sid)
         
     except Exception as e: 
@@ -48,38 +48,32 @@ async def nueva_orden(sid, data):
 
 @sio.on("actualizar_orden")
 async def actualizar_orden(sid, data):
-    try:
-        datos_validados = OrdenComedorIN(**data)
-        Detalles = datos_validados.Detalles
-        NumeroMesa = datos_validados.IdMesa
-        orden = MC.obtener_ordenActiva(IdMesa=NumeroMesa)
+    #try:
+    datos_validados = OrdenComedorIN(**data)
+    Detalles = datos_validados.Detalles
+    NumeroMesa = datos_validados.IdMesa
+    orden = MC.obtener_ordenActiva(IdMesa=NumeroMesa)
+    if not orden:
+        await sio.emit("error_actualizar", {"MENSAJE": "ORDEN NO ENCONTRADA EN MESA"}, to=sid)
+        return
+    id_orden = orden["IdOrden"] 
+    username = "system"
+    orden_actualizada = ordenesService.actualizar_ordenes(id_pedido=id_orden, Id_cliente=1, estado=EstadoOrden.PENDIENTE, detalles=Detalles, username=username)
+    estado_caja = cajaService.obtener_estado_caja()
+    if estado_caja:
+        total_nuevo = calcular_total_detalles(Detalles)
+        if cajaService.CajaMonitor.validarId(id_orden):
+            cajaService.Actualizar_Monto(id_orden, total_nuevo)
+            await sio.emit("actualizar_caja", cajaService.obtener_Caja()) # Avisamos a la caja del cambio
+    if not orden_actualizada:
+        await sio.emit("error_actualizar", {"MENSAJE": "ERROR AL ACTUALIZAR LA BD"}, to=sid)
+        return
 
-        if not orden:
-            await sio.emit("error_actualizar", {"MENSAJE": "ORDEN NO ENCONTRADA EN MESA"}, to=sid)
-            return
-
-        id_orden = orden["IdOrden"] 
-        username = "system"
-
-        orden_actualizada = ordenesService.actualizar_ordenes(id_pedido=id_orden, Id_cliente=1, estado=EstadoOrden.PENDIENTE, detalles=Detalles, username=username)
-
-        estado_caja = cajaService.obtener_estado_caja()
-        if estado_caja:
-            total_nuevo = calcular_total_detalles(Detalles)
-            if cajaService.CajaMonitor.validarId(id_orden):
-                cajaService.Actualizar_Monto(id_orden, total_nuevo)
-                await sio.emit("actualizar_caja", cajaService.obtener_Caja()) # Avisamos a la caja del cambio
-
-
-        if not orden_actualizada:
-            await sio.emit("error_actualizar", {"MENSAJE": "ERROR AL ACTUALIZAR LA BD"}, to=sid)
-            return
-
-        await sio.emit("orden_actualizada", data={'IdMesa': NumeroMesa})
-        await sio.emit("orden_actualizar", data={"Status": True}, to=sid)
-    except Exception as e: 
-        print(f"Error WS actualizar_orden: {e}")
-        await sio.emit("error_actualizar", {"MENSAJE": "ERROR INTERNO"}, to=sid)
+    await sio.emit("orden_actualizada", data={'IdMesa': NumeroMesa,'Mesero': orden['Mesero']})
+    await sio.emit("orden_actualizar", data={"Status": True}, to=sid)
+    #except Exception as e: 
+    #    print(f"Error WS actualizar_orden: {e}")
+    #    await sio.emit("error_actualizar", {"MENSAJE": "ERROR INTERNO"}, to=sid)
 
 @sio.on("cancelar_orden")
 async def cancelar_orden(sid, data):

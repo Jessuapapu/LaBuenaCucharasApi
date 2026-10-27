@@ -59,6 +59,17 @@ async def estado():
 async def obtener_estado_comedor():
     return comedor.obtener_estado_total()
 
+
+@router.get('/detalle/{IdOrden}')
+async def obtener_detalle_orden_comedor(IdOrden: int):
+    lista = comedor.obtener_detalle_orden_mesa(IdOrden)
+
+    if not lista:
+        return HTTPException(404, 'NO EXISTE LA ORDEN')
+
+    return lista
+
+
 @router.get('/{IdMesa}/{Estado}')
 async def obtener_orden_mesa(IdMesa: int, Estado: bool):
     if not IdMesa:
@@ -76,14 +87,6 @@ async def obtener_orden_mesa(IdMesa: int, Estado: bool):
     
     return mesa
 
-@router.get('/detalle/{IdOrden}')
-async def obtener_detalle_orden_comedor(IdOrden: int):
-    lista = comedor.obtener_detalle_orden_mesa(IdOrden)
-
-    if not lista:
-        return HTTPException(404, 'NO EXISTE LA ORDEN')
-
-    return lista
 
 
 @router.post("/{IdMesa}/{IdOrden}")
